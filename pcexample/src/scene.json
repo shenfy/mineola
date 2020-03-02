@@ -1,0 +1,56 @@
+{
+  "geometries": [
+    {
+      "filename": "dragon_20000.ply",
+      "material": "mineola:mat:fallback",
+      "effect": "mineola:effect:diffuse",
+      "shadowmap": false,
+      "node": "geometry",
+      "layer": 0
+    }
+  ],
+  "lights": [
+    {
+      "index": 0,
+      "proj": "perspective",
+      "fovy": 90,
+      "aspect": 1,
+      "near": 0.1,
+      "far": 20.0,
+      "node": "light"
+    }
+  ],
+  "cameras": [
+    {
+      "name": "main",
+      "proj": "perspective",
+      "fovy": 60,
+      "near": 0.1,
+      "far": 100.0,
+      "node": "camera"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "geometry",
+      "translate": "0, 0, 0",
+      "rotate": "0, 0, 0, 1",
+      "scale": "1, 1, 1",
+      "parent": "root"
+    },
+    {
+      "name": "light",
+      "translate": "3, 3, 3",
+      "rotate": "0, 0, 0, 1",
+      "scale": "1, 1, 1",
+      "parent": "root"
+    },
+    {
+      "name": "camera",
+      "eye": "0, 0, 0.5",
+      "target": "0, 0, 0",
+      "up": "0, 1, 0",
+      "parent": "root"
+    }
+  ]
+}
