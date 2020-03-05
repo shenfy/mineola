@@ -699,6 +699,7 @@ bool CreateSceneFromGLTFDoc(
           renderable->SetEffect("mineola:effect:fallback");
         }
 
+        renderable->SetLayerMask(layer_mask);
         mesh.push_back(renderable);
       }
 
