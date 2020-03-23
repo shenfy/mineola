@@ -42,10 +42,10 @@ void Renderable::SetSkin(std::shared_ptr<Skin> &skin) {
 }
 
 void Renderable::AddVertexArray(
-  std::shared_ptr<vertex_type::VertexArray> &va,
+  std::shared_ptr<vertex_type::VertexArray> va,
   const char *material_name) {
 
-  vertex_arrays_.push_back(va);
+  vertex_arrays_.push_back(std::move(va));
   material_names_.push_back(material_name);
 }
 

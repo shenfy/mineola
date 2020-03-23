@@ -19,7 +19,7 @@ public:
   virtual void PreRender(double frame_time, uint32_t pass);
   virtual void Draw(double frame_time, uint32_t pass);
 
-  void AddVertexArray(std::shared_ptr<vertex_type::VertexArray> &va,
+  void AddVertexArray(std::shared_ptr<vertex_type::VertexArray> va,
             const char *material_name);
   void SetEffect(const char *effect_name);
   inline const char *GetEffectName() const {return effect_name_.c_str();}
