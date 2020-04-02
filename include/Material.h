@@ -14,7 +14,7 @@ class GLEffect;
 
 class UniformWrapper {
 public:
-  virtual void UploadToShader(const char *var_name, std::shared_ptr<GLEffect> &effect) = 0;
+  virtual void UploadToShader(const char *var_name, GLEffect *effect) = 0;
 };
 
 struct Material : public Resource {
@@ -29,7 +29,7 @@ struct Material : public Resource {
   std::unordered_map<std::string, std::vector<std::string>> texture_slots;
   std::unordered_map<std::string, std::shared_ptr<UniformWrapper>> uniform_slots;
 
-  virtual void UploadToShader(std::shared_ptr<GLEffect> &effect);
+  virtual void UploadToShader(GLEffect *effect);
 };
 
 }

@@ -47,15 +47,16 @@ namespace mineola {
     children_.clear();
   }
 
-  void SceneNode::LinkTo(const std::shared_ptr<SceneNode> &child, const std::shared_ptr<SceneNode> &parent) {
+  void SceneNode::LinkTo(std::shared_ptr<SceneNode> child,
+    const std::shared_ptr<SceneNode> &parent) {
     if (!child)
       return;
     auto old_parent = child->parent_.lock();
     if (old_parent)
       old_parent->RemoveChild(*child);
-    if (parent)
-      parent->children_.push_back(child);
     child->parent_ = parent;
+    if (parent)
+      parent->children_.push_back(std::move(child));
   }
 
   const glm::vec3& SceneNode::Position() const {
@@ -168,7 +169,26 @@ namespace mineola {
 
   std::shared_ptr<SceneNode> SceneNode::FindNodeByName(
     const char *name,
-    const std::shared_ptr<SceneNode> &start_node) {
+    SceneNode *start_node) {
+
+    if (start_node == nullptr) {
+      return nullptr;
+    }
+
+    std::string name_str = name;
+    return start_node->FindIf(
+      [&name_str](const SceneNode &node) {
+        return node.Name() == name_str;
+      });
+  }
+
+  std::shared_ptr<SceneNode const> SceneNode::FindNodeByName(
+    const char *name,
+    const SceneNode *start_node) {
+
+    if (start_node == nullptr) {
+      return nullptr;
+    }
 
     std::string name_str = name;
     return start_node->FindIf(

@@ -34,7 +34,7 @@ public:
   int16_t QueueId() const;
   void SetQueueId(int16_t id);
 
-  void SetSkin(std::shared_ptr<Skin> &skin);
+  void SetSkin(std::shared_ptr<Skin> skin);
 
   enum {
     kQueueOpaque = 0,

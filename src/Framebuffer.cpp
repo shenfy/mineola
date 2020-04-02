@@ -36,14 +36,14 @@ void Framebuffer::SetAsRenderTarget() {
   CHKGLERR
 }
 
-void Framebuffer::AddViewport(std::shared_ptr<Viewport> &viewport_ptr) {
+void Framebuffer::AddViewport(std::shared_ptr<Viewport> viewport_ptr) {
   //check for redundancy first
   auto iter = std::find(viewports_.begin(), viewports_.end(), viewport_ptr);
   if (iter == viewports_.end()) {  //not found
     if (color_textures_.size() != 0) {  //must have at least one color attachment!
       viewport_ptr->OnSize(width_, height_);
     }
-    viewports_.push_back(viewport_ptr);
+    viewports_.push_back(std::move(viewport_ptr));
   }
 }
 
@@ -125,7 +125,8 @@ InternalFramebuffer::~InternalFramebuffer() {
   }
 }
 
-void InternalFramebuffer::AttachTexture(uint32_t attach_point, const char *texture_name, uint32_t level) {
+void InternalFramebuffer::AttachTexture(uint32_t attach_point,
+  const char *texture_name, uint32_t level) {
   std::shared_ptr<Texture> texture_ptr =
     bd_cast<Texture>(Engine::Instance().ResrcMgr().Find(texture_name));
   if (texture_ptr) {
@@ -134,7 +135,7 @@ void InternalFramebuffer::AttachTexture(uint32_t attach_point, const char *textu
 }
 
 void InternalFramebuffer::AttachTexture(uint32_t attach_point,
-  std::shared_ptr<Texture> &texture_ptr,
+  std::shared_ptr<Texture> texture_ptr,
   uint32_t level) {
 
   if (texture_ptr) {
@@ -150,7 +151,7 @@ void InternalFramebuffer::AttachTexture(uint32_t attach_point,
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
           texture_ptr->Handle(), level);
       }
-      depth_texture_ = texture_ptr;
+      depth_texture_ = std::move(texture_ptr);
     } else {
       glFramebufferTexture2D(GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0 + (attach_point - AT_COLOR0), GL_TEXTURE_2D,
@@ -177,7 +178,7 @@ void InternalFramebuffer::AttachTexture(uint32_t attach_point,
         for (auto iter = viewports_.begin(); iter != viewports_.end(); ++iter)
           (*iter)->OnSize(width_, height_);
       }
-      color_textures_[attach_point] = texture_ptr;
+      color_textures_[attach_point] = std::move(texture_ptr);
       attach_points_.push_back(GL_COLOR_ATTACHMENT0 + (attach_point - AT_COLOR0));
       std::sort(attach_points_.begin(), attach_points_.end());
     }

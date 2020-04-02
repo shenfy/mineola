@@ -14,7 +14,7 @@ template<typename T>
 class ScalarUniformWrapper : public UniformWrapper {
 public:
   ScalarUniformWrapper(T value) : value_(std::move(value)) {}
-  virtual void UploadToShader(const char *var_name, std::shared_ptr<GLEffect> &effect) override {
+  virtual void UploadToShader(const char *var_name, GLEffect *effect) override {
     effect->UploadVariable(var_name, &value_);
   }
 private:
@@ -25,7 +25,7 @@ template<typename T>
 class GLMUniformWrapper : public UniformWrapper {
 public:
   GLMUniformWrapper(T value) : value_(std::move(value)) {}
-  virtual void UploadToShader(const char *var_name, std::shared_ptr<GLEffect> &effect) override {
+  virtual void UploadToShader(const char *var_name, GLEffect *effect) override {
     effect->UploadVariable(var_name, glm::value_ptr(value_));
   }
 private:
@@ -36,7 +36,7 @@ template<typename T>
 class ScalarVectorUniformWrapper : public UniformWrapper {
 public:
   ScalarVectorUniformWrapper(std::vector<T> value) : value_(std::move(value)) {}
-  virtual void UploadToShader(const char *var_name, std::shared_ptr<GLEffect> &effect) override {
+  virtual void UploadToShader(const char *var_name, GLEffect *effect) override {
     effect->UploadVariable(var_name, &value_[0]);
   }
 private:
@@ -47,7 +47,7 @@ template<typename T>
 class GLMVectorUniformWrapper : public UniformWrapper {
 public:
   GLMVectorUniformWrapper(std::vector<T> value) : value_(std::move(value)) {}
-  virtual void UploadToShader(const char *var_name, std::shared_ptr<GLEffect> &effect) override {
+  virtual void UploadToShader(const char *var_name, GLEffect *effect) override {
     effect->UploadVariable(var_name, glm::value_ptr(value_[0]));
   }
 private:

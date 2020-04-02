@@ -24,7 +24,7 @@ public:
   void Unbind();
   void SetAsRenderTarget();
 
-  void AddViewport(std::shared_ptr<Viewport> &viewport_ptr);
+  void AddViewport(std::shared_ptr<Viewport> viewport_ptr);
   void RemoveViewport(uint32_t id);
   std::shared_ptr<Viewport> &GetViewport(uint32_t id);
   uint32_t NumViewport() const;
@@ -58,7 +58,8 @@ public:
   ~InternalFramebuffer();
 
   void AttachTexture(uint32_t attach_point, const char *texture_name, uint32_t level = 0);
-  void AttachTexture(uint32_t attach_point, std::shared_ptr<Texture> &texture_ptr, uint32_t level = 0);
+  void AttachTexture(uint32_t attach_point,
+    std::shared_ptr<Texture> texture_ptr, uint32_t level = 0);
 
   void ReadBack(uint32_t attach_point); //async read framebuffer to PBO
   GraphicsBuffer &GetReadPBO();

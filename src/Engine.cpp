@@ -130,8 +130,8 @@ void Engine::ChangeCamera(const std::string &name, bool force) {
     current_camera_.first = name;
     current_camera_.second = cam;
     if (current_framebuffer_.second) {
-        std::shared_ptr<Viewport> &vp = current_framebuffer_.second->GetViewport(current_viewport_);
-        cam->OnSize(vp);
+        auto &vp = current_framebuffer_.second->GetViewport(current_viewport_);
+        cam->OnSize(vp.get());
     }
     cam->Activate();
   }
@@ -185,10 +185,10 @@ std::shared_ptr<Framebuffer> Engine::GetScrFramebuffer() {
 void Engine::SetViewport(uint32_t id) {
   std::shared_ptr<Framebuffer> &fb = current_framebuffer_.second;
   if (fb && id < fb->NumViewport()) {
-    std::shared_ptr<Viewport> &vp = fb->GetViewport(id);
+    auto &vp = fb->GetViewport(id);
     vp->Activate();
     if (current_camera_.second) {
-      current_camera_.second->OnSize(vp);
+      current_camera_.second->OnSize(vp.get());
       current_camera_.second->Activate();
     }
     current_viewport_ = id;
@@ -542,8 +542,8 @@ void Engine::DoRender(vertex_type::VertexArray &va, const std::string &material_
    if (!material_ptr) //material not found, use default material
      material_ptr = bd_cast<Material>(resrc_mgr_.Find("mineola:material:fallback"));
 
-   material_ptr->UploadToShader(current_effect_.second);
-   va.Draw(current_effect_.second);
+   material_ptr->UploadToShader(current_effect_.second.get());
+   va.Draw();
 }
 
 void Engine::CacheEffectFiles(const std::string &effect,

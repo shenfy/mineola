@@ -94,15 +94,15 @@ public:
   VertexArray();
   ~VertexArray();
 
-  void AddVertexStream(std::shared_ptr<VertexStream> &vertex_stream);
-  void SetIndexStream(std::shared_ptr<VertexStream> &index_stream);
+  void AddVertexStream(std::shared_ptr<VertexStream> vertex_stream);
+  void SetIndexStream(std::shared_ptr<VertexStream> index_stream);
 
-  bool Draw(std::shared_ptr<GLEffect> &effect);
+  bool Draw();
 
   int &PrimitiveType();
 
 protected:
-  bool UpdateVAO(const GLEffect *effect);
+  bool UpdateVAO();
 
   std::vector<std::shared_ptr<VertexStream>> vertex_stream_ptrs_;
   std::shared_ptr<VertexStream> index_stream_ptr_;

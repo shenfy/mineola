@@ -17,7 +17,7 @@ CameraController::~CameraController() {
 
 void CameraController::BindToNode(const std::string &name) {
   auto &en = Engine::Instance();
-  auto node = SceneNode::FindNodeByName(name.c_str(), en.Scene());
+  auto node = SceneNode::FindNodeByName(name.c_str(), en.Scene().get());
   if (node) {
     node_ = node;
   }

@@ -1,7 +1,6 @@
 #ifndef MINEOLA_CAMERA_H
 #define MINEOLA_CAMERA_H
 
-#include <memory>
 #include <glm/glm.hpp>
 #include "Visitor.h"
 
@@ -27,7 +26,7 @@ public:
   void SetProjMatrix(const glm::mat4 &proj_mat);
   const glm::mat4 &GetViewMatrix() const {return view_mat_;}
   const glm::mat4 &GetProjMatrix() const {return proj_mat_;}
-  void OnSize(const std::shared_ptr<Viewport> &viewport);
+  void OnSize(const Viewport *viewport);
 
   virtual void Activate();
 

@@ -8,7 +8,7 @@
 
 namespace mineola {
 
-void Material::UploadToShader(std::shared_ptr<GLEffect> &effect) {
+void Material::UploadToShader(GLEffect *effect) {
   effect->UploadVariable("ambient", glm::value_ptr(ambient));
   effect->UploadVariable("diffuse", glm::value_ptr(diffuse));
   effect->UploadVariable("specular", glm::value_ptr(specular));

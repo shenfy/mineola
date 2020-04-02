@@ -198,7 +198,7 @@ bool BuildSceneFromConfig(const char *config_str,
         if (iter != nodes_dict.end()) {
           node = iter->second;
         } else {
-          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene());
+          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
           if (found_node) {
             node = found_node;
           } else {
@@ -309,7 +309,7 @@ bool BuildSceneFromConfig(const char *config_str,
         if (iter != nodes_dict.end()) {
           iter->second->Lights().push_back(light);
         } else {
-          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene());
+          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
           if (found_node) {
             found_node->Lights().push_back(light);
           } else {
@@ -359,7 +359,7 @@ bool BuildSceneFromConfig(const char *config_str,
         if (iter != nodes_dict.end()) {
           iter->second->Cameras().push_back(camera);
         } else {
-          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene());
+          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
           if (found_node) {
             found_node->Cameras().push_back(camera);
           } else {

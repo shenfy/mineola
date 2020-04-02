@@ -87,7 +87,7 @@ void TurntableController::OnMouseMove(int x, int y) {
 
 void TurntableController::SetTarget(const std::string &node_name) {
   auto &en = Engine::Instance();
-  auto target_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene());
+  auto target_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
   if (target_node) {
     target_node_ = target_node;
   }

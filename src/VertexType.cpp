@@ -33,17 +33,17 @@ int &VertexArray::PrimitiveType() {
   return primitive_type_;
 }
 
-void VertexArray::AddVertexStream(std::shared_ptr<VertexStream> &vertex_stream_ptr) {
-  vertex_stream_ptrs_.push_back(vertex_stream_ptr);
+void VertexArray::AddVertexStream(std::shared_ptr<VertexStream> vertex_stream_ptr) {
+  vertex_stream_ptrs_.push_back(std::move(vertex_stream_ptr));
   vao_updated_ = false;
 }
 
-void VertexArray::SetIndexStream(std::shared_ptr<VertexStream> &index_stream_ptr) {
-  index_stream_ptr_ = index_stream_ptr;
+void VertexArray::SetIndexStream(std::shared_ptr<VertexStream> index_stream_ptr) {
+  index_stream_ptr_ = std::move(index_stream_ptr);
   vao_updated_ = false;
 }
 
-bool VertexArray::UpdateVAO(const GLEffect *effect) {
+bool VertexArray::UpdateVAO() {
   if (!vao_ptr_)
     vao_ptr_.reset(new VertexArrayObject);
   if (!vao_ptr_)
@@ -84,8 +84,8 @@ bool VertexArray::UpdateVAO(const GLEffect *effect) {
   return true;
 }
 
-bool VertexArray::Draw(std::shared_ptr<GLEffect> &effect) {
-  if (!vao_updated_ && !UpdateVAO(effect.get()))
+bool VertexArray::Draw() {
+  if (!vao_updated_ && !UpdateVAO())
     return false;
 
   if (vao_ptr_) {
