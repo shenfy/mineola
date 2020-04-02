@@ -37,8 +37,8 @@ void Renderable::SetQueueId(int16_t queue_id) {
   q_id_ = queue_id;
 }
 
-void Renderable::SetSkin(std::shared_ptr<Skin> &skin) {
-  skin_ = skin;
+void Renderable::SetSkin(std::shared_ptr<Skin> skin) {
+  skin_ = std::move(skin);
 }
 
 void Renderable::AddVertexArray(

@@ -22,18 +22,18 @@ GLEffect::~GLEffect() {
   pixel_shader_.reset();
 }
 
-bool GLEffect::AttachShaders(std::shared_ptr<GLShader> &vs,
-	std::shared_ptr<GLShader> &ps) {
+bool GLEffect::AttachShaders(std::shared_ptr<GLShader> vs,
+	std::shared_ptr<GLShader> ps) {
   BOOST_ASSERT(handle_);
   if (vertex_shader_)
     glDetachShader(handle_, vertex_shader_->Handle());
   if (pixel_shader_)
     glDetachShader(handle_, pixel_shader_->Handle());
 
-  vertex_shader_ = vs;
-  pixel_shader_ = ps;
   glAttachShader(handle_, vs->Handle());
   glAttachShader(handle_, ps->Handle());
+  vertex_shader_ = std::move(vs);
+  pixel_shader_ = std::move(ps);
 
   glLinkProgram(handle_);
   if (!InfoLog()) return false;
@@ -120,7 +120,7 @@ bool GLEffect::FindAttribLoc(const char *semantics,
   if (iter != attribute_map_.end()) {  //found
     uint32_t type = 0, size = 0;
     type_mapping::MapGLType(std::get<1>(iter->second), &type, &size);
-    if (type != format 
+    if (type != format
       || type_mapping::SizeOf(type) * size != type_mapping::SizeOf(format) * length) {
       return false;
     }

@@ -14,8 +14,7 @@ public:
   GLEffect();
   virtual ~GLEffect();
 
-  bool AttachShaders(std::shared_ptr<GLShader> &pVS,
-		std::shared_ptr<GLShader> &pPS);
+  bool AttachShaders(std::shared_ptr<GLShader> pVS, std::shared_ptr<GLShader> pPS);
 
   bool FindAttribLoc(const char *semantics, uint32_t format, uint32_t length, uint32_t *loc) const;
 

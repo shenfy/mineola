@@ -23,7 +23,8 @@ namespace mineola {
     void RemoveChild(const SceneNode &node);
     void RemoveChild(size_t index);
     void RemoveChildren();
-    static void LinkTo(const std::shared_ptr<SceneNode> &child, const std::shared_ptr<SceneNode> &parent);
+    static void LinkTo(std::shared_ptr<SceneNode> child,
+      const std::shared_ptr<SceneNode> &parent);
 
     const glm::vec3 &Position() const;
     void SetPosition(const glm::vec3 &position);
@@ -64,8 +65,13 @@ namespace mineola {
     template<class UnaryPredicate>
     std::shared_ptr<SceneNode> FindIf(UnaryPredicate p);
 
+    template<class UnaryPredicate>
+    std::shared_ptr<SceneNode const> FindIf(UnaryPredicate p) const;
+
     static std::shared_ptr<SceneNode> FindNodeByName(
-      const char *name, const std::shared_ptr<SceneNode> &node);
+      const char *name, SceneNode *node);
+    static std::shared_ptr<SceneNode const> FindNodeByName(
+      const char *name, const SceneNode *node);
 
   protected:
     math::Rbt rbt_;
@@ -101,6 +107,19 @@ namespace mineola {
 
   template<class UnaryPredicate>
   std::shared_ptr<SceneNode> SceneNode::FindIf(UnaryPredicate p) {
+    if (p(*this))
+      return shared_from_this();
+    for (auto &child : children_) {
+      auto ret = child->FindIf(p);
+      if (ret) {
+        return ret;
+      }
+    }
+    return nullptr;
+  }
+
+  template<class UnaryPredicate>
+  std::shared_ptr<SceneNode const> SceneNode::FindIf(UnaryPredicate p) const {
     if (p(*this))
       return shared_from_this();
     for (auto &child : children_) {

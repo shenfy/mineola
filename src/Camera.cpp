@@ -89,7 +89,7 @@ void Camera::SetProjMatrix(const glm::mat4 &proj_mat) {
   using_custom_proj_matrix_ = true;
 }
 
-void Camera::OnSize(const std::shared_ptr<Viewport> &viewport) {
+void Camera::OnSize(const Viewport *viewport) {
   if (viewport && viewport->height != 0) {
     if (!using_custom_proj_matrix_) {
       aspect_ratio_ = (float)viewport->width / viewport->height;
