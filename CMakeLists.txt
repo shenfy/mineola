@@ -1,5 +1,5 @@
 #Project information
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(mineola)
 
@@ -7,16 +7,7 @@ set(${PROJECT_NAME}_MAJOR_VERSION 1)
 set(${PROJECT_NAME}_MINOR_VERSION 0)
 set(${PROJECT_NAME}_PATCH_LEVEL 0)
 
-IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
-ELSEIF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14 -Wall")
-ELSEIF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
-  # using Intel C++
-ELSEIF ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
-  # using Visual Studio C++
-ENDIF()
-
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
 if (WIN32)
@@ -50,6 +41,11 @@ install(FILES ${MINEOLA_HDR} DESTINATION include/mineola)
 # pc example
 file(GLOB PC_EXAMPLE_SRC pcexample/src/example.cpp pcexample/src/AppFrame.cpp pcexample/src/glad.c)
 add_executable(pcexample ${PC_EXAMPLE_SRC})
+add_custom_command(
+  TARGET pcexample
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pcexample/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
+  COMMENT "Copy resrc folder to build folder")
+
 if (WIN32)
   target_link_libraries(pcexample mineola)
 else ()
