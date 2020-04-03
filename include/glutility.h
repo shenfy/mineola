@@ -14,11 +14,11 @@
   #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR // iOS
     #include <OpenGLES/ES3/glext.h>
   #elif TARGET_OS_OSX  // macOS
-    #include <glad/glad.h>
+    #include "glad.h"
     #define MINEOLA_DESKTOP
   #endif
 #elif defined(__linux__) || defined(_WIN32)  // desktop
-  #include <glad/glad.h>
+  #include "glad.h"
   #define MINEOLA_DESKTOP
 #endif
 

@@ -16,7 +16,6 @@ if (WIN32)
 else ()
     include_directories("/usr/local/include")
 endif ()
-include_directories("dependencies/include")
 
 file(GLOB MINEOLA_SRC src/*.cpp)
 file(GLOB MINEOLA_HDR include/*.h)
