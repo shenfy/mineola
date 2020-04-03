@@ -13,7 +13,7 @@
 
 namespace {
 
-static const std::string kSceneFilename = "gltfscene.json";
+static const std::string kSceneFilename = "resrc/gltf.json";
 static const std::string kConfigPrefix = R"({
   "geometries": [
     {
@@ -115,6 +115,7 @@ int main(int argc, char *argv[]) {
 
   std::shared_ptr<mineola_pc::GLTFViewerApp> app(new mineola_pc::GLTFViewerApp());
   app->SetFilename(argv[1]);
+  std::cout << "Press P to play animation" << std::endl;
   app->Run(512, 512);
   return 0;
 }

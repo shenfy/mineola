@@ -29,8 +29,8 @@ public:
     // cam_ctrl_.reset(new ArcballController);
     cam_ctrl_->BindToNode("camera");
     cam_ctrl_->Activate();
-    bd_cast<TurntableController>(cam_ctrl_)->SetSpeed(0.01f);
-    bd_cast<TurntableController>(cam_ctrl_)->SetTarget("geometry0");
+    bd_cast<TurntableController>(cam_ctrl_)->SetSpeed(0.1f);
+    bd_cast<TurntableController>(cam_ctrl_)->SetTarget("geometry");
 
     en.RenderStateMgr().SetClearColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), true);
     en.ChangeCamera("main", false);

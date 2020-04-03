@@ -1,7 +1,7 @@
 {
   "geometries": [
     {
-      "filename": "dragon_20000.ply",
+      "primitive": "sphere",
       "material": "mineola:mat:fallback",
       "effect": "mineola:effect:diffuse",
       "shadowmap": false,
@@ -47,10 +47,13 @@
     },
     {
       "name": "camera",
-      "eye": "0, 0, 0.5",
+      "eye": "0, 0, 3.0",
       "target": "0, 0, 0",
       "up": "0, 1, 0",
       "parent": "root"
     }
+  ],
+  "passes": [
+    {}
   ]
 }
