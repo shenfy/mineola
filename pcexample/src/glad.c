@@ -7,7 +7,7 @@
     APIs: gles2=3.0
     Profile: core
     Extensions:
-        
+
     Loader: True
     Local files: False
     Omit khrplatform: False
@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glad/glad.h>
+#include "../../include/glad.h"
 
 struct gladGLversionStruct GLVersion = { 0, 0 };
 
