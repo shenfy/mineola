@@ -94,6 +94,9 @@ void SetAttribFlag(int semantics, AttribFlags &flags) {
   case TEXCOORD0:
     flags.EnableTexCoord();
     break;
+  case TEXCOORD1:
+    flags.EnableTexCoord2();
+    break;
   case DIFFUSE_COLOR:
     flags.EnableColor();
     break;
@@ -529,17 +532,17 @@ bool CreateSceneFromGLTFDoc(
       if (!m.normalTexture.empty()) {
         material->texture_slots["normal_sampler"] =
           {texture_names[(uint32_t)m.normalTexture.index]};
-        material_flags.EnableNormalMap();
+        material_flags.EnableNormalMap((uint8_t)m.normalTexture.texCoord);
       }
       if (!m.occlusionTexture.empty()) {
         material->texture_slots["lightmap_sampler"] =
           {texture_names[(uint32_t)m.occlusionTexture.index]};
-        material_flags.EnableOcclusionMap();
+        material_flags.EnableOcclusionMap((uint8_t)m.occlusionTexture.texCoord);
       }
       if (!m.emissiveTexture.empty()) {
         material->texture_slots["emissive_sampler"] =
           {texture_names[(uint32_t)m.emissiveTexture.index]};
-        material_flags.EnableEmissiveMap();
+        material_flags.EnableEmissiveMap((uint8_t)m.emissiveTexture.texCoord);
       }
       material->emit = glm::vec3(
         m.emissiveFactor[0], m.emissiveFactor[1], m.emissiveFactor[2]);
@@ -550,12 +553,13 @@ bool CreateSceneFromGLTFDoc(
         if (!m_pbr.baseColorTexture.empty()) {
           material->texture_slots["diffuse_sampler"] =
             {texture_names[(uint32_t)m_pbr.baseColorTexture.index]};
-          material_flags.EnableDiffuseMap();
+          material_flags.EnableDiffuseMap((uint8_t)m_pbr.baseColorTexture.texCoord);
         }
         if (!m_pbr.metallicRoughnessTexture.empty()) {
           material->texture_slots["metallic_roughness_sampler"] =
             {texture_names[(uint32_t)m_pbr.metallicRoughnessTexture.index]};
-          material_flags.EnableMetallicRoughnessMap();
+          material_flags.EnableMetallicRoughnessMap(
+            (uint8_t)m_pbr.metallicRoughnessTexture.texCoord);
         }
 
         material->diffuse = glm::vec3(

@@ -12,7 +12,7 @@ using namespace mineola;
 
 const char pbr_vs_str[] =
 R"(#version 300 es
-precision mediump float;
+precision highp float;
 #include "mineola_builtin_uniforms"
 
 in vec3 Pos;
@@ -28,8 +28,12 @@ out mat3 tbn;
 #endif  // HAS_TANGENT
 #if defined(HAS_TEXCOORD)
 in vec2 TexCoord0;
-out vec2 texcoord;
+out vec2 texcoord0;
 #endif  // HAS_TEXCOORD
+#if defined(HAS_TEXCOORD2)
+in vec2 TexCoord1;
+out vec2 texcoord1;
+#endif  // HAS_TEXCOORD2
 #if defined(HAS_COLOR)
 in vec3 Diffuse;
 out vec3 vcolor;
@@ -60,7 +64,10 @@ void main(void) {
   normal = Dir2WC(model_mat, Normal);
   #endif
   #if defined(HAS_TEXCOORD)
-  texcoord = TexCoord0;
+  texcoord0 = TexCoord0;
+  #endif
+  #if defined(HAS_TEXCOORD2)
+  texcoord1 = TexCoord1;
   #endif
   #if defined(HAS_TANGENT)
   vec3 tangent = Dir2WC(model_mat, Tangent);
@@ -74,10 +81,10 @@ void main(void) {
 
 const char pbr_fs_str[] =
 R"(#version 300 es
-precision mediump float;
+precision highp float;
 #include "mineola_builtin_uniforms"
 
-#if defined(HAS_ALBEDO_MAP)
+#if defined(HAS_DIFFUSE_MAP)
 uniform sampler2D diffuse_sampler;  // base color
 #endif
 #if defined(HAS_AO_MAP)
@@ -108,7 +115,10 @@ in vec3 pos_wc;
 in vec3 normal;
 #endif
 #if defined(HAS_TEXCOORD)
-in vec2 texcoord;
+in vec2 texcoord0;
+#endif
+#if defined(HAS_TEXCOORD2)
+in vec2 texcoord1;
 #endif
 #if defined(HAS_TANGENT)
 in mat3 tbn;
@@ -188,8 +198,8 @@ void main(void) {
   vec4 base_color = vec4(1.0);
   #endif
 
-  #if defined(HAS_ALBEDO_MAP) && defined(HAS_TEXCOORD)
-  base_color *= texture(diffuse_sampler, texcoord) * vec4(diffuse, alpha);
+  #if defined(HAS_DIFFUSE_MAP) && defined(DIFFUSE_TEXCOORD)
+  base_color *= texture(diffuse_sampler, DIFFUSE_TEXCOORD) * vec4(diffuse, alpha);
   #else
   base_color *= vec4(diffuse, alpha);
   #endif
@@ -200,14 +210,14 @@ void main(void) {
   }
   #endif
 
-  #if defined(HAS_AO_MAP) && defined(HAS_TEXCOORD)
-  float ao = texture(lightmap_sampler, texcoord).x;
+  #if defined(HAS_AO_MAP) && defined(AO_TEXCOORD)
+  float ao = texture(lightmap_sampler, AO_TEXCOORD).x;
   #else
   float ao = 1.0;
   #endif
 
-  #if defined(HAS_METALLIC_MAP) && defined(HAS_TEXCOORD)
-  vec4 o_m_r = texture(metallic_roughness_sampler, texcoord);
+  #if defined(HAS_METALLIC_MAP) && defined(METAL_TEXCOORD)
+  vec4 o_m_r = texture(metallic_roughness_sampler, METAL_TEXCOORD);
   float rough = o_m_r.y;
   float metallic = o_m_r.z;
   #else
@@ -215,8 +225,8 @@ void main(void) {
   float metallic = specularity;
   #endif
 
-  #if defined(HAS_EMISSIVE_MAP) && defined(HAS_TEXCOORD)
-  vec3 emission = texture(emissive_sampler, texcoord).rgb * emit;
+  #if defined(HAS_EMISSIVE_MAP) && defined(EMIT_TEXCOORD)
+  vec3 emission = texture(emissive_sampler, EMIT_TEXCOORD).rgb * emit;
   #else
   vec3 emission = emit;
   #endif
@@ -228,8 +238,8 @@ void main(void) {
   vec3 light_dir = normalize(light_wc);
   vec3 view_dir = normalize(eye_wc.xyz - pos_wc);
 
-  #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(HAS_TEXCOORD)
-  vec3 normal_pp = texture(normal_sampler, texcoord).xyz;
+  #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
+  vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
   normal_pp = normalize(normal_pp * 2.0 - 1.0);
   vec3 normal_dir = normalize(tbn * normal_pp);
   #elif defined(HAS_NORMAL)
@@ -263,6 +273,12 @@ void main(void) {
   #endif
 })";
 
+std::string BuildTCName(uint8_t idx) {
+  std::string result("texcoord0");
+  result[8] = idx + '0';
+  return result;
+}
+
 effect_defines_t CreatePBRShaderMacros(
   const MaterialFlags &mat_flags, const AttribFlags &attrib_flags) {
   effect_defines_t result;
@@ -275,6 +291,9 @@ effect_defines_t CreatePBRShaderMacros(
   if (attrib_flags.HasTexCoord()) {
     result.push_back({"HAS_TEXCOORD", {}});
   }
+  if (attrib_flags.HasTexCoord2()) {
+    result.push_back({"HAS_TEXCOORD2", {}});
+  }
   if (attrib_flags.HasColor()) {
     result.push_back({"HAS_COLOR", {}});
   }
@@ -283,19 +302,29 @@ effect_defines_t CreatePBRShaderMacros(
   }
 
   if (mat_flags.HasDiffuseMap()) {
-    result.push_back({"HAS_ALBEDO_MAP", {}});
+    result.push_back({"HAS_DIFFUSE_MAP", {}});
+    result.push_back({"DIFFUSE_TEXCOORD",
+      BuildTCName(mat_flags.tex_uvs[MaterialFlags::DIFFUSE_UV_LOC])});
   }
   if (mat_flags.HasOcclusionMap()) {
     result.push_back({"HAS_AO_MAP", {}});
+    result.push_back({"AO_TEXCOORD",
+      BuildTCName(mat_flags.tex_uvs[MaterialFlags::OCC_UV_LOC])});
   }
   if (mat_flags.HasNormalMap()) {
     result.push_back({"HAS_NORMAL_MAP", {}});
+    result.push_back({"NORMAL_TEXCOORD",
+      BuildTCName(mat_flags.tex_uvs[MaterialFlags::NORM_UV_LOC])});
   }
   if (mat_flags.HasMetallicRoughnessMap()) {
     result.push_back({"HAS_METALLIC_MAP", {}});
+    result.push_back({"METAL_TEXCOORD",
+      BuildTCName(mat_flags.tex_uvs[MaterialFlags::METAL_ROUGH_UV_LOC])});
   }
   if (mat_flags.HasEmissiveMap()) {
     result.push_back({"HAS_EMISSIVE_MAP", {}});
+    result.push_back({"EMIT_TEXCOORD",
+      BuildTCName(mat_flags.tex_uvs[MaterialFlags::EMIT_UV_LOC])});
   }
   if (mat_flags.IsAlphaCutOffEnabled()) {
     result.push_back({"USE_ALPHA_MASK", {}});
@@ -308,24 +337,29 @@ effect_defines_t CreatePBRShaderMacros(
 
 namespace mineola {
 
-void MaterialFlags::EnableDiffuseMap() {
+void MaterialFlags::EnableDiffuseMap(int uv) {
   flags |= DIFFUSE_MAP_BIT;
+  tex_uvs[DIFFUSE_UV_LOC] = uv;
 }
 
-void MaterialFlags::EnableOcclusionMap() {
+void MaterialFlags::EnableOcclusionMap(int uv) {
   flags |= OCCLUSION_MAP_BIT;
+  tex_uvs[OCC_UV_LOC] = uv;
 }
 
-void MaterialFlags::EnableNormalMap() {
+void MaterialFlags::EnableNormalMap(int uv) {
   flags |= NORMAL_MAP_BIT;
+  tex_uvs[NORM_UV_LOC] = uv;
 }
 
-void MaterialFlags::EnableMetallicRoughnessMap() {
+void MaterialFlags::EnableMetallicRoughnessMap(int uv) {
   flags |= METALLIC_ROUGHNESS_MAP_BIT;
+  tex_uvs[METAL_ROUGH_UV_LOC] = uv;
 }
 
-void MaterialFlags::EnableEmissiveMap() {
+void MaterialFlags::EnableEmissiveMap(int uv) {
   flags |= EMISSIVE_MAP_BIT;
+  tex_uvs[EMIT_UV_LOC] = uv;
 }
 
 void MaterialFlags::EnableBlending() {
@@ -373,26 +407,31 @@ bool MaterialFlags::HasTextures() const {
 }
 
 std::string MaterialFlags::Abbrev() const {
-  std::string result = "donmea";
+  std::string result = "d0o0n0m0e0a";
   if (HasDiffuseMap()) {
     result[0] = 'D';
+    result[1] = tex_uvs[DIFFUSE_UV_LOC] + '0';
   }
   if (HasOcclusionMap()) {
-    result[1] = 'O';
+    result[2] = 'O';
+    result[3] = tex_uvs[OCC_UV_LOC] + '0';
   }
   if (HasNormalMap()) {
-    result[2] = 'N';
+    result[4] = 'N';
+    result[5] = tex_uvs[NORM_UV_LOC] + '0';
   }
   if (HasMetallicRoughnessMap()) {
-    result[3] = 'M';
+    result[6] = 'M';
+    result[7] = tex_uvs[METAL_ROUGH_UV_LOC] + '0';
   }
   if (HasEmissiveMap()) {
-    result[4] = 'E';
+    result[8] = 'E';
+    result[9] = tex_uvs[EMIT_UV_LOC] + '0';
   }
   if (IsBlendingEnabled()) {
-    result[5] = 'A';
+    result[10] = 'A';
   } else if (IsAlphaCutOffEnabled()) {
-    result[5] = 'C';
+    result[10] = 'C';
   }
   return result;
 }
@@ -407,6 +446,10 @@ void AttribFlags::EnableTangent() {
 
 void AttribFlags::EnableTexCoord() {
   flags |= TEXCOORD_BIT;
+}
+
+void AttribFlags::EnableTexCoord2() {
+  flags |= TEXCOORD2_BIT;
 }
 
 void AttribFlags::EnableColor() {
@@ -433,6 +476,10 @@ bool AttribFlags::HasTexCoord() const {
   return flags & TEXCOORD_BIT;
 }
 
+bool AttribFlags::HasTexCoord2() const {
+  return flags & TEXCOORD2_BIT;
+}
+
 bool AttribFlags::HasColor() const {
   return flags & COLOR_BIT;
 }
@@ -442,7 +489,7 @@ bool AttribFlags::HasSkin() const {
 }
 
 std::string AttribFlags::Abbrev() const {
-  std::string result = "nttcs";
+  std::string result = "ntttcs";
   if (HasNormal()) {
     result[0] = 'N';
   }
@@ -452,11 +499,14 @@ std::string AttribFlags::Abbrev() const {
   if (HasTexCoord()) {
     result[2] = 'T';
   }
+  if (HasTexCoord2()) {
+    result[3] = 'T';
+  }
   if (HasColor()) {
-    result[3] = 'C';
+    result[4] = 'C';
   }
   if (HasSkin()) {
-    result[4] = 'S';
+    result[5] = 'S';
   }
   return result;
 }

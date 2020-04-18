@@ -22,7 +22,7 @@
       "proj": "perspective",
       "fovy": 60,
       "near": 0.1,
-      "far": 50.0,
+      "far": 100.0,
       "node": "camera"
     }
   ],
