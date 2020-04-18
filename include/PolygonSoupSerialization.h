@@ -7,7 +7,7 @@ namespace mineola {
   bool SerializeSoup(const char *filename, const PolygonSoup &soup, bool is_binary);
   bool DeserializeSoup(const char *filename, bool is_binary);
 
-  bool WriteSoupToPLY(const char *filename, const PolygonSoup &soup);
+  bool WriteSoupToPLY(const char *filename, const PolygonSoup &soup, bool is_binary = false);
   bool LoadSoupFromPLY(const char *filename, PolygonSoup &soup);
   bool LoadSoupFromPLY(std::istream &ins, PolygonSoup &soup);
 }

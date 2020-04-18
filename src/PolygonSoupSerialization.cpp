@@ -3,11 +3,12 @@
 #include <fstream>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "../include/Engine.h"
 
 namespace mineola {
 
-  bool WriteSoupToPLY(const char *fn, const PolygonSoup &soup) {
+  bool WriteSoupToPLY(const char *fn, const PolygonSoup &soup, bool is_binary) {
     std::ofstream out(fn, std::ios_base::out);
     if (!out.good()) return false;
 
@@ -31,30 +32,62 @@ namespace mineola {
       out << "property list uchar float texcoord\n";
     out << "end_header\n";
 
-    for (const auto &v : soup.vertices) {
-      out << v.pos.x << " " << v.pos.y << " " << v.pos.z << " ";
-      if (soup.has_vertex_normal)
-        out << v.normal.x << " " << v.normal.y << " " << v.normal.z << " ";
-      if (soup.has_vertex_texcoord)
-        out << v.tex.x << " " << v.tex.y << " ";
-      if (soup.has_vertex_color) {
-        out << (uint32_t)v.color.rgba[0] << " " << (uint32_t)v.color.rgba[1] << " "
-        << (uint32_t)v.color.rgba[2] << " ";
+    if (is_binary) {
+      for (const auto &v : soup.vertices) {
+        out.write((char*)glm::value_ptr(v.pos), sizeof(float) * 3);
+        if (soup.has_vertex_normal) {
+          out.write((char*)glm::value_ptr(v.normal), sizeof(float) * 3);
+        }
+        if (soup.has_vertex_texcoord) {
+          out.write((char*)glm::value_ptr(v.tex), sizeof(float) * 2);
+        }
+        if (soup.has_vertex_color) {
+          out.write((char*)&v.color.val, 3);
+        }
       }
-      out << "\n";
+
+      for (const auto &f : soup.faces) {
+        uint8_t num_vertex = (uint8_t)f.indices.size();
+        out.write((char*)&num_vertex, 1);
+        for (auto index : f.indices) {
+          int idx = (int)index;
+          out.write((char*)&idx, sizeof(int));
+        }
+        if (soup.has_face_texcoord) {
+          uint8_t num_texcoords = (uint8_t)f.texcoords.size() * 2;
+          out.write((char*)&num_texcoords, 1);
+          for (const auto &tex : f.texcoords) {
+            out.write((char*)glm::value_ptr(tex), sizeof(float) * 2);
+          }
+        }
+      }
+    } else {
+      for (const auto &v : soup.vertices) {
+        out << v.pos.x << " " << v.pos.y << " " << v.pos.z << " ";
+        if (soup.has_vertex_normal)
+          out << v.normal.x << " " << v.normal.y << " " << v.normal.z << " ";
+        if (soup.has_vertex_texcoord)
+          out << v.tex.x << " " << v.tex.y << " ";
+        if (soup.has_vertex_color) {
+          out << (uint32_t)v.color.rgba[0] << " " << (uint32_t)v.color.rgba[1] << " "
+          << (uint32_t)v.color.rgba[2] << " ";
+        }
+        out << "\n";
+      }
+
+      for (const auto &f : soup.faces) {
+        out << f.indices.size() << " ";
+        for (auto index : f.indices)
+          out << index << " ";
+        if (soup.has_face_texcoord) {
+          out << 2 * f.texcoords.size() << " ";
+          for (const auto &tex : f.texcoords)
+            out << tex.x << " " << tex.y << " ";
+        }
+        out << "\n";
+      }
     }
 
-    for (const auto &f : soup.faces) {
-      out << f.indices.size() << " ";
-      for (auto index : f.indices)
-        out << index << " ";
-      if (soup.has_face_texcoord) {
-        out << 2 * f.texcoords.size() << " ";
-        for (const auto &tex : f.texcoords)
-          out << tex.x << " " << tex.y << " ";
-      }
-      out << "\n";
-    }
     out.close();
     return true;
   }
@@ -75,7 +108,7 @@ namespace mineola {
 
     soup.vertices.clear();
     soup.faces.clear();
-    
+
     std::string line;
     std::getline(ins, line); // "ply"
     if (line != "ply") {
@@ -152,7 +185,7 @@ namespace mineola {
       if (is_ascii) {
         std::getline(ins, line);
         boost::algorithm::split(str_vec, line, boost::algorithm::is_any_of(" "));
-        size_t total_size = 3 + 
+        size_t total_size = 3 +
           (soup.has_vertex_normal ? 3 : 0) +
           (soup.has_vertex_texcoord ? 2 : 0) +
           (soup.has_vertex_color ? 3 : 0);
