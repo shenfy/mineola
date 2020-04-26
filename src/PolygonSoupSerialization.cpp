@@ -1,7 +1,6 @@
 #include "prefix.h"
 #include "../include/PolygonSoupSerialization.h"
 #include <fstream>
-#include <iostream>
 #include <boost/algorithm/string.hpp>
 #include "../include/Engine.h"
 
@@ -75,7 +74,7 @@ namespace mineola {
 
     soup.vertices.clear();
     soup.faces.clear();
-    
+
     std::string line;
     std::getline(ins, line); // "ply"
     if (line != "ply") {
@@ -109,10 +108,13 @@ namespace mineola {
       std::for_each(str_vec.begin(), str_vec.end(), [](std::string &str) {
         str = boost::trim_copy(str);
       });
-      if (boost::algorithm::trim_copy(line) == "end_header") break;
-      else if (str_vec[0] == "comment") {
+      if (boost::algorithm::trim_copy(line) == "end_header") {
+        break;
+      } else if (str_vec[0] == "comment") {
         if (str_vec.size() > 2) {
-          if (str_vec[1] == "TextureFile") soup.texture_filename = boost::algorithm::trim_copy(str_vec[2]);
+          if (str_vec[1] == "TextureFile") {
+            soup.texture_filename = boost::algorithm::trim_copy(str_vec[2]);
+          }
         }
       } else if (str_vec[0] == "element") {
         if (str_vec.size() > 2) {
@@ -152,7 +154,7 @@ namespace mineola {
       if (is_ascii) {
         std::getline(ins, line);
         boost::algorithm::split(str_vec, line, boost::algorithm::is_any_of(" "));
-        size_t total_size = 3 + 
+        size_t total_size = 3 +
           (soup.has_vertex_normal ? 3 : 0) +
           (soup.has_vertex_texcoord ? 2 : 0) +
           (soup.has_vertex_color ? 3 : 0);

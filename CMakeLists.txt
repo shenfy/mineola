@@ -8,7 +8,9 @@ set(${PROJECT_NAME}_MINOR_VERSION 0)
 set(${PROJECT_NAME}_PATCH_LEVEL 0)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_BUILD_TYPE Release)
+if (NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
+endif()
 
 if (WIN32)
     include_directories("C:\\include")

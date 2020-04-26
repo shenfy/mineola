@@ -1,6 +1,5 @@
 #include "prefix.h"
 #include <algorithm>
-#include <iostream>
 #include <cstring>
 #include <unordered_set>
 #include <numeric>
@@ -52,7 +51,7 @@ void GLProgram::BindBuiltinUniformBlocks() {
     }
   }
 }
-  
+
 bool GLProgram::GenerateUniformBlockMap() {
   BOOST_ASSERT(handle_);
 
@@ -62,11 +61,11 @@ bool GLProgram::GenerateUniformBlockMap() {
   glGetProgramiv(handle_, GL_ACTIVE_UNIFORM_BLOCKS, &num_ubs);
   if (num_ubs <= 0)
     return true;
-  
+
   static char name[VAR_NAME_MAX_LENGTH] = {0};
   int32_t name_length = 0;
   int32_t binding = -1;
-  
+
   for (int32_t i = 0; i < num_ubs; ++i) {
     glGetActiveUniformBlockName(handle_, i, VAR_NAME_MAX_LENGTH, &name_length, name);
     glGetActiveUniformBlockiv(handle_, i, GL_UNIFORM_BLOCK_BINDING, &binding);
@@ -78,27 +77,27 @@ bool GLProgram::GenerateUniformBlockMap() {
 
 bool GLProgram::GenerateVarMap() {
   BOOST_ASSERT(handle_);
-  
+
   variable_map_.clear();
   int32_t num_uniforms = 0;
   glGetProgramiv(handle_, GL_ACTIVE_UNIFORMS, &num_uniforms);
   if (num_uniforms <= 0)
     return true;
-  
+
   static char uniform_name[VAR_NAME_MAX_LENGTH] = {0};
   int32_t uniform_name_length = 0, uniform_size = 0, uniform_loc = 0;
   GLenum uniform_type;
-  
+
   std::vector<GLuint> uniform_indices(num_uniforms);
   std::iota(uniform_indices.begin(), uniform_indices.end(), 0);
   std::vector<GLint> block_indices(num_uniforms);
-  
+
   glGetActiveUniformsiv(handle_, num_uniforms, &uniform_indices[0], GL_UNIFORM_BLOCK_INDEX, &block_indices[0]);
-  
+
   for (int32_t i = 0; i < num_uniforms; ++i) {
     if (block_indices[i] != -1)
       continue;
-    
+
     glGetActiveUniform(handle_, i, VAR_NAME_MAX_LENGTH,
       &uniform_name_length, &uniform_size, &uniform_type, uniform_name);
     uniform_loc = glGetUniformLocation(handle_, uniform_name);
@@ -106,13 +105,13 @@ bool GLProgram::GenerateVarMap() {
       variable_map_[uniform_name] = std::make_tuple(uniform_loc, (uint32_t)uniform_type, uniform_size);
     }
   }
-  
+
 //  for (auto iter = variable_map_.begin(); iter != variable_map_.end(); ++iter)
 //    printf("%s: %d, %d, %d\n", iter->first.c_str(), std::get<0>(iter->second), std::get<1>(iter->second), std::get<2>(iter->second));
-  
+
   return true;
 }
-  
+
 int32_t GLProgram::GetUniformBlockBinding(const std::string &name) {
   auto iter = ub_map_.find(name);
   if (iter != ub_map_.end()) {
@@ -139,21 +138,21 @@ bool GLProgram::GetVariableInfo(
 void GLProgram::UploadVariable(const char *var_name, const float *val) {
   uint32_t type = 0, loc = 0, length = 0;
   if (GetVariableInfo(var_name, type, loc, length)) {
-    gl_uniform::SetUniform(type, loc, length, val);        
+    gl_uniform::SetUniform(type, loc, length, val);
   }
 }
 
 void GLProgram::UploadVariable(const char *var_name, const int32_t *val) {
   uint32_t type = 0, loc = 0, length = 0;
   if (GetVariableInfo(var_name, type, loc, length)) {
-    gl_uniform::SetUniform(type, loc, length, val);        
+    gl_uniform::SetUniform(type, loc, length, val);
   }
 }
 
 void GLProgram::UploadVariable(const char *var_name, const uint32_t *val) {
   uint32_t type = 0, loc = 0, length = 0;
   if (GetVariableInfo(var_name, type, loc, length)) {
-    gl_uniform::SetUniform(type, loc, length, val);        
+    gl_uniform::SetUniform(type, loc, length, val);
   }
 }
 

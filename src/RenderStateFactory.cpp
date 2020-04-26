@@ -1,7 +1,6 @@
 #include "../include/RenderStateFactory.h"
 #include "../include/RenderState.h"
 #include "../include/GLMHelper.h"
-#include <iostream>
 #include <unordered_map>
 #include <vector>
 #include <boost/algorithm/string.hpp>

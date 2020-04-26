@@ -14,6 +14,10 @@
 #include "ResourceManager.h"
 #include "RenderStateManager.h"
 
+namespace imgpp {
+class Img;
+}
+
 namespace mineola {
 
 //forward declaration
@@ -65,42 +69,42 @@ public:
   enum : uint8_t {BUTTON_DOWN = 0, BUTTON_UP};
   enum : uint8_t {MOUSE_LBUTTON = 0, MOUSE_RBUTTON = 1, MOUSE_MBUTTON = 2};
 
-  typedef boost::signals2::signal<void (uint32_t, uint8_t)> keyboard_signal_t;
-  typedef keyboard_signal_t::slot_type keyboard_callback_t;
+  using keyboard_signal_t = boost::signals2::signal<void (uint32_t, uint8_t)>;
+  using keyboard_callback_t = keyboard_signal_t::slot_type;
   boost::signals2::connection AddKeyboardCallback(const keyboard_callback_t &callback);
   void OnKey(uint32_t key, uint8_t action);
 
-  typedef boost::signals2::signal<void (uint8_t, uint8_t, int, int)> mouse_btn_signal_t;
-  typedef mouse_btn_signal_t::slot_type mouse_btn_callback_t;
+  using mouse_btn_signal_t = boost::signals2::signal<void (uint8_t, uint8_t, int, int)>;
+  using mouse_btn_callback_t = mouse_btn_signal_t::slot_type;
   boost::signals2::connection AddMouseButtonCallback(const mouse_btn_callback_t &callback);
   void OnMouseButton(uint8_t button, uint8_t action, int x, int y);
 
-  typedef boost::signals2::signal<void (int, int)> mouse_move_signal_t;
-  typedef mouse_move_signal_t::slot_type mouse_move_callback_t;
+  using mouse_move_signal_t = boost::signals2::signal<void (int, int)>;
+  using mouse_move_callback_t = mouse_move_signal_t::slot_type;
   boost::signals2::connection AddMouseMoveCallback(const mouse_move_callback_t &callback);
   void OnMouseMove(int x, int y);
 
-  typedef boost::signals2::signal<void (int, int)> mouse_scroll_signal_t;
-  typedef mouse_scroll_signal_t::slot_type mouse_scroll_callback_t;
+  using mouse_scroll_signal_t = boost::signals2::signal<void (int, int)>;
+  using mouse_scroll_callback_t = mouse_scroll_signal_t::slot_type;
   boost::signals2::connection AddMouseScrollCallback(const mouse_scroll_callback_t &callback);
   void OnMouseScroll(int x_offset, int y_offset);
 
-  typedef boost::signals2::signal<void (float)> pinch_signal_t;
-  typedef pinch_signal_t::slot_type pinch_callback_t;
+  using pinch_signal_t = boost::signals2::signal<void (float)>;
+  using pinch_callback_t = pinch_signal_t::slot_type;
   boost::signals2::connection AddPinchCallback(const pinch_callback_t &callback);
   void OnPinch(float scale);
 
-  typedef boost::signals2::signal<void (uint32_t)> pass_signal_t;
-  typedef pass_signal_t::slot_type pass_callback_t;
+  using pass_signal_t = boost::signals2::signal<void (uint32_t)>;
+  using pass_callback_t = pass_signal_t::slot_type;
   boost::signals2::connection AddPassBeginCallback(const pass_callback_t &callback);
   boost::signals2::connection AddPassEndCallback(const pass_callback_t &callback);
 
-  typedef boost::signals2::signal<void (double, double)> frame_move_signal_t;
-  typedef frame_move_signal_t::slot_type frame_move_callback_t;
+  using frame_move_signal_t = boost::signals2::signal<void (double, double)>;
+  using frame_move_callback_t = frame_move_signal_t::slot_type;
   boost::signals2::connection AddFrameMoveCallback(const frame_move_callback_t &callback);
 
-  typedef boost::signals2::signal<void (uint32_t, uint32_t)> size_signal_t;
-  typedef size_signal_t::slot_type size_callback_t;
+  using size_signal_t = boost::signals2::signal<void (uint32_t, uint32_t)>;
+  using size_callback_t = size_signal_t::slot_type;
   boost::signals2::connection AddSizeChangeCallback(const size_callback_t &callback);
 
   // time
@@ -111,11 +115,10 @@ public:
   std::shared_ptr<SceneNode> Scene() const;
 
   // effects
-  typedef std::vector<std::pair<std::string, std::string>> effect_defines_t;
-  typedef std::unordered_map<
+  using effect_defines_t = std::vector<std::pair<std::string, std::string>>;
+  using effect_files_cache_t = std::unordered_map<
     std::string,
-    std::tuple<std::string, std::string, std::string, effect_defines_t>>
-  effect_files_cache_t;
+    std::tuple<std::string, std::string, std::string, effect_defines_t>>;
   void CacheEffectFiles(const std::string &effect, const std::string &vs, const std::string &ps,
     const effect_defines_t *defines);
   void CacheEffectFiles(const std::string &effect,
@@ -125,6 +128,14 @@ public:
 
   // uniform block
   const std::weak_ptr<UniformBlock> &BuiltinUniformBlock() const;
+
+  // external texture loaders
+  using texture_loader_t = std::add_pointer<bool(const char *, imgpp::Img &img)>::type;
+  using texture_mem_loader_t =
+    std::add_pointer<bool(const char *, uint32_t, imgpp::Img &img)>::type;
+  void SetExtTextureLoaders(texture_loader_t file_loader, texture_mem_loader_t mem_loader);
+  texture_loader_t ExtTextureLoader();
+  texture_mem_loader_t ExtTextureMemLoader();
 
   // termination
   bool TerminationSignaled() const;
@@ -175,6 +186,9 @@ private:
   std::string override_material_;
 
   effect_files_cache_t effect_files_cache_;
+
+  texture_loader_t ext_texture_loader_;
+  texture_mem_loader_t ext_texture_mem_loader_;
 
   std::weak_ptr<UniformBlock> builtin_uniform_block_;
 

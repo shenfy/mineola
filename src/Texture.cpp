@@ -1,6 +1,5 @@
 #include "prefix.h"
 #include "../include/Texture.h"
-#include <iostream>
 #include <algorithm>
 #include "../include/glutility.h"
 

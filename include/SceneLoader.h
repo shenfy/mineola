@@ -11,11 +11,11 @@ namespace mineola {
 class SceneNode;
 using GeometryLoaderT = std::function<
   bool (
-    const char *,
-    const std::shared_ptr<SceneNode> &,
-    const char *,
-    int,
-    const std::vector<std::pair<std::string, std::string>> &
+    const char *,  // path
+    const std::shared_ptr<SceneNode> &,  // dst SceneNode
+    const char *,  // effect name
+    int,  // layer id
+    const std::vector<std::pair<std::string, std::string>> &  // inject textures
   )
 >;
 using GeometryLoaderVecT = std::vector<GeometryLoaderT>;

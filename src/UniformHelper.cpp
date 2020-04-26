@@ -1,5 +1,4 @@
 #include "prefix.h"
-#include <iostream>
 #include "../include/glutility.h"
 #include "../include/UniformHelper.h"
 

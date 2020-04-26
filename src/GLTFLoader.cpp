@@ -315,8 +315,6 @@ void ParseAnimationChannel(const fx::gltf::Document &doc,
 }
 
 bool CreateSceneFromGLTFDoc(
-  texture_helper::texture_loader_t texture_file_loader,
-  texture_helper::texture_mem_loader_t texture_mem_loader,
   const fx::gltf::Document &doc,
   std::string model_name,
   const std::shared_ptr<SceneNode> &parent_node,
@@ -476,8 +474,8 @@ bool CreateSceneFromGLTFDoc(
         // find file on disk
         if (en.ResrcMgr().LocateFile(input_path.c_str(), full_path)) {
           if (!en.ResrcMgr().Find(full_path)) {  // not loaded
-            if (texture_helper::CreateTextureFromExtLoader(
-              full_path.c_str(), full_path.c_str(), true, srgb, texture_file_loader)) {
+            if (texture_helper::CreateTexture(
+              full_path.c_str(), full_path.c_str(), true, srgb)) {
               texture_names[(uint32_t)tex_idx] = full_path;
             } else {
               MLOG("Failed to create texture from file %s\n", full_path.c_str());
@@ -489,9 +487,9 @@ bool CreateSceneFromGLTFDoc(
       } else if (img_buffers.find(t.source) != img_buffers.end()) {  // load from buffer
         std::string texture_name = "tex:" + t.name + ":" + std::to_string(tex_idx);
         if (!en.ResrcMgr().Find(texture_name)) {  // not loaded
-          if (texture_helper::CreateTextureFromExtLoader(
+          if (texture_helper::CreateTexture(
             texture_name.c_str(), img_buffers[t.source].first, img_buffers[t.source].second,
-            true, srgb, texture_mem_loader)) {
+            true, srgb)) {
             texture_names[(uint32_t)tex_idx] = texture_name;
           } else {
             MLOG("Failed to create texture %s from memory!\n", texture_name.c_str());
@@ -879,8 +877,6 @@ bool CreateSceneFromGLTFDoc(
 namespace mineola { namespace gltf {
 
 bool LoadScene(
-  texture_helper::texture_loader_t file_loader,
-  texture_helper::texture_mem_loader_t mem_loader,
   const char *fn,
   const std::shared_ptr<SceneNode> &parent_node,
   const char *effect_name,
@@ -899,7 +895,7 @@ bool LoadScene(
   }
 
 
-  bool result = CreateSceneFromGLTFDoc(file_loader, mem_loader, gltf_doc,
+  bool result = CreateSceneFromGLTFDoc(gltf_doc,
     fn, parent_node, effect_name, layer_mask, inject_textures);
 
   return result;

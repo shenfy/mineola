@@ -1,6 +1,5 @@
 #include "prefix.h"
 #include "../include/ShaderParser.h"
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>

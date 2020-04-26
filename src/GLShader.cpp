@@ -5,7 +5,6 @@
 #include <boost/assert.hpp>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include "../include/ShaderParser.h"
 #include "../include/Engine.h"
 #include "../include/glutility.h"

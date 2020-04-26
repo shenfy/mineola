@@ -1,9 +1,8 @@
 #include "prefix.h"
 #include "../include/TextureHelper.h"
 #include <cstring>
-#include <iostream>
+#include <fstream>
 #include <boost/algorithm/string.hpp>
-#include <gli/gli.hpp>
 #include "../include/glutility.h"
 #include "../include/TypeMapping.h"
 #include "../include/Texture.h"
@@ -11,7 +10,6 @@
 #include "../include/PixelType.h"
 #include "../include/Framebuffer.h"
 #include "../include/ImgppTextureSrc.h"
-#include "../include/GLITextureSrc.h"
 
 namespace {
 
@@ -53,84 +51,23 @@ bool CreateTextureDescImgpp(const imgpp::Img &img, bool mipmap, bool srgb,
   desc.height = roi.Height();
   desc.depth = roi.Depth();
 
-  ImgppTextureSrc *data = new ImgppTextureSrc;
-  if (data == nullptr)
+  auto data = std::make_shared<ImgppTextureSrc>();
+  if (!data) {
       return false;
+  }
   data->AddBuffer(img.Data());
   data->AddROI(roi);
-  desc.src_data.reset(data);
+  desc.src_data = std::move(data);
 
   return true;
 }
 
-bool CreateTextureDescGLI(const gli::texture &gli_texture, TextureDesc &desc) {
-
-  gli::gl gli_gl(gli::gl::PROFILE_ES30);  // use highest version profile available
-  const gli::gl::format texture_gl_format =
-      gli_gl.translate(gli_texture.format(), gli_texture.swizzles());
-  uint32_t target = gli_gl.translate(gli_texture.target());
-
-  // rejects texture formats not implemented in mineola
-  if (target == GL_TEXTURE_CUBE_MAP)
-    return false;
-
-  desc.type = target;
-  desc.compressed = gli::is_compressed(gli_texture.format());
-  desc.min_filter = GL_NEAREST_MIPMAP_LINEAR;
-  desc.mag_filter = GL_LINEAR;
-  desc.wrap_s = GL_REPEAT;
-  desc.wrap_t = GL_REPEAT;
-  desc.access = 0;
-  switch (target) {
-    case GL_TEXTURE_2D_ARRAY:
-      desc.array_size = (uint32_t)(gli_texture.layers() * gli_texture.faces());
-      break;
-    default:
-      desc.array_size = 1;
-  }
-  desc.levels = (uint32_t)gli_texture.levels();
-  desc.format = texture_gl_format.External;
-  desc.internal_format = texture_gl_format.Internal;
-  desc.data_type = texture_gl_format.Type;
-  desc.width = gli_texture.extent().x;
-  desc.height = gli_texture.extent().y;
-  desc.depth_compare = false;
-
-  GLITextureSrc *data = new GLITextureSrc;
-  if (data == nullptr)
-    return false;
-  data->SetGLITexture(gli_texture);
-  desc.src_data.reset(data);
-
-  return true;
-}
-
-bool CreateTextureDescGLIFile(const char *filename, TextureDesc &desc) {
-  std::string found_path;
-  if (!Engine::Instance().ResrcMgr().LocateFile(filename, found_path))
-    return false;
-
-  gli::texture gli_texture = gli::load(found_path);
-  if (gli_texture.empty())
-    return false;
-
-  return CreateTextureDescGLI(gli_texture, desc);
-}
-
-bool CreateTextureDescGLIMem(const char *buffer, size_t length, TextureDesc &desc) {
-  gli::texture gli_texture = gli::load(buffer, length);
-  if (gli_texture.empty())
-    return false;
-
-  return CreateTextureDescGLI(gli_texture, desc);
-}
-
-bool IsDDSFormat(const char *buffer) {
+bool IsDDSFormat(const uint8_t *buffer) {
   const uint32_t *value = (const uint32_t *)buffer;
   return (*value == 0x20534444);
 }
 
-bool IsKTXFormat(const char *buffer) {
+bool IsKTXFormat(const uint8_t *buffer) {
   if ((uint8_t)buffer[0] == 0xAB && buffer[1] == 0x4B && buffer[2] == 0x54 && buffer[3] == 0x58
     && buffer[4] == 0x20 && buffer[5] == 0x31 && buffer[6] == 0x31 && (uint8_t)buffer[7] == 0xBB
     && buffer[8] == 0x0D && buffer[9] == 0x0A && buffer[10] == 0x1A && buffer[11] == 0x0A) {
@@ -139,20 +76,58 @@ bool IsKTXFormat(const char *buffer) {
   return false;
 }
 
-// bool IsPNGFormat(const char *buffer) {
-//   if (buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4E && buffer[3] == 0x47 &&
-//     buffer[4] == 0x0D && buffer[5] == 0x0A && buffer[6] == 0x1A && buffer[7] == 0x0A) {
-//     return true;
-//   }
-//   return false;
-// }
+bool IsPNGFormat(const uint8_t *buffer) {
+  if (buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4E && buffer[3] == 0x47 &&
+    buffer[4] == 0x0D && buffer[5] == 0x0A && buffer[6] == 0x1A && buffer[7] == 0x0A) {
+    return true;
+  }
+  return false;
+}
 
-// bool IsJPEGFormat(const char *buffer) {
-//   if (buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF && buffer[3] == 0xE0) {
-//     return true;
-//   }
-//   return false;
-// }
+bool IsJPEGFormat(const uint8_t *buffer) {
+  if (buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF &&
+    (buffer[3] == 0xE0 || buffer[3] == 0xE1 || buffer[3] == 0xEE || buffer[3] == 0xDB)) {
+    return true;
+  }
+  return false;
+}
+
+const char *DetermineImageFormat(const uint8_t *buffer) {
+  if (IsDDSFormat(buffer)) {
+    return "dds";
+  } else if (IsKTXFormat(buffer)) {
+    return "ktx";
+  } else if (IsJPEGFormat(buffer)) {
+    return "jpeg";
+  } else if (IsPNGFormat(buffer)) {
+    return "png";
+  } else {
+    return "?";
+  }
+}
+
+const char *PeekImageFormat(const char *fn) {
+  enum {kMagicNumberDigits = 16};
+
+  std::ifstream infile(fn, std::ios::binary);
+  if (infile.good()) {
+    infile.seekg(0, std::ios::end);
+    auto file_size = infile.tellg();
+    if (file_size < kMagicNumberDigits) {
+      infile.close();
+      return "?";
+    }
+
+    infile.seekg(0, std::ios::beg);
+    std::string buffer;
+    buffer.resize(kMagicNumberDigits);
+    infile.read(&buffer[0], kMagicNumberDigits);
+    infile.close();
+
+    return DetermineImageFormat((const uint8_t*)buffer.data());
+  }
+  return "?";
+}
 
 }  // namespace
 
@@ -160,6 +135,7 @@ namespace mineola { namespace texture_helper {
 
 bool CreateTextureFromImgpp(const char *texture_name, const imgpp::Img &img,
   bool mipmap, bool srgb, uint32_t minimum_dimension) {
+
     if (texture_name == nullptr || strlen(texture_name) == 0)
         return false;
 
@@ -180,7 +156,7 @@ bool CreateTextureFromImgpp(const char *texture_name, const imgpp::Img &img,
             break;
     }
     if (texture_ptr == nullptr) {  // unsupported texture target
-        std::cerr << "Error: unsupported texture target for specified imgpp" << std::endl;
+        MLOG("Error: unsupported texture target for specified imgpp!\n");
         return false;
     }
 
@@ -192,80 +168,64 @@ bool CreateTextureFromImgpp(const char *texture_name, const imgpp::Img &img,
         return false;
 }
 
-bool CreateTextureFromFile(const char *texture_name, const char *filename, bool mipmap) {
-  if (texture_name == nullptr || filename == nullptr
-    || strlen(texture_name) == 0 || strlen(filename) == 0)
+bool CreateTexture(
+  const char *texture_name,
+  const char *fn,
+  bool mipmap, bool srgb) {
+
+  if (texture_name == nullptr || fn == nullptr
+    || strlen(texture_name) == 0 || strlen(fn) == 0) {
     return false;
+  }
 
   TextureDesc desc;
-  if (!CreateDescFromFile(filename, mipmap, desc))
-    return false;
+
+  // determine file format
+  auto img_fmt = PeekImageFormat(fn);
+  if (img_fmt == "ktx") {
+    // TODO: use internal ktx loader
+    throw std::runtime_error("ktx loader not implemented!");
+  } else if (img_fmt == "jpeg" || img_fmt == "png") {
+    if (auto loader = Engine::Instance().ExtTextureLoader(); loader != nullptr) {
+      imgpp::Img img;
+      if (!loader(fn, img) || !CreateTextureDescImgpp(img, mipmap, srgb, desc, 2)) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 
   return CreateTextureFromDesc(texture_name, desc);
 }
 
-bool CreateTextureFromExtLoader(
-  const char *texture_name, const char *fn, bool mipmap, bool srgb,
-  texture_loader_t loader) {
-	if (texture_name == nullptr || fn == nullptr || loader == nullptr
-		|| strlen(texture_name) == 0 || strlen(fn) == 0) {
-		return false;
-	}
+bool CreateTexture(
+  const char *texture_name,
+  const char *buffer, uint32_t length,
+  bool mipmap, bool srgb) {
 
-	imgpp::Img img;
-	TextureDesc desc;
-	if (!loader(fn, img) || !CreateTextureDescImgpp(img, mipmap, srgb, desc, 2)) {
-		return false;
-	}
-	return CreateTextureFromDesc(texture_name, desc);
-}
-
-bool CreateTextureFromExtLoader(
-  const char *texture_name, const char *buffer,
-  uint32_t length, bool mipmap, bool srgb,
-  texture_mem_loader_t loader) {
   if (texture_name == nullptr || buffer == nullptr || length == 0) {
     return false;
   }
 
-  imgpp::Img img;
   TextureDesc desc;
-  if (!loader(buffer, length, img) || !CreateTextureDescImgpp(img, mipmap, srgb, desc, 2)) {
-    return false;
+
+  auto img_fmt = DetermineImageFormat((const uint8_t*)buffer);
+
+  if (img_fmt == "ktx") {
+    // TODO: use internal ktx loader
+    throw std::runtime_error("ktx loader not implemented!");
+  } else if (img_fmt == "jpeg" || img_fmt == "png") {
+    if (auto loader = Engine::Instance().ExtTextureMemLoader(); loader != nullptr) {
+      imgpp::Img img;
+      if (!loader(buffer, length, img) || !CreateTextureDescImgpp(img, mipmap, srgb, desc, 2)) {
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
   return CreateTextureFromDesc(texture_name, desc);
-}
-
-bool CreateDescFromFile(const char *filename, bool mipmap, TextureDesc &desc) {
-  if (filename == nullptr || strlen(filename) == 0)
-    return false;
-
-  bool result = false;
-  if (boost::algorithm::ends_with(filename, "dds")
-    || boost::algorithm::ends_with(filename, "ktx")) {
-    result = CreateTextureDescGLIFile(filename, desc);
-  }
-  return result;
-}
-
-bool CreateTextureFromMemory(const char *texture_name, const void *buffer, size_t length, bool mipmap) {
-  if (texture_name == nullptr || strlen(texture_name) == 0)
-    return false;
-  TextureDesc desc;
-  if (!CreateDescFromMemory(buffer, length, mipmap, desc))
-    return false;
-
-  return CreateTextureFromDesc(texture_name, desc);
-}
-
-bool CreateDescFromMemory(const void *buffer, size_t length, bool mipmap, TextureDesc &desc) {
-  if (buffer == nullptr || length == 0)
-    return false;
-  bool result = false;
-  if (IsDDSFormat((const char *)buffer) || IsKTXFormat((const char *)buffer)) {
-    result = CreateTextureDescGLIMem((const char *)buffer, length, desc);
-  }
-  return result;
 }
 
 bool CreateTextureFromDesc(const char *texture_name, const TextureDesc &desc) {
@@ -290,7 +250,7 @@ bool CreateTextureFromDesc(const char *texture_name, const TextureDesc &desc) {
     return false;
   }
 
-  std::shared_ptr<Texture> texture(texture_ptr);
+  auto texture = std::shared_ptr<Texture>(texture_ptr);
   if (texture->Create(desc)) {
     Engine::Instance().ResrcMgr().Add(texture_name, texture);
     return true;

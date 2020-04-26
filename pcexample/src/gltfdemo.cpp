@@ -72,16 +72,13 @@ public:
 
     Engine &en = GetEngine();
 
-    if (!gltf_filename_.empty()) {
-      namespace ph = std::placeholders;
-      auto gltf_loader = std::bind(gltf::LoadScene,
-        STBLoadImageFromFile, STBLoadImageFromMem,
-        ph::_1, ph::_2, ph::_3, ph::_4, ph::_5);
+    en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
 
-      BuildSceneFromConfigFile(kSceneFilename.c_str(), {gltf_loader});
+    if (!gltf_filename_.empty()) {
+      BuildSceneFromConfigFile(kSceneFilename.c_str(), {gltf::LoadScene});
       auto cfg = kConfigPrefix + gltf_filename_ + kConfigSuffix;
 
-      BuildSceneFromConfig(cfg.c_str(), {gltf_loader});
+      BuildSceneFromConfig(cfg.c_str(), {gltf::LoadScene});
     }
 
     cam_ctrl_.reset(new ArcballController);
