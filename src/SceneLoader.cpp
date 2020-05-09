@@ -421,12 +421,15 @@ bool BuildSceneFromConfig(const char *config_str,
 
       if (texture.find("filename") != texture.end()) {
         // a texture from file
+
         auto filename = texture["filename"].get<std::string>();
+        std::string full_path;
+        en.ResrcMgr().LocateFile(filename.c_str(), full_path);
         bool mipmap = false;
         if (texture.find("mipmap") != texture.end()) {
           mipmap = texture["mipmap"].get<bool>();
         }
-        texture_helper::CreateTexture(texture_name.c_str(), filename.c_str(), mipmap, is_srgb);
+        texture_helper::CreateTexture(texture_name.c_str(), full_path.c_str(), mipmap, is_srgb);
       } else {
         // empty texture
         uint32_t type = GL_TEXTURE_2D, width = 1, height = 1, depth = 1;

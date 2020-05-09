@@ -6,6 +6,8 @@
 #include "../../include/SceneLoader.h"
 #include "../../include/MeshIO.h"
 #include "../../include/FileSystem.h"
+#define MINEOLA_USE_STBIMAGE
+#include "../../include/STBImagePlugin.h"
 
 namespace mineola_pc {
 using namespace mineola;
@@ -21,6 +23,7 @@ public:
 
     Engine &en = GetEngine();
 
+    en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
     if (!init_scene_fn_.empty()) {
       BuildSceneFromConfigFile(init_scene_fn_.c_str(), {mesh_io::LoadPLY});
     }

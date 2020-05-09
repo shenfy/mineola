@@ -12,7 +12,7 @@ public:
   virtual uint32_t DataSize(uint32_t level) const = 0;
 
   // returns (width, height, depth)
-  virtual glm::ivec3 Dimensions(uint32_t level) const = 0;
+  virtual glm::ivec4 Dimensions(uint32_t level) const = 0;
   virtual int Alignment(uint32_t level) const = 0;
 };
 
