@@ -7,7 +7,7 @@
 namespace mineola {
 class ImgppTextureSrc;
 
-// KTX 1.0 specification
+// KTX 1.1 specification
 // https://www.khronos.org/opengles/sdk/tools/KTX/file_format_spec/
 struct KTXHeader {
   uint8_t identifier[12];
@@ -27,8 +27,8 @@ struct KTXHeader {
 };
 
 
-bool LoadKTXFromFile(const char *fn, std::shared_ptr<ImgppTextureSrc> &tex_src);
-bool LoadKTXFromMem(const char *buffer, uint32_t length, std::shared_ptr<ImgppTextureSrc> &tex_src);
+std::shared_ptr<ImgppTextureSrc> LoadKTXFromFile(const char *fn);
+std::shared_ptr<ImgppTextureSrc> LoadKTXFromMem(const char *buffer, uint32_t length);
 }
 
 #endif // MINEOLA_KTXIMAGELOADER_H

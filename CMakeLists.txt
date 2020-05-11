@@ -61,3 +61,13 @@ if (WIN32)
 else ()
   target_link_libraries(gltfdemo mineola glfw pthread)
 endif ()
+
+# imgpptexturesrc example
+file(GLOB IMGPPTEX_SRC pcexample/src/imgpptexdemo.cpp pcexample/src/TextureMixer.cpp
+  pcexample/src/AppFrame.cpp pcexample/src/glad.c)
+add_executable(imgpptexdemo ${IMGPPTEX_SRC})
+if (WIN32)
+  target_link_libraries(imgpptexdemo mineola)
+else ()
+  target_link_libraries(imgpptexdemo mineola glfw pthread)
+endif ()

@@ -99,7 +99,7 @@ bool Texture2D::Create(const TextureDesc &desc) {
   if (desc_.array_size == 1) {  //not a texture array
     if (desc_.levels == 0) {  //automatically generate mipmaps
       if (initialize) {
-        glm::ivec4 dims = desc_.src_data->Dimensions(0);
+        glm::ivec3 dims = desc_.src_data->Dimensions(0);
         const void *data = desc_.src_data->Data(0, 0, 0);
         if (desc_.compressed) {
           uint32_t data_size = desc_.src_data->DataSize(0);
@@ -121,7 +121,7 @@ bool Texture2D::Create(const TextureDesc &desc) {
     } else {  //precomputed mipmaps
       for (uint32_t level = 0; level < desc_.levels; ++level) {
         if (initialize) {
-          glm::ivec4 dims = desc_.src_data->Dimensions(level);
+          glm::ivec3 dims = desc_.src_data->Dimensions(level);
           const void *data = desc_.src_data->Data(0, 0, level);
           if (desc_.compressed) {
             uint32_t data_size = desc_.src_data->DataSize(level);
@@ -139,14 +139,14 @@ bool Texture2D::Create(const TextureDesc &desc) {
             width, height, 0, desc_.format, desc_.data_type, 0);
         }
       }
-      if (initialize) {
+      if (initialize && !desc_.compressed) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, kDefaultAlignment);  // resotre pack alignment
       }
     }
   } else if (desc_.array_size > 1) {  //texture array
     if (desc_.levels == 0) {  //auto mipmaps
       if (initialize) {
-        glm::ivec4 dims = desc_.src_data->Dimensions(0);
+        glm::ivec3 dims = desc_.src_data->Dimensions(0);
         const void *data = desc_.src_data->Data(0, 0, 0);
         if (desc_.compressed) {
           uint32_t data_size = desc_.src_data->DataSize(0);
@@ -169,7 +169,7 @@ bool Texture2D::Create(const TextureDesc &desc) {
     } else {
       for (uint32_t level = 0; level < desc_.levels; ++level) {
         if (initialize) {
-          glm::ivec4 dims = desc_.src_data->Dimensions(level);
+          glm::ivec3 dims = desc_.src_data->Dimensions(level);
           const void *data = desc_.src_data->Data(0, 0, level);
 
           if (desc_.compressed) {
@@ -191,7 +191,7 @@ bool Texture2D::Create(const TextureDesc &desc) {
             desc_.format, desc_.data_type, 0);
         }
       }
-      if (initialize) {
+      if (initialize && !desc.compressed) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, kDefaultAlignment);
       }
     }
@@ -276,7 +276,7 @@ bool Texture3D::Create(const TextureDesc &desc) {
   bool initialize = (bool)desc_.src_data; //is initial data provided?
   if (desc_.levels == 0) {  //automatically generate mipmaps
     if (initialize) {
-      glm::ivec4 dims = desc_.src_data->Dimensions(0);
+      glm::ivec3 dims = desc_.src_data->Dimensions(0);
       const void *data = desc_.src_data->Data(0, 0, 0);
       if (desc_.compressed) {
         uint32_t data_size = desc_.src_data->DataSize(0);
@@ -299,7 +299,7 @@ bool Texture3D::Create(const TextureDesc &desc) {
   } else {  //precomputed mipmaps
     for (uint32_t level = 0; level < desc_.levels; ++level) {
       if (initialize) {
-        glm::ivec4 dims = desc_.src_data->Dimensions(level);
+        glm::ivec3 dims = desc_.src_data->Dimensions(level);
         const void *data = desc_.src_data->Data(0, 0, level);
         if (desc_.compressed) {
           uint32_t data_size = desc_.src_data->DataSize(level);

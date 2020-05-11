@@ -18,48 +18,9 @@ namespace {
 using namespace mineola;
 
 void CreateTextureSrcFromBitmapImgpp(const imgpp::Img &img, std::shared_ptr<ImgppTextureSrc> &tex_src) {
-  tex_src = std::make_shared<ImgppTextureSrc>(0, 0, false, false);
+  tex_src = std::make_shared<ImgppTextureSrc>(1, 1, 1);
   tex_src->AddBuffer(img.Data());
   tex_src->AddROI(img.ROI());
-}
-
-bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_src,
-  bool srgb, bool mipmap, TextureDesc &desc) {
-  auto dims = tex_src->Dimensions(0);
-  if (dims[2] > 1 && dims[3] > 1) {
-    return false;
-  }
-  if (dims[2] == 1) {
-    if (dims[3] == 1) {
-      desc.type = GL_TEXTURE_2D;
-    } else {
-      desc.type = GL_TEXTURE_2D_ARRAY;
-    }
-  } else {
-    desc.type = GL_TEXTURE_3D;
-  }
-  desc.compressed = tex_src->IsCompressed();
-  desc.min_filter = GL_NEAREST_MIPMAP_LINEAR;
-  desc.mag_filter = GL_LINEAR;
-  desc.wrap_s = GL_REPEAT;
-  desc.wrap_t = GL_REPEAT;
-  desc.access = 0;
-  desc.array_size = dims[3];
-  desc.levels = mipmap ? 0 : 1;
-  desc.depth_compare = false;
-  desc.width = dims[0];
-  desc.height = dims[1];
-  desc.depth = dims[2];
-
-  if (desc.compressed) {
-    desc.internal_format = imgpp::BCFormatToKHR(tex_src->BCROI(0).Format());
-  } else {
-    const auto &roi = tex_src->ROI(0);
-    pixel_type::Map2GL(roi.BPC(), roi.Channel(), roi.IsSigned(), roi.IsFloat(), srgb,
-      desc.internal_format, desc.format, desc.data_type);
-  }
-  desc.src_data = tex_src;
-  return true;
 }
 
 bool IsDDSFormat(const uint8_t *buffer) {
@@ -148,8 +109,8 @@ bool CreateTexture(
   // determine file format
   auto img_fmt = PeekImageFormat(fn);
   if (img_fmt == "ktx") {
-    std::shared_ptr<ImgppTextureSrc> tex_src;
-    if (!LoadKTXFromFile(fn, tex_src)) {
+    auto tex_src = LoadKTXFromFile(fn);
+    if (!tex_src) {
       return false;
     }
     if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), srgb, mipmap, desc)) {
@@ -188,8 +149,8 @@ bool CreateTexture(
   auto img_fmt = DetermineImageFormat((const uint8_t*)buffer);
 
   if (img_fmt == "ktx") {
-    std::shared_ptr<ImgppTextureSrc> tex_src;
-    if (!LoadKTXFromMem(buffer, length, tex_src)) {
+    auto tex_src = LoadKTXFromMem(buffer, length);
+    if (!tex_src) {
       return false;
     }
     if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), srgb, mipmap, desc)) {
@@ -211,6 +172,56 @@ bool CreateTexture(
     }
   }
   return CreateTextureFromDesc(texture_name, desc);
+}
+
+bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_src,
+  bool srgb, bool mipmap, TextureDesc &desc) {
+  auto dims = tex_src->Dimensions(0);
+  if (tex_src->Faces() == 1 && tex_src->Layers() == 1) {
+    if (dims[2] > 1) {
+      desc.type = GL_TEXTURE_3D;
+    } else {
+      desc.type = GL_TEXTURE_2D;
+    }
+    desc.array_size = 1;
+  } else {
+    if (tex_src->Layers() > 1) {
+      if (tex_src->Faces() > 1) {
+        // GL_TEXTURE_CUBE_MAP_ARRAY does not suppported in GLES
+        return false;
+      } else {
+        desc.array_size = dims[3];
+        desc.type = GL_TEXTURE_2D_ARRAY;
+      }
+    } else {
+      desc.type = GL_TEXTURE_CUBE_MAP;
+      desc.array_size = 1;
+    }
+
+  }
+  desc.compressed = tex_src->IsCompressed();
+  desc.min_filter = GL_NEAREST_MIPMAP_LINEAR;
+  desc.mag_filter = GL_LINEAR;
+  desc.wrap_s = GL_REPEAT;
+  desc.wrap_t = GL_REPEAT;
+  desc.access = 0;
+
+  // 0 means auto generate mipmaps
+  desc.levels = mipmap ? (tex_src->Levels() > 1 ? tex_src->Levels() : 0) : 1;
+  desc.depth_compare = false;
+  desc.width = dims[0];
+  desc.height = dims[1];
+  desc.depth = dims[2];
+
+  if (desc.compressed) {
+    desc.internal_format = imgpp::BCFormatToKHR(tex_src->BCROI(0).Format());
+  } else {
+    const auto &roi = tex_src->ROI(0);
+    pixel_type::Map2GL(roi.BPC(), roi.Channel(), roi.IsSigned(), roi.IsFloat(), srgb,
+      desc.internal_format, desc.format, desc.data_type);
+  }
+  desc.src_data = std::move(tex_src);
+  return true;
 }
 
 bool CreateTextureFromDesc(const char *texture_name, const TextureDesc &desc) {
@@ -250,7 +261,7 @@ bool CreateFallbackTexture2D() {
   img.ROI().At<uint8_t>(0, 0, 1) = 255;
   img.ROI().At<uint8_t>(0, 0, 2) = 255;
   img.ROI().At<uint8_t>(0, 0, 3) = 255;
-  auto tex_src = std::make_shared<ImgppTextureSrc>(1, 1, false, false);
+  auto tex_src = std::make_shared<ImgppTextureSrc>(1, 1, 1);
   if (!tex_src) {
     return false;
   }
@@ -258,11 +269,8 @@ bool CreateFallbackTexture2D() {
   tex_src->AddROI(img.ROI());
 
   TextureDesc desc;
-  if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), false, false, desc)) {
-    return false;
-  }
-
-  return CreateTextureFromDesc("mineola:texture:fallback", desc);
+  return CreateTextureDescFromImgppTextureSrc(std::move(tex_src), false, false, desc)
+    && CreateTextureFromDesc("mineola:texture:fallback", desc);
 }
 
 bool CreateDepthTexture(const char *texture_name, uint32_t width, uint32_t height,

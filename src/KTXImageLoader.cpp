@@ -1,75 +1,80 @@
 #include "../include/KTXImageLoader.h"
 #include <fstream>
-#include <imgpp/bcimgpp.hpp>
+#include <imgpp/imgpp_bc.hpp>
 #include <imgpp/bchelper.hpp>
 #include "../include/ImgppTextureSrc.h"
 
 namespace mineola {
 
-bool LoadKTXFromFile(const char *fn, std::shared_ptr<ImgppTextureSrc> &tex_src) {
+std::shared_ptr<ImgppTextureSrc> LoadKTXFromFile(const char *fn) {
   std::ifstream in(fn, std::ios::binary);
   if(!in.good()) {
-    return false;
+    return {};
   }
   KTXHeader ktx_header;
   in.read((char *)(&ktx_header), sizeof(KTXHeader));
   in.seekg(ktx_header.bytes_of_key_value_data, std::ios::cur);
   imgpp::BCFormat format = imgpp::KHRToBCFormat(ktx_header.gl_internal_format);
-  if (format == imgpp::UNKNOWN) {
+  if (format == imgpp::UNKNOWN_BC) {
     // Not Support uncompressed texture in ktx
-    return false;
+    return {};
   }
-  tex_src = std::make_shared<ImgppTextureSrc>(
-    ktx_header.number_of_faces, ktx_header.number_of_mipmap_levels,
-    ktx_header.number_of_array_elements != 0, true);
+  uint32_t layers = ktx_header.number_of_array_elements > 0
+    ? ktx_header.number_of_array_elements : 1;
+  auto tex_src = std::make_shared<ImgppTextureSrc>(
+    ktx_header.number_of_faces, layers, ktx_header.number_of_mipmap_levels);
 
   for (int level = 0; level < ktx_header.number_of_mipmap_levels; ++level) {
     uint32_t data_size;
     in.read((char*)(&data_size), sizeof(uint32_t));
     if (data_size % 4 != 0) {
       // BC texture data bytes size should multiple of 4;
-      tex_src.reset();
-      return false;
+      return {};
     }
-    uint32_t depth = std::max(ktx_header.number_of_array_elements, ktx_header.number_of_faces);
-    imgpp::BCImg img(format, ktx_header.pixel_width, ktx_header.pixel_height, depth);
+    uint32_t width = ktx_header.pixel_width >> level;
+    uint32_t height = ktx_header.pixel_height >> level;
+    uint32_t depth = tex_src->Layers() * tex_src->Faces();
+    imgpp::BCImg img(format, width, height, depth);
     in.read((char*)(img.ROI().GetData()), data_size);
     tex_src->AddBuffer(img.Data());
     tex_src->AddBCROI(img.ROI());
   }
-  return true;
+  return tex_src;
 }
 
-bool LoadKTXFromMem(const char *buffer, uint32_t length, std::shared_ptr<ImgppTextureSrc> &tex_src) {
+std::shared_ptr<ImgppTextureSrc> LoadKTXFromMem(const char *buffer, uint32_t length) {
   KTXHeader const &ktx_header(*reinterpret_cast<KTXHeader const*>(buffer));
   imgpp::BCFormat format = imgpp::KHRToBCFormat(ktx_header.gl_internal_format);
-  if (format != imgpp::UNKNOWN) {
+  if (format != imgpp::UNKNOWN_BC) {
     // Not Support uncompressed texture in ktx
-    return false;
+    return {};
   }
   size_t offset = sizeof(KTXHeader);
   offset += ktx_header.bytes_of_key_value_data;
 
-  tex_src = std::make_shared<ImgppTextureSrc>(
-    ktx_header.number_of_faces, ktx_header.number_of_mipmap_levels,
-    ktx_header.number_of_array_elements != 0, true);
+  uint32_t layers = ktx_header.number_of_array_elements > 0
+    ? ktx_header.number_of_array_elements : 1;
+  auto tex_src = std::make_shared<ImgppTextureSrc>(
+    ktx_header.number_of_faces, layers, ktx_header.number_of_mipmap_levels);
 
   for (int level = 0; level < ktx_header.number_of_mipmap_levels; ++level) {
     uint32_t data_size = *(buffer + offset);
     if (data_size % 4 != 0) {
       // BC texture data bytes size should multiple of 4;
       tex_src.reset();
-      return false;
+      return {};
     }
     offset += sizeof(uint32_t);
-    uint32_t depth = std::max(ktx_header.number_of_array_elements, ktx_header.number_of_faces);
-    imgpp::BCImg img(format, ktx_header.pixel_width, ktx_header.pixel_height, depth);
+    uint32_t width = ktx_header.pixel_width >> level;
+    uint32_t height = ktx_header.pixel_height >> level;
+    uint32_t depth = tex_src->Layers() * tex_src->Faces();
+    imgpp::BCImg img(format, width, height, depth);
     std::memcpy((char*)img.ROI().GetData(), buffer + offset, data_size);
     tex_src->AddBuffer(img.Data());
     tex_src->AddBCROI(img.ROI());
     offset += data_size;
   }
-  return true;
+  return tex_src;
 }
 
 }

@@ -3,39 +3,17 @@
     {
       "primitive": "rect_xy",
       "material": "mat:rect0",
-      "effect": "mineola:effect:ambienttex",
+      "effect": "effect:tex2d",
       "shadowmap": false,
       "node": "geometry",
-      "layer": 0
-    },
-    {
-      "primitive": "rect_xy",
-      "material": "mat:rect1",
-      "effect": "mineola:effect:ambienttex",
-      "shadowmap": false,
-      "node": "geometry1",
       "layer": 0
     }
   ],
   "textures": [
-    {
-      "name": "texture0",
-      "filename": "resrc/kueken7_rgba_astc4x4_srgb.ktx"
-    }
   ],
   "materials": [
     {
       "name": "mat:rect0",
-      "uniforms": [
-        {
-          "name": "diffuse_sampler",
-          "type": "texture",
-          "texture_names": ["texture0"]
-        }
-      ]
-    },
-    {
-      "name": "mat:rect1",
       "uniforms": [
         {
           "name": "diffuse_sampler",
@@ -69,14 +47,7 @@
   "nodes": [
     {
       "name": "geometry",
-      "translate": "-1.1, 0, 0",
-      "rotate": "0, 0, 0, 1",
-      "scale": "1, 1, 1",
-      "parent": "root"
-    },
-    {
-      "name": "geometry1",
-      "translate": "1.1, 0, 0",
+      "translate": "0, 0, 0",
       "rotate": "0, 0, 0, 1",
       "scale": "1, 1, 1",
       "parent": "root"
@@ -98,6 +69,17 @@
   ],
   "passes": [
     {
+    }
+  ],
+  "effects": [
+    {
+      "name": "effect:tex2d",
+      "vertex": "resrc/tex2d.vert",
+      "fragment": "resrc/tex2d.frag",
+      "states": {
+        "blendenable": "off",
+        "blendfunc": "one_minus_src_alpha, src_alpha"
+      }
     }
   ]
 }

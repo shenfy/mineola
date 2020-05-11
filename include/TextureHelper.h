@@ -1,6 +1,7 @@
 #ifndef MINEOLA_TEXTURE_HELPER
 #define MINEOLA_TEXTURE_HELPER
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 namespace imgpp {
@@ -9,7 +10,7 @@ namespace imgpp {
 
 namespace mineola {
   struct TextureDesc;
-
+  class ImgppTextureSrc;
   namespace texture_helper {
 
     // Create texture using external loaders
@@ -25,6 +26,17 @@ namespace mineola {
       const char *buffer, uint32_t length,
       bool mipmap, bool srgb);
 
+    /**
+     * Split the texture creation to two steps. This is the first.
+     * Create texture desc from imgpptexturesrc.
+     * @param  tex_src
+     * @param  srgb
+     * @param  mipmap
+     * @param  desc         - Output TextureDesc.
+     * @return              - Success or not.
+     */
+    bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_src,
+      bool srgb, bool mipmap, TextureDesc &desc);
     /**
      * Split the texture creation to two steps. This is the second.
      * Create texture and copy data to graphics memory given a TextureDesc.
