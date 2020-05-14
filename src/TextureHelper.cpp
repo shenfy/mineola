@@ -16,13 +16,6 @@
 namespace {
 
 using namespace mineola;
-
-void CreateTextureSrcFromBitmapImgpp(const imgpp::Img &img, std::shared_ptr<ImgppTextureSrc> &tex_src) {
-  tex_src = std::make_shared<ImgppTextureSrc>(1, 1, 1);
-  tex_src->AddBuffer(img.Data());
-  tex_src->AddROI(img.ROI());
-}
-
 bool IsDDSFormat(const uint8_t *buffer) {
   const uint32_t *value = (const uint32_t *)buffer;
   return (*value == 0x20534444);
@@ -95,83 +88,85 @@ const char *PeekImageFormat(const char *fn) {
 
 namespace mineola { namespace texture_helper {
 
+std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *fn) {
+  if (fn == nullptr || strlen(fn) == 0) {
+    return {};
+  }
+  auto img_fmt = PeekImageFormat(fn);
+  std::shared_ptr<ImgppTextureSrc> tex_src;
+  if (img_fmt == "ktx") {
+    tex_src = LoadKTXFromFile(fn);
+  } else if (img_fmt == "jpeg" || img_fmt == "png") {
+    if (auto loader = Engine::Instance().ExtTextureLoader(); loader != nullptr) {
+      imgpp::Img img;
+      if (loader(fn, img)) {
+        tex_src = CreateTextureSrcFromBitmapImgpp(img);
+      }
+    }
+  }
+  return tex_src;
+}
+
+std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *buffer, uint32_t length) {
+  if (buffer == nullptr || length == 0) {
+    return {};
+  }
+  auto img_fmt = DetermineImageFormat((const uint8_t*)buffer);
+  std::shared_ptr<ImgppTextureSrc> tex_src;
+  if (img_fmt == "ktx") {
+    tex_src = LoadKTXFromMem(buffer, length);
+  } else if (img_fmt == "jpeg" || img_fmt == "png") {
+    if (auto loader = Engine::Instance().ExtTextureMemLoader(); loader != nullptr) {
+      imgpp::Img img;
+      if (loader(buffer, length, img)) {
+        tex_src = CreateTextureSrcFromBitmapImgpp(img);
+      }
+    }
+  }
+  return tex_src;
+}
+
 bool CreateTexture(
   const char *texture_name,
   const char *fn,
   bool mipmap, bool srgb) {
+  if (texture_name == nullptr || strlen(texture_name) == 0) {
+    return false;
+  }
 
-  if (texture_name == nullptr || fn == nullptr
-    || strlen(texture_name) == 0 || strlen(fn) == 0) {
+  auto tex_src = CreateTextureSrc(fn);
+  if (!tex_src) {
     return false;
   }
 
   TextureDesc desc;
-  // determine file format
-  auto img_fmt = PeekImageFormat(fn);
-  if (img_fmt == "ktx") {
-    auto tex_src = LoadKTXFromFile(fn);
-    if (!tex_src) {
-      return false;
-    }
-    if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), srgb, mipmap, desc)) {
-      return false;
-    }
-  } else if (img_fmt == "jpeg" || img_fmt == "png") {
-    if (auto loader = Engine::Instance().ExtTextureLoader(); loader != nullptr) {
-      imgpp::Img img;
-      if (!loader(fn, img)) {
-        return false;
-      }
-      std::shared_ptr<ImgppTextureSrc> tex_src;
-      CreateTextureSrcFromBitmapImgpp(img, tex_src);
-      if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), srgb, mipmap, desc)) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
-  return CreateTextureFromDesc(texture_name, desc);
+  return !CreateTextureDescFromImgppTextureSrc(tex_src, srgb, mipmap, desc)
+    && CreateTextureFromDesc(texture_name, desc);
 }
 
 bool CreateTexture(
   const char *texture_name,
   const char *buffer, uint32_t length,
   bool mipmap, bool srgb) {
+  if (texture_name == nullptr || strlen(texture_name) == 0) {
+    return false;
+  }
 
-  if (texture_name == nullptr || buffer == nullptr || length == 0) {
+  auto tex_src = CreateTextureSrc(buffer,  length);
+  if (!tex_src) {
     return false;
   }
 
   TextureDesc desc;
+  return !CreateTextureDescFromImgppTextureSrc(tex_src, srgb, mipmap, desc)
+    && CreateTextureFromDesc(texture_name, desc);
+}
 
-  auto img_fmt = DetermineImageFormat((const uint8_t*)buffer);
-
-  if (img_fmt == "ktx") {
-    auto tex_src = LoadKTXFromMem(buffer, length);
-    if (!tex_src) {
-      return false;
-    }
-    if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), srgb, mipmap, desc)) {
-      return false;
-    }
-  } else if (img_fmt == "jpeg" || img_fmt == "png") {
-    if (auto loader = Engine::Instance().ExtTextureMemLoader(); loader != nullptr) {
-      imgpp::Img img;
-      if (!loader(buffer, length, img)) {
-        return false;
-      }
-      std::shared_ptr<ImgppTextureSrc> tex_src;
-      CreateTextureSrcFromBitmapImgpp(img, tex_src);
-      if (!CreateTextureDescFromImgppTextureSrc(std::move(tex_src), srgb, mipmap, desc)) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-  return CreateTextureFromDesc(texture_name, desc);
+std::shared_ptr<ImgppTextureSrc> CreateTextureSrcFromBitmapImgpp(const imgpp::Img &img) {
+  auto tex_src = std::make_shared<ImgppTextureSrc>(1, 1, 1);
+  tex_src->AddBuffer(img.Data());
+  tex_src->AddROI(img.ROI());
+  return tex_src;
 }
 
 bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_src,
@@ -220,7 +215,7 @@ bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_s
     pixel_type::Map2GL(roi.BPC(), roi.Channel(), roi.IsSigned(), roi.IsFloat(), srgb,
       desc.internal_format, desc.format, desc.data_type);
   }
-  desc.src_data = std::move(tex_src);
+  desc.src_data = tex_src;
   return true;
 }
 
@@ -269,7 +264,7 @@ bool CreateFallbackTexture2D() {
   tex_src->AddROI(img.ROI());
 
   TextureDesc desc;
-  return CreateTextureDescFromImgppTextureSrc(std::move(tex_src), false, false, desc)
+  return CreateTextureDescFromImgppTextureSrc(tex_src, false, false, desc)
     && CreateTextureFromDesc("mineola:texture:fallback", desc);
 }
 

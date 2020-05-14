@@ -26,8 +26,14 @@ namespace mineola {
       const char *buffer, uint32_t length,
       bool mipmap, bool srgb);
 
+
+    std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *fn);
+
+    std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *buffer, uint32_t length);
+
+    std::shared_ptr<ImgppTextureSrc> CreateTextureSrcFromBitmapImgpp(const imgpp::Img &img);
     /**
-     * Split the texture creation to two steps. This is the first.
+     * Split the texture creation to four steps. This is the third.
      * Create texture desc from imgpptexturesrc.
      * @param  tex_src
      * @param  srgb
@@ -38,7 +44,7 @@ namespace mineola {
     bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_src,
       bool srgb, bool mipmap, TextureDesc &desc);
     /**
-     * Split the texture creation to two steps. This is the second.
+     * Split the texture creation to four steps. This is the fourth.
      * Create texture and copy data to graphics memory given a TextureDesc.
      * @param  texture_name - Texture name in engine resource map.
      * @param  desc         - Input TextureDesc.

@@ -13,21 +13,19 @@ TextureMixer::TextureMixer(const char *tex_name,
 void TextureMixer::FrameMove(double time, double frame_time) {
   static uint32_t count = 0;
   static uint32_t shift = 0;
-
   if (count > 5) {
     for (int block_y = 0; block_y < src_roi_.VerticalBlockNum(); ++block_y) {
       auto dst_sub_roi = dst_roi_.SubRegion(
         0, block_y * dst_roi_.BlockHeight(), 0,
-        dst_roi_.Width(), (block_y + 1) * dst_roi_.BlockHeight() - 1, 0);
+        dst_roi_.Width() - 1, (block_y + 1) * dst_roi_.BlockHeight() - 1, 0);
       auto src_sub_roi = src_roi_.SubRegion(
         0, (block_y + shift) %  src_roi_.VerticalBlockNum() * src_roi_.BlockHeight(), 0,
-        src_roi_.Width(), (block_y + shift + 1) %  src_roi_.VerticalBlockNum() * src_roi_.BlockHeight() - 1, 0);
+        src_roi_.Width() - 1, (block_y + shift + 1) %  src_roi_.VerticalBlockNum() * src_roi_.BlockHeight() - 1, 0);
 
       imgpp::CopyData(dst_sub_roi, src_sub_roi);
     }
-
-    auto tex = std::dynamic_pointer_cast<mineola::InternalTexture>(
-    mineola::Engine::Instance().ResrcMgr().Find(tex_name_));
+    auto tex = std::dynamic_pointer_cast<mineola::Texture2D>(
+      mineola::Engine::Instance().ResrcMgr().Find(tex_name_));
     if (tex) {
       mineola::SubTextureDesc desc;
       desc.level = 0;
