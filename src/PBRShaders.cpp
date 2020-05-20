@@ -242,13 +242,16 @@ void main(void) {
   vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
   normal_pp = normalize(normal_pp * 2.0 - 1.0);
   vec3 normal_dir = normalize(tbn * normal_pp);
+  #define USE_SHADING
   #elif defined(HAS_NORMAL)
   vec3 normal_dir = normalize(normal);
+  #define USE_SHADING
   #else
-  frag_color = vec4(base_color.rgb * ao, base_color.a);
+  frag_color = SRGBEncode(vec4(base_color.rgb * ao, base_color.a));
   return;
   #endif
 
+  #if defined(USE_SHADING)
   vec3 half_dir;
   float n_dot_l;
   float n_dot_v;
@@ -270,6 +273,7 @@ void main(void) {
   frag_color = SRGBEncode(vec4(color_result, base_color.a));
   #else
   frag_color = vec4(color_result, base_color.a);
+  #endif
   #endif
 })";
 

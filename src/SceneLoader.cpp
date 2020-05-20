@@ -426,7 +426,7 @@ bool BuildSceneFromConfig(const char *config_str,
         if (texture.find("mipmap") != texture.end()) {
           mipmap = texture["mipmap"].get<bool>();
         }
-        texture_helper::CreateTextureFromFile(texture_name.c_str(), filename.c_str(), mipmap);
+        texture_helper::CreateTexture(texture_name.c_str(), filename.c_str(), mipmap, is_srgb);
       } else {
         // empty texture
         uint32_t type = GL_TEXTURE_2D, width = 1, height = 1, depth = 1;

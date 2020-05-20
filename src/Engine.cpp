@@ -1,11 +1,11 @@
 #include "prefix.h"
+#include "../include/Engine.h"
 #include <cstring>
-#include <iostream>
 #include <algorithm>
 #include <ctime>
+#include <imgpp/imgpp.hpp>
 #include "../include/glutility.h"
 #include "../include/GLEffect.h"
-#include "../include/Engine.h"
 #include "../include/Framebuffer.h"
 #include "../include/TextureHelper.h"
 #include "../include/Material.h"
@@ -52,6 +52,8 @@ Engine::Engine()
   override_effect_(false),
   override_camera_(false),
   override_render_target_(false),
+  ext_texture_loader_(nullptr),
+  ext_texture_mem_loader_(nullptr),
   terminate_signaled_(false) {
   timer_.reset(new Timer);
   timer_->Start();
@@ -518,6 +520,21 @@ boost::signals2::connection Engine::AddFrameMoveCallback(const frame_move_callba
 
 boost::signals2::connection Engine::AddSizeChangeCallback(const size_callback_t &callback) {
   return size_change_sig_.connect(callback);
+}
+
+void Engine::SetExtTextureLoaders(
+  Engine::texture_loader_t file_loader,
+  Engine::texture_mem_loader_t mem_loader) {
+  ext_texture_loader_ = file_loader;
+  ext_texture_mem_loader_ = mem_loader;
+}
+
+Engine::texture_loader_t Engine::ExtTextureLoader() {
+  return ext_texture_loader_;
+}
+
+Engine::texture_mem_loader_t Engine::ExtTextureMemLoader() {
+  return ext_texture_mem_loader_;
 }
 
 std::shared_ptr<SceneNode> Engine::Scene() const {

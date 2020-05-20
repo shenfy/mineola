@@ -135,8 +135,8 @@ bool BuildFromPolygonSoup(const PolygonSoup &soup,
 
   // create texture
   if (!soup.texture_filename.empty())
-   texture_helper::CreateTextureFromFile(soup.texture_filename.c_str(),
-     soup.texture_filename.c_str(), false);
+   texture_helper::CreateTexture(soup.texture_filename.c_str(),
+     soup.texture_filename.c_str(), false, true);
 
   // create material
   auto material = std::make_shared<Material>();

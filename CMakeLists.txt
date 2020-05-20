@@ -1,61 +1,48 @@
-#Project information
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
+project(mineola VERSION 1.1.0 LANGUAGES C CXX)
 
-project(mineola)
+if (EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
+  include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+endif()
 
-set(${PROJECT_NAME}_MAJOR_VERSION 1)
-set(${PROJECT_NAME}_MINOR_VERSION 0)
-set(${PROJECT_NAME}_PATCH_LEVEL 0)
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_BUILD_TYPE Release)
+find_package(imgpp REQUIRED)
+find_package(Boost REQUIRED)
+find_package(glm REQUIRED)
+find_package(fx_gltf REQUIRED)
+find_package(glfw REQUIRED)
+find_package(OpenGL COMPONENTS OpenGL)
 
-if (WIN32)
-    include_directories("C:\\include")
-    link_directories("C:\\lib")
-else ()
-    include_directories("/usr/local/include")
-endif ()
+set(MINEOLA_SRC
+  src/AnimatedEntity.cpp src/Animation.cpp src/AppHelper.cpp src/ArcballController.cpp src/BasisObj.cpp src/CameraController.cpp
+  src/Camera.cpp src/Engine.cpp src/Entity.cpp src/FileSystem.cpp src/FPSController.cpp src/Framebuffer.cpp src/GLEffect.cpp
+  src/GLMHelper.cpp src/GLProgram.cpp src/GLShader.cpp src/GLTFLoader.cpp src/GraphicsBuffer.cpp src/ImgppTextureSrc.cpp
+  src/KTXImageLoader.cpp src/Light.cpp src/Material.cpp src/MeshIO.cpp src/PBRShaders.cpp src/PolygonSoup.cpp src/PolygonSoupLoader.cpp
+  src/PolygonSoupSerialization.cpp src/PrimitiveHelper.cpp src/Rbt.cpp src/Renderable.cpp src/RenderPass.cpp src/RenderState.cpp
+  src/RenderStateFactory.cpp src/RenderStateManager.cpp src/ResourceManager.cpp src/SceneLoader.cpp src/SceneNode.cpp
+  src/ShaderParser.cpp src/Skin.cpp src/STBImagePlugin.cpp src/Texture.cpp src/TextureHelper.cpp src/TurntableController.cpp
+  src/UniformBlock.cpp src/UniformHelper.cpp src/UniformWrappers.cpp src/VertexType.cpp src/Viewport.cpp)
 
-file(GLOB MINEOLA_SRC src/*.cpp)
-file(GLOB MINEOLA_HDR include/*.h)
-add_library(mineola ${MINEOLA_SRC} ${MINEOLA_HDR})
+add_library(mineola STATIC)
+target_sources(mineola PRIVATE ${MINEOLA_SRC})
+target_compile_features(mineola PUBLIC cxx_std_17)
+set_property(TARGET mineola PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(mineola PUBLIC
+  imgpp::imgpp
+  Boost::Boost
+  glm::glm
+  fx_gltf::fx_gltf
+  ${CMAKE_DL_LIBS})
 
-if(WIN32)
-  # Use this snippet *after* PROJECT(xxx):
-  IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    SET(CMAKE_INSTALL_PREFIX C:/ CACHE PATH "install to C:/ on windows" FORCE)
-  ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-endif(WIN32)
-
-if (WIN32)
-    install(TARGETS mineola CONFIGURATIONS Debug DESTINATION lib/Debug)
-    install(TARGETS mineola CONFIGURATIONS Release DESTINATION lib/Release)
-else ()
-    install(TARGETS mineola DESTINATION lib)
-endif ()
-install(FILES ${MINEOLA_HDR} DESTINATION include/mineola)
-
-
-# pc example
-file(GLOB PC_EXAMPLE_SRC pcexample/src/example.cpp pcexample/src/AppFrame.cpp pcexample/src/glad.c)
-add_executable(pcexample ${PC_EXAMPLE_SRC})
+add_executable(gltfview)
+target_sources(gltfview PRIVATE
+  pcexample/src/gltfdemo.cpp pcexample/src/AppFrame.cpp pcexample/src/glad.c)
+target_link_libraries(gltfview PRIVATE mineola glfw::glfw)
 add_custom_command(
-  TARGET pcexample
+  TARGET gltfview
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pcexample/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
   COMMENT "Copy resrc folder to build folder")
 
-if (WIN32)
-  target_link_libraries(pcexample mineola)
-else ()
-  target_link_libraries(pcexample mineola glfw pthread)
-endif ()
-
-# gltf example
-file(GLOB GLTF_SRC pcexample/src/gltfdemo.cpp pcexample/src/AppFrame.cpp pcexample/src/glad.c)
-add_executable(gltfdemo ${GLTF_SRC})
-if (WIN32)
-  target_link_libraries(gltfdemo mineola)
-else ()
-  target_link_libraries(gltfdemo mineola glfw pthread)
-endif ()

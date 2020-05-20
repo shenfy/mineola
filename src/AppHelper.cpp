@@ -9,7 +9,6 @@ namespace mineola {
 
 bool LoadBuiltInShaders() {
   Engine &en = Engine::Instance();
-  en.Init();
 
   std::vector<std::unique_ptr<RenderState>> render_states;
 

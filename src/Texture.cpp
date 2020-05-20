@@ -1,6 +1,5 @@
 #include "prefix.h"
 #include "../include/Texture.h"
-#include <iostream>
 #include <algorithm>
 #include "../include/glutility.h"
 
@@ -140,7 +139,7 @@ bool Texture2D::Create(const TextureDesc &desc) {
             width, height, 0, desc_.format, desc_.data_type, 0);
         }
       }
-      if (initialize) {
+      if (initialize && !desc_.compressed) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, kDefaultAlignment);  // resotre pack alignment
       }
     }
@@ -192,7 +191,7 @@ bool Texture2D::Create(const TextureDesc &desc) {
             desc_.format, desc_.data_type, 0);
         }
       }
-      if (initialize) {
+      if (initialize && !desc.compressed) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, kDefaultAlignment);
       }
     }

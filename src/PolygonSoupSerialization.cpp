@@ -1,7 +1,6 @@
 #include "prefix.h"
 #include "../include/PolygonSoupSerialization.h"
 #include <fstream>
-#include <iostream>
 #include <boost/algorithm/string.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../include/Engine.h"
@@ -142,10 +141,13 @@ namespace mineola {
       std::for_each(str_vec.begin(), str_vec.end(), [](std::string &str) {
         str = boost::trim_copy(str);
       });
-      if (boost::algorithm::trim_copy(line) == "end_header") break;
-      else if (str_vec[0] == "comment") {
+      if (boost::algorithm::trim_copy(line) == "end_header") {
+        break;
+      } else if (str_vec[0] == "comment") {
         if (str_vec.size() > 2) {
-          if (str_vec[1] == "TextureFile") soup.texture_filename = boost::algorithm::trim_copy(str_vec[2]);
+          if (str_vec[1] == "TextureFile") {
+            soup.texture_filename = boost::algorithm::trim_copy(str_vec[2]);
+          }
         }
       } else if (str_vec[0] == "element") {
         if (str_vec.size() > 2) {

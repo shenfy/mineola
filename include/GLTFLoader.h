@@ -10,16 +10,9 @@ namespace imgpp {
 namespace mineola {
 class SceneNode;
 
-namespace texture_helper {
-using texture_loader_t = std::add_pointer<bool(const char*, imgpp::Img &img)>::type;
-using texture_mem_loader_t = std::add_pointer<bool(const char*, uint32_t, imgpp::Img &img)>::type;
-}
-
 namespace gltf {
 
 bool LoadScene(
-  texture_helper::texture_loader_t texture_file_loader,
-  texture_helper::texture_mem_loader_t texture_mem_loader,
   const char *fn,
   const std::shared_ptr<SceneNode> &parent_node,
   const char *effect,

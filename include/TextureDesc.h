@@ -8,7 +8,7 @@ namespace mineola {
 
 class TextureSrcData {
 public:
-  virtual const void *Data(uint32_t layer, uint32_t face, uint32_t level) const = 0;
+  virtual const void *Data(uint32_t face, uint32_t layer, uint32_t level) const = 0;
   virtual uint32_t DataSize(uint32_t level) const = 0;
 
   // returns (width, height, depth)

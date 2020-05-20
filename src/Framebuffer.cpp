@@ -1,7 +1,6 @@
 #include "prefix.h"
 #include <fstream>
 #include <algorithm>
-#include <iostream>
 #include <imgpp/imgpp.hpp>
 #include "../include/glutility.h"
 #include "../include/Framebuffer.h"
