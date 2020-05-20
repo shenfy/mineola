@@ -26,7 +26,6 @@ uint32_t ImgppTextureSrc::DataSize(uint32_t level) const {
 }
 
 glm::ivec3 ImgppTextureSrc::Dimensions(uint32_t level) const {
-  uint32_t idx = level;
   glm::ivec3 dims;
   if (IsCompressed()) {
     dims = glm::ivec3(bc_rois_[level].Width(), bc_rois_[level].Height(), bc_rois_[level].Depth());

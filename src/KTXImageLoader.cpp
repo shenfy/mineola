@@ -24,8 +24,8 @@ std::shared_ptr<ImgppTextureSrc> LoadKTXFromFile(const char *fn) {
   auto tex_src = std::make_shared<ImgppTextureSrc>(
     ktx_header.number_of_faces, layers, ktx_header.number_of_mipmap_levels);
 
-  for (int level = 0; level < ktx_header.number_of_mipmap_levels; ++level) {
-    uint32_t data_size;
+  for (uint32_t level = 0; level < ktx_header.number_of_mipmap_levels; ++level) {
+    uint32_t data_size = 0;
     in.read((char*)(&data_size), sizeof(uint32_t));
     if (data_size % 4 != 0) {
       // BC texture data bytes size should multiple of 4;

@@ -100,7 +100,7 @@ std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *fn) {
     if (auto loader = Engine::Instance().ExtTextureLoader(); loader != nullptr) {
       imgpp::Img img;
       if (loader(fn, img)) {
-        tex_src = CreateTextureSrcFromBitmapImgpp(img);
+        tex_src = CreateTextureSrc(img);
       }
     }
   }
@@ -119,7 +119,7 @@ std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *buffer, uint32_t l
     if (auto loader = Engine::Instance().ExtTextureMemLoader(); loader != nullptr) {
       imgpp::Img img;
       if (loader(buffer, length, img)) {
-        tex_src = CreateTextureSrcFromBitmapImgpp(img);
+        tex_src = CreateTextureSrc(img);
       }
     }
   }
@@ -140,7 +140,7 @@ bool CreateTexture(
   }
 
   TextureDesc desc;
-  return !CreateTextureDescFromImgppTextureSrc(tex_src, srgb, mipmap, desc)
+  return CreateTextureDesc(tex_src, srgb, mipmap, desc)
     && CreateTextureFromDesc(texture_name, desc);
 }
 
@@ -158,18 +158,18 @@ bool CreateTexture(
   }
 
   TextureDesc desc;
-  return !CreateTextureDescFromImgppTextureSrc(tex_src, srgb, mipmap, desc)
+  return CreateTextureDesc(tex_src, srgb, mipmap, desc)
     && CreateTextureFromDesc(texture_name, desc);
 }
 
-std::shared_ptr<ImgppTextureSrc> CreateTextureSrcFromBitmapImgpp(const imgpp::Img &img) {
+std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const imgpp::Img &img) {
   auto tex_src = std::make_shared<ImgppTextureSrc>(1, 1, 1);
   tex_src->AddBuffer(img.Data());
   tex_src->AddROI(img.ROI());
   return tex_src;
 }
 
-bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_src,
+bool CreateTextureDesc(std::shared_ptr<ImgppTextureSrc> tex_src,
   bool srgb, bool mipmap, TextureDesc &desc) {
   auto dims = tex_src->Dimensions(0);
   if (tex_src->Faces() == 1 && tex_src->Layers() == 1) {
@@ -215,7 +215,7 @@ bool CreateTextureDescFromImgppTextureSrc(std::shared_ptr<ImgppTextureSrc> tex_s
     pixel_type::Map2GL(roi.BPC(), roi.Channel(), roi.IsSigned(), roi.IsFloat(), srgb,
       desc.internal_format, desc.format, desc.data_type);
   }
-  desc.src_data = tex_src;
+  desc.src_data = std::move(tex_src);
   return true;
 }
 
@@ -264,7 +264,7 @@ bool CreateFallbackTexture2D() {
   tex_src->AddROI(img.ROI());
 
   TextureDesc desc;
-  return CreateTextureDescFromImgppTextureSrc(tex_src, false, false, desc)
+  return CreateTextureDesc(tex_src, false, false, desc)
     && CreateTextureFromDesc("mineola:texture:fallback", desc);
 }
 
