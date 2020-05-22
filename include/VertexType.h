@@ -2,8 +2,8 @@
 #define MINEOLA_VERTEXTYPE_H
 #include <vector>
 #include <memory>
-#include <boost/noncopyable.hpp>
 #include "TypeMapping.h"
+#include "Noncopyable.h"
 
 namespace mineola {
 
@@ -36,7 +36,7 @@ inline const char *GetSemanticsString(uint32_t semantics) {
   case TANGENT: return "Tangent";
   case BINORMAL: return "Binormal";
   case INDEX: return "Index";
-  default: return 0;
+  default: return nullptr;
   }
 }
 
@@ -77,7 +77,7 @@ struct VertexStream {
   std::shared_ptr<GraphicsBuffer> buffer_ptr;
 };
 
-class VertexArrayObject : private boost::noncopyable {
+class VertexArrayObject : Noncopyable {
 public:
   VertexArrayObject();
   ~VertexArrayObject();

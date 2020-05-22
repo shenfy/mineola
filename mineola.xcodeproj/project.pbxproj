@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0406EF5F2476C28A00431A67 /* AnimatedEntity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0406EF5A2476C28A00431A67 /* AnimatedEntity.cpp */; };
+		0406EF602476C28A00431A67 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0406EF5B2476C28A00431A67 /* Animation.cpp */; };
+		0406EF612476C28A00431A67 /* PBRShaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0406EF5C2476C28A00431A67 /* PBRShaders.cpp */; };
+		0406EF622476C28A00431A67 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0406EF5D2476C28A00431A67 /* Skin.cpp */; };
+		0406EF632476C28A00431A67 /* KTXImageLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0406EF5E2476C28A00431A67 /* KTXImageLoader.cpp */; };
 		043A4590215E74D400A7D07A /* GLMHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 043A458D215E74D400A7D07A /* GLMHelper.cpp */; };
 		043A4591215E74D400A7D07A /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 043A458F215E74D400A7D07A /* FileSystem.cpp */; };
 		043A4597215E76BC00A7D07A /* scene.json in Resources */ = {isa = PBXBuildFile; fileRef = 043A4594215E76BC00A7D07A /* scene.json */; };
@@ -178,6 +183,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0406EF532476C27200431A67 /* AnimatedEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AnimatedEntity.h; sourceTree = "<group>"; };
+		0406EF542476C27200431A67 /* glad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glad.h; sourceTree = "<group>"; };
+		0406EF552476C27200431A67 /* khrplatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = khrplatform.h; sourceTree = "<group>"; };
+		0406EF562476C27200431A67 /* PBRShaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBRShaders.h; sourceTree = "<group>"; };
+		0406EF572476C27200431A67 /* KTXImageLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTXImageLoader.h; sourceTree = "<group>"; };
+		0406EF582476C27200431A67 /* Skin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skin.h; sourceTree = "<group>"; };
+		0406EF592476C27200431A67 /* Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Animation.h; sourceTree = "<group>"; };
+		0406EF5A2476C28A00431A67 /* AnimatedEntity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnimatedEntity.cpp; sourceTree = "<group>"; };
+		0406EF5B2476C28A00431A67 /* Animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Animation.cpp; sourceTree = "<group>"; };
+		0406EF5C2476C28A00431A67 /* PBRShaders.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PBRShaders.cpp; sourceTree = "<group>"; };
+		0406EF5D2476C28A00431A67 /* Skin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skin.cpp; sourceTree = "<group>"; };
+		0406EF5E2476C28A00431A67 /* KTXImageLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KTXImageLoader.cpp; sourceTree = "<group>"; };
 		043A458D215E74D400A7D07A /* GLMHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLMHelper.cpp; sourceTree = "<group>"; };
 		043A458E215E74D400A7D07A /* prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prefix.h; sourceTree = "<group>"; };
 		043A458F215E74D400A7D07A /* FileSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileSystem.cpp; sourceTree = "<group>"; };
@@ -334,6 +351,13 @@
 		04C2179D214D22E1004E15ED /* include */ = {
 			isa = PBXGroup;
 			children = (
+				0406EF532476C27200431A67 /* AnimatedEntity.h */,
+				0406EF592476C27200431A67 /* Animation.h */,
+				0406EF542476C27200431A67 /* glad.h */,
+				0406EF552476C27200431A67 /* khrplatform.h */,
+				0406EF572476C27200431A67 /* KTXImageLoader.h */,
+				0406EF562476C27200431A67 /* PBRShaders.h */,
+				0406EF582476C27200431A67 /* Skin.h */,
 				0443E783229FB2A00032DF4C /* UniformWrappers.h */,
 				04C217BA214D22E1004E15ED /* AppHelper.h */,
 				04C217BE214D22E1004E15ED /* BasisObj.h */,
@@ -391,6 +415,11 @@
 		04C217C6214D22F5004E15ED /* src */ = {
 			isa = PBXGroup;
 			children = (
+				0406EF5A2476C28A00431A67 /* AnimatedEntity.cpp */,
+				0406EF5B2476C28A00431A67 /* Animation.cpp */,
+				0406EF5E2476C28A00431A67 /* KTXImageLoader.cpp */,
+				0406EF5C2476C28A00431A67 /* PBRShaders.cpp */,
+				0406EF5D2476C28A00431A67 /* Skin.cpp */,
 				0443E784229FB2AC0032DF4C /* UniformWrappers.cpp */,
 				04C217CE214D22F5004E15ED /* AppHelper.cpp */,
 				04C217C7214D22F5004E15ED /* ArcballController.cpp */,
@@ -567,7 +596,9 @@
 			files = (
 				04C21804214D22F5004E15ED /* PolygonSoupSerialization.cpp in Sources */,
 				04BBE83F2169135400BA0AB8 /* Viewport.cpp in Sources */,
+				0406EF5F2476C28A00431A67 /* AnimatedEntity.cpp in Sources */,
 				04C217F9214D22F5004E15ED /* Rbt.cpp in Sources */,
+				0406EF622476C28A00431A67 /* Skin.cpp in Sources */,
 				04C217F6214D22F5004E15ED /* RenderPass.cpp in Sources */,
 				04C217EF214D22F5004E15ED /* Entity.cpp in Sources */,
 				043A4591215E74D400A7D07A /* FileSystem.cpp in Sources */,
@@ -578,6 +609,7 @@
 				04C21807214D22F5004E15ED /* ResourceManager.cpp in Sources */,
 				04C2180A214D22F5004E15ED /* GLITextureSrc.cpp in Sources */,
 				04C217FA214D22F5004E15ED /* PolygonSoupLoader.cpp in Sources */,
+				0406EF602476C28A00431A67 /* Animation.cpp in Sources */,
 				04C217FB214D22F5004E15ED /* Renderable.cpp in Sources */,
 				04C217EB214D22F5004E15ED /* SceneLoader.cpp in Sources */,
 				04C217FE214D22F5004E15ED /* TextureHelper.cpp in Sources */,
@@ -585,11 +617,13 @@
 				04C21805214D22F5004E15ED /* ImgppTextureSrc.cpp in Sources */,
 				04C21801214D22F5004E15ED /* Engine.cpp in Sources */,
 				04C217F3214D22F5004E15ED /* UniformBlock.cpp in Sources */,
+				0406EF612476C28A00431A67 /* PBRShaders.cpp in Sources */,
 				04C21800214D22F5004E15ED /* CameraController.cpp in Sources */,
 				04C217EE214D22F5004E15ED /* Camera.cpp in Sources */,
 				04C217ED214D22F5004E15ED /* UniformHelper.cpp in Sources */,
 				04C217EC214D22F5004E15ED /* GLShader.cpp in Sources */,
 				04C217FF214D22F5004E15ED /* PolygonSoup.cpp in Sources */,
+				0406EF632476C28A00431A67 /* KTXImageLoader.cpp in Sources */,
 				04C21802214D22F5004E15ED /* ShaderParser.cpp in Sources */,
 				045F7E39229D911C0045CDFD /* RenderState.cpp in Sources */,
 				04C217EA214D22F5004E15ED /* GraphicsBuffer.cpp in Sources */,
@@ -633,7 +667,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -691,7 +725,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;

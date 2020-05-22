@@ -2,11 +2,11 @@
 #define MINEOLA_GRAPHICSBUFFER_H
 #include <cstdint>
 #include <vector>
-#include <boost/noncopyable.hpp>
+#include "Noncopyable.h"
 
 namespace mineola {
 
-class GraphicsBuffer : private boost::noncopyable {
+class GraphicsBuffer : Noncopyable {
 public:
   GraphicsBuffer(uint32_t frequency, uint32_t direction, uint32_t access, uint32_t target);
   GraphicsBuffer(uint32_t frequency, uint32_t direction, uint32_t access,

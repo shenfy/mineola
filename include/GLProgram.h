@@ -5,12 +5,12 @@
 #include <memory>
 #include <tuple>
 #include <unordered_map>
-#include <boost/noncopyable.hpp>
 #include "BasisObj.h"
+#include "Noncopyable.h"
 
 namespace mineola {
 
-class GLProgram : boost::noncopyable, public Resource {
+class GLProgram : Noncopyable, public Resource {
 public:
   GLProgram();
   virtual ~GLProgram();
