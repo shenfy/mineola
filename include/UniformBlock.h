@@ -2,7 +2,9 @@
 #define MINEOLA_UNIFORMBLOCK_H
 
 #include <memory>
+#include <utility>
 #include <unordered_map>
+#include <string>
 #include "BasisObj.h"
 
 namespace mineola {

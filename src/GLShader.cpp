@@ -2,7 +2,6 @@
 #include "../include/GLShader.h"
 #include <cstdio>
 #include <algorithm>
-#include <boost/assert.hpp>
 #include <sstream>
 #include <fstream>
 #include "../include/ShaderParser.h"
@@ -62,7 +61,11 @@ bool GLShader::LoadFromFile(const char *fn, const effect_defines_t *defines) {
 }
 
 bool GLShader::LoadFromRawMemory(const char *str) {
-  BOOST_ASSERT(handle_);
+  if (handle_ == 0) {
+    MLOG("Unable to load code to an invalid GLShader!\n");
+    return false;
+  }
+
   glShaderSource(handle_, 1, (const char **)&str, NULL);
   glCompileShader(handle_);
   bool result = InfoLog();

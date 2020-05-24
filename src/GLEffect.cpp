@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <cstring>
 #include <unordered_set>
-#include <boost/assert.hpp>
 #include "../include/glutility.h"
 #include "../include/GLShader.h"
 #include "../include/GLEffect.h"
@@ -24,7 +23,11 @@ GLEffect::~GLEffect() {
 
 bool GLEffect::AttachShaders(std::shared_ptr<GLShader> vs,
 	std::shared_ptr<GLShader> ps) {
-  BOOST_ASSERT(handle_);
+  if (handle_ == 0) {
+    MLOG("Cannot attach shaders to an invalid GLEffect!\n");
+    return false;
+  }
+
   if (vertex_shader_)
     glDetachShader(handle_, vertex_shader_->Handle());
   if (pixel_shader_)
@@ -77,7 +80,9 @@ void GLEffect::ReorderAttribBindings() {
     ++semantics) {
 
     const char *var_name = vertex_type::GetSemanticsString(semantics);
-    BOOST_ASSERT(var_name != 0);
+    if (var_name == nullptr) {
+      continue;
+    }
 
     int bind_loc = vertex_type::GetSemanticsBindLocation(semantics);
     auto iter = attrib_names.find(var_name);
@@ -88,7 +93,11 @@ void GLEffect::ReorderAttribBindings() {
 }
 
 bool GLEffect::GenerateAttribMap() {
-  BOOST_ASSERT(handle_);
+  if (handle_ == 0) {
+    MLOG("Unable to generate attribute map for an invalid GLEffect!\n");
+    return false;
+  }
+
   int32_t attrib_num = 0;
   glGetProgramiv(handle_, GL_ACTIVE_ATTRIBUTES, &attrib_num);
   if (attrib_num < 0)

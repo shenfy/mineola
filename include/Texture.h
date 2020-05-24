@@ -3,13 +3,13 @@
 
 #include <cstdint>
 #include <vector>
-#include <boost/noncopyable.hpp>
 #include "BasisObj.h"
 #include "TextureDesc.h"
+#include "Noncopyable.h"
 
 namespace mineola {
 
-class Texture : public Resource, boost::noncopyable {
+class Texture : public Resource, Noncopyable {
 public:
   Texture();
   virtual ~Texture();

@@ -3,7 +3,6 @@
 #include <cstring>
 #include <unordered_set>
 #include <numeric>
-#include <boost/assert.hpp>
 #include "../include/glutility.h"
 #include "../include/GLShader.h"
 #include "../include/GLProgram.h"
@@ -53,7 +52,9 @@ void GLProgram::BindBuiltinUniformBlocks() {
 }
 
 bool GLProgram::GenerateUniformBlockMap() {
-  BOOST_ASSERT(handle_);
+  if (handle_ == 0) {
+    return false;
+  }
 
   ub_map_.clear();
 
@@ -76,7 +77,9 @@ bool GLProgram::GenerateUniformBlockMap() {
 }
 
 bool GLProgram::GenerateVarMap() {
-  BOOST_ASSERT(handle_);
+  if (handle_ == 0) {
+    return false;
+  }
 
   variable_map_.clear();
   int32_t num_uniforms = 0;
@@ -157,8 +160,9 @@ void GLProgram::UploadVariable(const char *var_name, const uint32_t *val) {
 }
 
 bool GLProgram::Bind() {
-  BOOST_ASSERT(handle_);
-  CHKGLERR_RET;
+  if (handle_ == 0) {
+    return false;
+  }
   glUseProgram(handle_);
   CHKGLERR_RET;
   return true;

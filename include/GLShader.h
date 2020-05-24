@@ -7,11 +7,11 @@
 #include <vector>
 #include <tuple>
 #include <unordered_map>
-#include <boost/noncopyable.hpp>
+#include "Noncopyable.h"
 
 namespace mineola {
 
-class GLShader : boost::noncopyable {
+class GLShader : Noncopyable {
 public:
   typedef std::vector<std::pair<std::string, std::string>> effect_defines_t;
 
