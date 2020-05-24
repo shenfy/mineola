@@ -601,7 +601,7 @@ bool CreateSceneFromGLTFDoc(
 
         AttribFlags attrib_flags;
 
-        if (skinned_mesh_ids.find(mesh_idx) != skinned_mesh_ids.end()) {
+        if (skinned_mesh_ids.find((uint32_t)mesh_idx) != skinned_mesh_ids.end()) {
           attrib_flags.EnableSkinning();
         }
 

@@ -2,7 +2,7 @@
 #define MINEOLA_FILESYSTEM_H
 
 #include <tuple>
-#include <boost/algorithm/string.hpp>
+#include <string>
 
 namespace mineola { namespace file_system {
 

@@ -47,21 +47,23 @@ bool IsJPEGFormat(const uint8_t *buffer) {
   return false;
 }
 
-const char *DetermineImageFormat(const uint8_t *buffer) {
+enum { kImgFmtUnknown = 0, kImgFmtDDS, kImgFmtKTX, kImgFmtJPEG, kImgFmtPNG, kImgFmtPFM };
+
+int DetermineImageFormat(const uint8_t *buffer) {
   if (IsDDSFormat(buffer)) {
-    return "dds";
+    return kImgFmtDDS;
   } else if (IsKTXFormat(buffer)) {
-    return "ktx";
+    return kImgFmtKTX;
   } else if (IsJPEGFormat(buffer)) {
-    return "jpeg";
+    return kImgFmtJPEG;
   } else if (IsPNGFormat(buffer)) {
-    return "png";
+    return kImgFmtPNG;
   } else {
-    return "?";
+    return kImgFmtUnknown;
   }
 }
 
-const char *PeekImageFormat(const char *fn) {
+int PeekImageFormat(const char *fn) {
   enum {kMagicNumberDigits = 16};
 
   std::ifstream infile(fn, std::ios::binary);
@@ -70,7 +72,7 @@ const char *PeekImageFormat(const char *fn) {
     auto file_size = infile.tellg();
     if (file_size < kMagicNumberDigits) {
       infile.close();
-      return "?";
+      return kImgFmtUnknown;
     }
 
     infile.seekg(0, std::ios::beg);
@@ -81,7 +83,7 @@ const char *PeekImageFormat(const char *fn) {
 
     return DetermineImageFormat((const uint8_t*)buffer.data());
   }
-  return "?";
+  return kImgFmtUnknown;
 }
 
 }  // namespace
@@ -94,9 +96,9 @@ std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *fn) {
   }
   auto img_fmt = PeekImageFormat(fn);
   std::shared_ptr<ImgppTextureSrc> tex_src;
-  if (img_fmt == "ktx") {
+  if (kImgFmtKTX == img_fmt) {
     tex_src = LoadKTXFromFile(fn);
-  } else if (img_fmt == "jpeg" || img_fmt == "png") {
+  } else if (kImgFmtJPEG == img_fmt || kImgFmtPNG == img_fmt) {
     if (auto loader = Engine::Instance().ExtTextureLoader(); loader != nullptr) {
       imgpp::Img img;
       if (loader(fn, img)) {
@@ -113,9 +115,9 @@ std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *buffer, uint32_t l
   }
   auto img_fmt = DetermineImageFormat((const uint8_t*)buffer);
   std::shared_ptr<ImgppTextureSrc> tex_src;
-  if (img_fmt == "ktx") {
+  if (kImgFmtKTX == img_fmt) {
     tex_src = LoadKTXFromMem(buffer, length);
-  } else if (img_fmt == "jpeg" || img_fmt == "png") {
+  } else if (kImgFmtJPEG == img_fmt || kImgFmtPNG == img_fmt) {
     if (auto loader = Engine::Instance().ExtTextureMemLoader(); loader != nullptr) {
       imgpp::Img img;
       if (loader(buffer, length, img)) {

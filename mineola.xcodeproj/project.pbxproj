@@ -57,7 +57,6 @@
 		04C21807214D22F5004E15ED /* ResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04C217E5214D22F5004E15ED /* ResourceManager.cpp */; };
 		04C21808214D22F5004E15ED /* RendererViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 04C217E6214D22F5004E15ED /* RendererViewController.mm */; };
 		04C21809214D22F5004E15ED /* MeshIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04C217E7214D22F5004E15ED /* MeshIO.cpp */; };
-		04C2180A214D22F5004E15ED /* GLITextureSrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04C217E8214D22F5004E15ED /* GLITextureSrc.cpp */; };
 		04C21813214D246F004E15ED /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C21812214D246F004E15ED /* AppDelegate.m */; };
 		04C2181B214D2472004E15ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04C2181A214D2472004E15ED /* Assets.xcassets */; };
 		04C21821214D2472004E15ED /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C21820214D2472004E15ED /* main.m */; };
@@ -76,7 +75,6 @@
 		04FF051D216409E400C05601 /* FileSystem.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 043A4593215E74DE00A7D07A /* FileSystem.h */; };
 		04FF051E216409E400C05601 /* Framebuffer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217AE214D22E1004E15ED /* Framebuffer.h */; };
 		04FF051F216409E400C05601 /* GLEffect.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217A4214D22E1004E15ED /* GLEffect.h */; };
-		04FF0520216409E400C05601 /* GLITextureSrc.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217B7214D22E1004E15ED /* GLITextureSrc.h */; };
 		04FF0521216409E400C05601 /* GLMHelper.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 043A4592215E74DE00A7D07A /* GLMHelper.h */; };
 		04FF0522216409E400C05601 /* GLProgram.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217C5214D22E1004E15ED /* GLProgram.h */; };
 		04FF0523216409E400C05601 /* GLShader.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217C3214D22E1004E15ED /* GLShader.h */; };
@@ -110,8 +108,6 @@
 		04FF053F216409E400C05601 /* VertexType.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217B5214D22E1004E15ED /* VertexType.h */; };
 		04FF0540216409E400C05601 /* Visitor.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C217B0214D22E1004E15ED /* Visitor.h */; };
 		04FF05452164170400C05601 /* libmineola.a in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04C21791214D22A7004E15ED /* libmineola.a */; };
-		76E16740219D669A0073EAB2 /* CompressedTextureSrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76E1673F219D669A0073EAB2 /* CompressedTextureSrc.cpp */; };
-		76E16748219D79030073EAB2 /* CompressedTextureSrc.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 76E16741219D66A30073EAB2 /* CompressedTextureSrc.h */; };
 		76E16749219D79030073EAB2 /* Viewport.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 04BBE83D2169134C00BA0AB8 /* Viewport.h */; };
 		C7F4B4F02181CE4A00171337 /* BasisObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7F4B4EF2181CE4A00171337 /* BasisObj.cpp */; };
 /* End PBXBuildFile section */
@@ -123,7 +119,6 @@
 			dstPath = "/usr/local/include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 0;
 			files = (
-				76E16748219D79030073EAB2 /* CompressedTextureSrc.h in CopyFiles */,
 				76E16749219D79030073EAB2 /* Viewport.h in CopyFiles */,
 				04FF0517216409E400C05601 /* AppHelper.h in CopyFiles */,
 				04FF0518216409E400C05601 /* BasisObj.h in CopyFiles */,
@@ -134,7 +129,6 @@
 				04FF051D216409E400C05601 /* FileSystem.h in CopyFiles */,
 				04FF051E216409E400C05601 /* Framebuffer.h in CopyFiles */,
 				04FF051F216409E400C05601 /* GLEffect.h in CopyFiles */,
-				04FF0520216409E400C05601 /* GLITextureSrc.h in CopyFiles */,
 				04FF0521216409E400C05601 /* GLMHelper.h in CopyFiles */,
 				04FF0522216409E400C05601 /* GLProgram.h in CopyFiles */,
 				04FF0523216409E400C05601 /* GLShader.h in CopyFiles */,
@@ -241,7 +235,6 @@
 		04C217B4214D22E1004E15ED /* GraphicsBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphicsBuffer.h; sourceTree = "<group>"; };
 		04C217B5214D22E1004E15ED /* VertexType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VertexType.h; sourceTree = "<group>"; };
 		04C217B6214D22E1004E15ED /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
-		04C217B7214D22E1004E15ED /* GLITextureSrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLITextureSrc.h; sourceTree = "<group>"; };
 		04C217B8214D22E1004E15ED /* TextureHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextureHelper.h; sourceTree = "<group>"; };
 		04C217B9214D22E1004E15ED /* PolygonSoupLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PolygonSoupLoader.h; sourceTree = "<group>"; };
 		04C217BA214D22E1004E15ED /* AppHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppHelper.h; sourceTree = "<group>"; };
@@ -289,13 +282,13 @@
 		04C217E5214D22F5004E15ED /* ResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ResourceManager.cpp; sourceTree = "<group>"; };
 		04C217E6214D22F5004E15ED /* RendererViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RendererViewController.mm; sourceTree = "<group>"; };
 		04C217E7214D22F5004E15ED /* MeshIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshIO.cpp; sourceTree = "<group>"; };
-		04C217E8214D22F5004E15ED /* GLITextureSrc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLITextureSrc.cpp; sourceTree = "<group>"; };
 		04C2180F214D246F004E15ED /* mineola test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "mineola test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		04C21811214D246F004E15ED /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		04C21812214D246F004E15ED /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		04C2181A214D2472004E15ED /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04C2181F214D2472004E15ED /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		04C21820214D2472004E15ED /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = conanbuildinfo.xcconfig; path = ios/build/conanbuildinfo.xcconfig; sourceTree = "<group>"; };
 		04D74420214D3C5500CAF217 /* RenderTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = RenderTest.mm; sourceTree = "<group>"; };
 		04D74421214D3C5500CAF217 /* RenderTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderTest.h; sourceTree = "<group>"; };
 		04E30F8A229E6F09006D0743 /* STBImagePlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STBImagePlugin.h; sourceTree = "<group>"; };
@@ -304,8 +297,6 @@
 		04FB37B022A03747005A272D /* Corset.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = Corset.glb; sourceTree = "<group>"; };
 		04FE66D2229DAC58005D82A1 /* GLTFLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFLoader.h; sourceTree = "<group>"; };
 		04FE66D3229DAC61005D82A1 /* GLTFLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLTFLoader.cpp; sourceTree = "<group>"; };
-		76E1673F219D669A0073EAB2 /* CompressedTextureSrc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CompressedTextureSrc.cpp; sourceTree = "<group>"; };
-		76E16741219D66A30073EAB2 /* CompressedTextureSrc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompressedTextureSrc.h; sourceTree = "<group>"; };
 		C7F4B4EF2181CE4A00171337 /* BasisObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasisObj.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -331,6 +322,7 @@
 		04C21788214D22A7004E15ED = {
 			isa = PBXGroup;
 			children = (
+				04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */,
 				04C2179D214D22E1004E15ED /* include */,
 				04C217C6214D22F5004E15ED /* src */,
 				04C21810214D246F004E15ED /* mineola_ios_test */,
@@ -363,13 +355,11 @@
 				04C217BE214D22E1004E15ED /* BasisObj.h */,
 				04C217AA214D22E1004E15ED /* Camera.h */,
 				04C217A5214D22E1004E15ED /* CameraController.h */,
-				76E16741219D66A30073EAB2 /* CompressedTextureSrc.h */,
 				04C217A3214D22E1004E15ED /* Engine.h */,
 				04C217B6214D22E1004E15ED /* Entity.h */,
 				043A4593215E74DE00A7D07A /* FileSystem.h */,
 				04C217AE214D22E1004E15ED /* Framebuffer.h */,
 				04C217A4214D22E1004E15ED /* GLEffect.h */,
-				04C217B7214D22E1004E15ED /* GLITextureSrc.h */,
 				043A4592215E74DE00A7D07A /* GLMHelper.h */,
 				04C217C5214D22E1004E15ED /* GLProgram.h */,
 				04C217C3214D22E1004E15ED /* GLShader.h */,
@@ -426,14 +416,12 @@
 				C7F4B4EF2181CE4A00171337 /* BasisObj.cpp */,
 				04C217CC214D22F5004E15ED /* Camera.cpp */,
 				04C217DE214D22F5004E15ED /* CameraController.cpp */,
-				76E1673F219D669A0073EAB2 /* CompressedTextureSrc.cpp */,
 				04C217DF214D22F5004E15ED /* Engine.cpp */,
 				04C217CD214D22F5004E15ED /* Entity.cpp */,
 				043A458F215E74D400A7D07A /* FileSystem.cpp */,
 				04C217CF214D22F5004E15ED /* FPSController.cpp */,
 				04C217D0214D22F5004E15ED /* Framebuffer.cpp */,
 				04C217E1214D22F5004E15ED /* GLEffect.cpp */,
-				04C217E8214D22F5004E15ED /* GLITextureSrc.cpp */,
 				043A458D215E74D400A7D07A /* GLMHelper.cpp */,
 				04C217D6214D22F5004E15ED /* GLProgram.cpp */,
 				04C217CA214D22F5004E15ED /* GLShader.cpp */,
@@ -602,12 +590,10 @@
 				04C217F6214D22F5004E15ED /* RenderPass.cpp in Sources */,
 				04C217EF214D22F5004E15ED /* Entity.cpp in Sources */,
 				043A4591215E74D400A7D07A /* FileSystem.cpp in Sources */,
-				76E16740219D669A0073EAB2 /* CompressedTextureSrc.cpp in Sources */,
 				045F7E3C229D911C0045CDFD /* RenderStateManager.cpp in Sources */,
 				04C217F8214D22F5004E15ED /* GLProgram.cpp in Sources */,
 				04C217F4214D22F5004E15ED /* Light.cpp in Sources */,
 				04C21807214D22F5004E15ED /* ResourceManager.cpp in Sources */,
-				04C2180A214D22F5004E15ED /* GLITextureSrc.cpp in Sources */,
 				04C217FA214D22F5004E15ED /* PolygonSoupLoader.cpp in Sources */,
 				0406EF602476C28A00431A67 /* Animation.cpp in Sources */,
 				04C217FB214D22F5004E15ED /* Renderable.cpp in Sources */,
@@ -663,6 +649,7 @@
 /* Begin XCBuildConfiguration section */
 		04C21798214D22A7004E15ED /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -721,6 +708,7 @@
 		};
 		04C21799214D22A7004E15ED /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -773,10 +761,19 @@
 		};
 		04C2179B214D22A7004E15ED /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = M9M645HT83;
-				HEADER_SEARCH_PATHS = /usr/local/include;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"/Users/shenfy/.conan/data/glm/0.9.8.5/bincrafters/stable/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include\"",
+					"\"/Users/shenfy/.conan/data/fx_gltf/1.1.0/shenfy/testing/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include\"",
+					"\"/Users/shenfy/.conan/data/nlohmann_json/3.7.3/_/_/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include\"",
+					"\"/Users/shenfy/.conan/data/imgpp_headers/2.0.1/shenfy/testing/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9\"",
+					/usr/local/include,
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -786,10 +783,19 @@
 		};
 		04C2179C214D22A7004E15ED /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = M9M645HT83;
-				HEADER_SEARCH_PATHS = /usr/local/include;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"/Users/shenfy/.conan/data/glm/0.9.8.5/bincrafters/stable/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include\"",
+					"\"/Users/shenfy/.conan/data/fx_gltf/1.1.0/shenfy/testing/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include\"",
+					"\"/Users/shenfy/.conan/data/nlohmann_json/3.7.3/_/_/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9/include\"",
+					"\"/Users/shenfy/.conan/data/imgpp_headers/2.0.1/shenfy/testing/package/5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9\"",
+					/usr/local/include,
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -799,6 +805,7 @@
 		};
 		04C21823214D2472004E15ED /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -817,6 +824,7 @@
 		};
 		04C21824214D2472004E15ED /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04C29EBF24780CCC004173FA /* conanbuildinfo.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
