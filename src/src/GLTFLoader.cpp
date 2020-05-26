@@ -6,7 +6,6 @@
 #include <boost/algorithm/string.hpp>
 #include <fx/gltf.h>
 #include <glm/glm.hpp>
-#include <opnut/glm_matrix_decompose.h>
 #include "../include/Material.h"
 #include "../include/Engine.h"
 #include "../include/Renderable.h"
@@ -16,6 +15,7 @@
 #include "../include/UniformWrappers.h"
 #include "../include/PBRShaders.h"
 #include "../include/AnimatedEntity.h"
+#include "../include/GLMHelper.h"
 
 namespace {
 
@@ -726,7 +726,7 @@ bool CreateSceneFromGLTFDoc(
           n.matrix[4], n.matrix[5], n.matrix[6], n.matrix[7],
           n.matrix[8], n.matrix[9], n.matrix[10], n.matrix[11],
           n.matrix[12], n.matrix[13], n.matrix[14], n.matrix[15]);
-        if (!opnut::decompose_matrix(mat, scale, rotation, translation, skew, perspective)) {
+        if (!decompose(mat, scale, rotation, translation, skew, perspective)) {
           MLOG("Error: failed to decompose matrix for node %u!\n", (uint32_t)scene_nodes.size());
         } else {
           node->SetPosition(translation);
