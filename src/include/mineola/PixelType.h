@@ -79,6 +79,33 @@ inline void Map2GL(
 
 }
 
+bool Mipmappable(uint32_t internal_type) {
+  switch (internal_type) {
+    // unsized types:
+    case GL_RGB:
+    case GL_RGBA:
+    case GL_LUMINANCE_ALPHA:
+    case GL_LUMINANCE:
+    case GL_ALPHA:
+    // sized types both color-renderable and texture-filterable:
+    case GL_R8:
+    case GL_RG8:
+    case GL_RGB8:
+    case GL_RGB565:
+    case GL_RGBA8:
+    case GL_SRGB8_ALPHA8:
+    case GL_RGB5_A1:
+    case GL_RGBA4:
+    case GL_RGB10_A2: {
+      return true;
+    }
+
+    default: {
+      return false;
+    }
+  }
+}
+
 }} //namespace
 
 #endif

@@ -24,6 +24,7 @@ set(MINEOLA_SRC
   ../src/src/PBRShaders.cpp ../src/src/PolygonSoup.cpp ../src/src/PolygonSoupLoader.cpp
   ../src/src/PolygonSoupSerialization.cpp ../src/src/PrimitiveHelper.cpp ../src/src/Rbt.cpp
   ../src/src/Renderable.cpp ../src/src/RenderPass.cpp ../src/src/RenderState.cpp
+  ../src/src/RendererViewController.mm
   ../src/src/RenderStateFactory.cpp ../src/src/RenderStateManager.cpp
   ../src/src/ResourceManager.cpp ../src/src/SceneLoader.cpp ../src/src/SceneNode.cpp
   ../src/src/ShaderParser.cpp ../src/src/Skin.cpp ../src/src/Texture.cpp
@@ -45,4 +46,22 @@ target_link_libraries(mineola PUBLIC
   fx_gltf::fx_gltf
   stb::stb
   ${CMAKE_DL_LIBS})
+
+
+add_executable(gltfview MACOSX_BUNDLE)
+set_target_properties(gltfview PROPERTIES
+  MACOSX_BUNDLE_GUI_IDENTIFIER com.shenfy.mineola.gltfview
+  MACOSX_BUNDLE_BUNDLE_VERSION ${CMAKE_PROJECT_VERSION}
+  MACOSX_BUNDLE_SHORT_VERSION_STRING ${CMAKE_PROJECT_VERSION})
+target_sources(gltfview PRIVATE
+  src/AppDelegate.h src/AppDelegate.m src/RenderTest.h src/RenderTest.mm src/main.m)
+set_source_files_properties(src/gltf.json ../pc/resrc/CesiumMan.glb
+  PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+target_sources(gltfview PRIVATE
+  src/gltf.json ../pc/resrc/CesiumMan.glb)
+target_compile_features(gltfview PUBLIC cxx_std_17)
+target_link_libraries(gltfview PUBLIC
+  mineola
+  "-framework GLKit" "-framework OpenGLES"
+  "-framework UIKit" "-framework Foundation")
 

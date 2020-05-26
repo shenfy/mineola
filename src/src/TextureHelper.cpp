@@ -217,6 +217,12 @@ bool CreateTextureDesc(std::shared_ptr<ImgppTextureSrc> tex_src,
     pixel_type::Map2GL(roi.BPC(), roi.Channel(), roi.IsSigned(), roi.IsFloat(), srgb,
       desc.internal_format, desc.format, desc.data_type);
   }
+
+  // check automatic mipmap generation capability for current internal format
+  if (desc.levels == 0 && !pixel_type::Mipmappable(desc.internal_format)) {
+    desc.levels = 1;
+  }
+
   desc.src_data = std::move(tex_src);
   return true;
 }

@@ -1,13 +1,26 @@
 # Mineola
 OpenGL ES based minimal rendering engine.
 
-## Guide to Install Dependencies
+## Build on Ubuntu 18.04
 
-1. Download the most recent dependencies package (mineola_deps_xxxxxxxx.zip) from the release section.
-
-2. Unzip mineola_deps_xxxxxxxx.zip to a temporary folder (e.g. mdeps) and run the install script:
+We have switched to using [Conan](https://conan.io) to manage dependencies. To build mineola under Linux, please run conan and cmake to generate makefile and build the project:
 ```bash
-$ unzip mineola_deps_xxxxxxxx.zip -d mdeps
-$ cd mdeps
-$ ./install.sh /path/to/install/directory  # defaults to /usr/local
+$ cd pc
+$ mkdir build
+$ cd build
+$ conan install ..
+$ cmake ..
+$ make -j8
 ```
+
+## Build for iOS on MacOS
+
+We have switched to using CMAKE to generate the XCode project.
+```bash
+$ cd ios
+$ mkdir build
+$ cd build
+$ conan install ..
+$ cmake .. -GXcode -DCMAKE_SYSTEM_NAME=iOS
+```
+Then you can either use cmake/xcode command line tools to build the project or open the generated project "mineola_ios" directly in XCode GUI.
