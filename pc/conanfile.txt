@@ -4,6 +4,7 @@ glm/0.9.8.5@bincrafters/stable
 imgpp/2.0.1@shenfy/testing
 fx_gltf/1.1.0@shenfy/testing
 glfw/3.3.2@shenfy/testing
+stb/20200203
 
 [generators]
 cmake_paths
