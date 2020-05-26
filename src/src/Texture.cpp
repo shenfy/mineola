@@ -1,7 +1,7 @@
 #include "prefix.h"
-#include "../include/Texture.h"
+#include <mineola/Texture.h>
 #include <algorithm>
-#include "../include/glutility.h"
+#include <mineola/glutility.h>
 
 namespace {
   enum {kDefaultAlignment = 4};

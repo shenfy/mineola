@@ -3,12 +3,12 @@
 #include <cstring>
 #include <unordered_set>
 #include <numeric>
-#include "../include/glutility.h"
-#include "../include/GLShader.h"
-#include "../include/GLProgram.h"
-#include "../include/TypeMapping.h"
-#include "../include/UniformBlock.h"
-#include "../include/UniformHelper.h"
+#include <mineola/glutility.h>
+#include <mineola/GLShader.h>
+#include <mineola/GLProgram.h>
+#include <mineola/TypeMapping.h>
+#include <mineola/UniformBlock.h>
+#include <mineola/UniformHelper.h>
 
 namespace mineola {
 

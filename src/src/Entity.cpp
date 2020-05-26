@@ -1,5 +1,5 @@
 #include "prefix.h"
-#include "../include/Entity.h"
+#include <mineola/Entity.h>
 #include <boost/uuid/uuid_generators.hpp>
 
 namespace mineola {

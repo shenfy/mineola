@@ -1,9 +1,9 @@
 #include "prefix.h"
-#include "../include/Skin.h"
+#include <mineola/Skin.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/Engine.h"
-#include "../include/SceneNode.h"
-#include "../include/GLEffect.h"
+#include <mineola/Engine.h>
+#include <mineola/SceneNode.h>
+#include <mineola/GLEffect.h>
 
 namespace mineola {
 

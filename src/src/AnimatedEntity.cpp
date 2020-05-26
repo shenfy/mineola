@@ -1,6 +1,6 @@
 #include "prefix.h"
-#include "../include/AnimatedEntity.h"
-#include "../include/Engine.h"
+#include <mineola/AnimatedEntity.h>
+#include <mineola/Engine.h>
 
 namespace mineola {
 

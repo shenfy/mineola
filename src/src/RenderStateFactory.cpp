@@ -1,6 +1,6 @@
-#include "../include/RenderStateFactory.h"
-#include "../include/RenderState.h"
-#include "../include/GLMHelper.h"
+#include <mineola/RenderStateFactory.h>
+#include <mineola/RenderState.h>
+#include <mineola/GLMHelper.h>
 #include <unordered_map>
 #include <vector>
 #include <boost/algorithm/string.hpp>

@@ -1,9 +1,9 @@
 #include "prefix.h"
-#include "../include/PolygonSoupSerialization.h"
+#include <mineola/PolygonSoupSerialization.h>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/Engine.h"
+#include <mineola/Engine.h>
 
 namespace mineola {
 

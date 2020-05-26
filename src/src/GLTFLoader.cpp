@@ -1,21 +1,21 @@
 #include "prefix.h"
-#include "../include/GLTFLoader.h"
+#include <mineola/GLTFLoader.h>
 #include <unordered_set>
 #include <unordered_map>
 #include <tuple>
 #include <boost/algorithm/string.hpp>
 #include <fx/gltf.h>
 #include <glm/glm.hpp>
-#include "../include/Material.h"
-#include "../include/Engine.h"
-#include "../include/Renderable.h"
-#include "../include/TextureHelper.h"
-#include "../include/GraphicsBuffer.h"
-#include "../include/SceneNode.h"
-#include "../include/UniformWrappers.h"
-#include "../include/PBRShaders.h"
-#include "../include/AnimatedEntity.h"
-#include "../include/GLMHelper.h"
+#include <mineola/Material.h>
+#include <mineola/Engine.h>
+#include <mineola/Renderable.h>
+#include <mineola/TextureHelper.h>
+#include <mineola/GraphicsBuffer.h>
+#include <mineola/SceneNode.h>
+#include <mineola/UniformWrappers.h>
+#include <mineola/PBRShaders.h>
+#include <mineola/AnimatedEntity.h>
+#include <mineola/GLMHelper.h>
 
 namespace {
 

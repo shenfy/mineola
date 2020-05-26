@@ -1,17 +1,17 @@
 #include "prefix.h"
-#include "../include/TextureHelper.h"
+#include <mineola/TextureHelper.h>
 #include <cstring>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 #include <imgpp/bchelper.hpp>
-#include "../include/glutility.h"
-#include "../include/TypeMapping.h"
-#include "../include/Texture.h"
-#include "../include/Engine.h"
-#include "../include/PixelType.h"
-#include "../include/Framebuffer.h"
-#include "../include/ImgppTextureSrc.h"
-#include "../include/KTXImageLoader.h"
+#include <mineola/glutility.h>
+#include <mineola/TypeMapping.h>
+#include <mineola/Texture.h>
+#include <mineola/Engine.h>
+#include <mineola/PixelType.h>
+#include <mineola/Framebuffer.h>
+#include <mineola/ImgppTextureSrc.h>
+#include <mineola/KTXImageLoader.h>
 
 namespace {
 

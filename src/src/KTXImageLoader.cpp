@@ -1,8 +1,8 @@
-#include "../include/KTXImageLoader.h"
+#include <mineola/KTXImageLoader.h>
 #include <fstream>
 #include <imgpp/imgpp_bc.hpp>
 #include <imgpp/bchelper.hpp>
-#include "../include/ImgppTextureSrc.h"
+#include <mineola/ImgppTextureSrc.h>
 
 namespace mineola {
 

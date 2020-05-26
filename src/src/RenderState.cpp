@@ -1,5 +1,5 @@
-#include "../include/RenderState.h"
-#include "../include/RenderStateManager.h"
+#include <mineola/RenderState.h>
+#include <mineola/RenderStateManager.h>
 
 namespace mineola {
 

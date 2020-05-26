@@ -1,12 +1,12 @@
 #include "prefix.h"
-#include "../include/PolygonSoupLoader.h"
+#include <mineola/PolygonSoupLoader.h>
 #include <numeric>
-#include "../include/GraphicsBuffer.h"
-#include "../include/Renderable.h"
-#include "../include/Material.h"
-#include "../include/PolygonSoup.h"
-#include "../include/TextureHelper.h"
-#include "../include/Engine.h"
+#include <mineola/GraphicsBuffer.h>
+#include <mineola/Renderable.h>
+#include <mineola/Material.h>
+#include <mineola/PolygonSoup.h>
+#include <mineola/TextureHelper.h>
+#include <mineola/Engine.h>
 
 namespace mineola { namespace primitive_helper {
 

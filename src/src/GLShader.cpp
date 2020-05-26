@@ -1,12 +1,12 @@
 #include "prefix.h"
-#include "../include/GLShader.h"
+#include <mineola/GLShader.h>
 #include <cstdio>
 #include <algorithm>
 #include <sstream>
 #include <fstream>
-#include "../include/ShaderParser.h"
-#include "../include/Engine.h"
-#include "../include/glutility.h"
+#include <mineola/ShaderParser.h>
+#include <mineola/Engine.h>
+#include <mineola/glutility.h>
 
 namespace {
   std::string AddLineNumber(const std::string &shader_str) {

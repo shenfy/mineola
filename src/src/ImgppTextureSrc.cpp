@@ -1,5 +1,5 @@
 #include "prefix.h"
-#include "../include/ImgppTextureSrc.h"
+#include <mineola/ImgppTextureSrc.h>
 
 namespace mineola {
 

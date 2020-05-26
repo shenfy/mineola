@@ -1,9 +1,9 @@
 #include "prefix.h"
-#include "../include/PrimitiveHelper.h"
+#include <mineola/PrimitiveHelper.h>
 #include <map>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/GraphicsBuffer.h"
+#include <mineola/GraphicsBuffer.h>
 
 namespace mineola { namespace primitive_helper {
 

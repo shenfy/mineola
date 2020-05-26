@@ -1,5 +1,5 @@
 #include "prefix.h"
-#include "../include/BasisObj.h"
+#include <mineola/BasisObj.h>
 
 namespace mineola {
 

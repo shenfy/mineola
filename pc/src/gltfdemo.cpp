@@ -1,15 +1,15 @@
 #include "../include/AppFrame.h"
 #include <memory>
 #include <iostream>
-#include "../../src/include/AppHelper.h"
-#include "../../src/include/CameraController.h"
-#include "../../src/include/SceneLoader.h"
-#include "../../src/include/MeshIO.h"
-#include "../../src/include/FileSystem.h"
+#include <mineola/AppHelper.h>
+#include <mineola/CameraController.h>
+#include <mineola/SceneLoader.h>
+#include <mineola/MeshIO.h>
+#include <mineola/FileSystem.h>
 #define MINEOLA_USE_STBIMAGE
-#include "../../src/include/STBImagePlugin.h"
-#include "../../src/include/GLTFLoader.h"
-#include "../../src/include/AnimatedEntity.h"
+#include <mineola/STBImagePlugin.h>
+#include <mineola/GLTFLoader.h>
+#include <mineola/AnimatedEntity.h>
 
 namespace {
 

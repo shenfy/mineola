@@ -1,9 +1,9 @@
 #include "prefix.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "../include/glutility.h"
-#include "../include/Animation.h"
-#include "../include/SceneNode.h"
+#include <mineola/glutility.h>
+#include <mineola/Animation.h>
+#include <mineola/SceneNode.h>
 
 namespace {
 

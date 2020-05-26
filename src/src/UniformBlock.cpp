@@ -1,8 +1,8 @@
 #include "prefix.h"
-#include "../include/UniformBlock.h"
+#include <mineola/UniformBlock.h>
 #include <string>
-#include "../include/glutility.h"
-#include "../include/GraphicsBuffer.h"
+#include <mineola/glutility.h>
+#include <mineola/GraphicsBuffer.h>
 
 namespace mineola {
 

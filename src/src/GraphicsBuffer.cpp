@@ -1,8 +1,8 @@
 #include "prefix.h"
 #include <cstdio>
-#include "../include/GraphicsBuffer.h"
-#include "../include/TypeMapping.h"
-#include "../include/glutility.h"
+#include <mineola/GraphicsBuffer.h>
+#include <mineola/TypeMapping.h>
+#include <mineola/glutility.h>
 
 namespace mineola {
 

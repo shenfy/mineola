@@ -1,8 +1,8 @@
 #include "prefix.h"
-#include "../include/Light.h"
-#include "../include/Camera.h"
-#include "../include/SceneNode.h"
-#include "../include/Renderable.h"
+#include <mineola/Light.h>
+#include <mineola/Camera.h>
+#include <mineola/SceneNode.h>
+#include <mineola/Renderable.h>
 
 namespace mineola {
   SceneNode::SceneNode() :

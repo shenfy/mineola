@@ -1,8 +1,8 @@
 #include "../include/AppFrame.h"
-#include "../../src/include/glutility.h"
+#include <mineola/glutility.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include "../../src/include/AppHelper.h"
+#include <mineola/AppHelper.h>
 
 namespace {
 using namespace mineola;

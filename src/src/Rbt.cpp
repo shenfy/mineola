@@ -1,7 +1,7 @@
 #include "prefix.h"
-#include "../include/Rbt.h"
+#include <mineola/Rbt.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include "../include/MathHelper.h"
+#include <mineola/MathHelper.h>
 
 namespace mineola { namespace math {
 

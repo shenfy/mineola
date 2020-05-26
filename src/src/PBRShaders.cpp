@@ -1,10 +1,10 @@
 #include "prefix.h"
-#include "../include/PBRShaders.h"
+#include <mineola/PBRShaders.h>
 #include <vector>
 #include <memory>
-#include "../include/Engine.h"
-#include "../include/GLEffect.h"
-#include "../include/RenderState.h"
+#include <mineola/Engine.h>
+#include <mineola/GLEffect.h>
+#include <mineola/RenderState.h>
 
 namespace {
 

@@ -1,11 +1,11 @@
-#include "../include/CameraController.h"
+#include <mineola/CameraController.h>
 #include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "../include/Engine.h"
-#include "../include/Camera.h"
-#include "../include/Framebuffer.h"
-#include "../include/SceneNode.h"
+#include <mineola/Engine.h>
+#include <mineola/Camera.h>
+#include <mineola/Framebuffer.h>
+#include <mineola/SceneNode.h>
 
 namespace mineola {
 

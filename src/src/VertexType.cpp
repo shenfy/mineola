@@ -1,7 +1,7 @@
-#include "../include/VertexType.h"
-#include "../include/GLEffect.h"
-#include "../include/GraphicsBuffer.h"
-#include "../include/glutility.h"
+#include <mineola/VertexType.h>
+#include <mineola/GLEffect.h>
+#include <mineola/GraphicsBuffer.h>
+#include <mineola/glutility.h>
 
 namespace mineola { namespace vertex_type {
 

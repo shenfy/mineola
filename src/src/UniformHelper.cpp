@@ -1,6 +1,6 @@
 #include "prefix.h"
-#include "../include/glutility.h"
-#include "../include/UniformHelper.h"
+#include <mineola/glutility.h>
+#include <mineola/UniformHelper.h>
 
 namespace mineola { namespace gl_uniform {
 

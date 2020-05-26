@@ -1,6 +1,6 @@
 #include "prefix.h"
-#include "../include/Light.h"
-#include "../include/Rbt.h"
+#include <mineola/Light.h>
+#include <mineola/Rbt.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace mineola {

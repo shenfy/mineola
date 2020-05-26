@@ -1,9 +1,9 @@
 #include "prefix.h"
-#include "../include/glutility.h"
-#include "../include/AppHelper.h"
-#include "../include/Engine.h"
-#include "../include/GLEffect.h"
-#include "../include/Material.h"
+#include <mineola/glutility.h>
+#include <mineola/AppHelper.h>
+#include <mineola/Engine.h>
+#include <mineola/GLEffect.h>
+#include <mineola/Material.h>
 
 namespace mineola {
 

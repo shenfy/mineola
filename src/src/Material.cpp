@@ -1,10 +1,10 @@
 #include "prefix.h"
-#include "../include/Material.h"
+#include <mineola/Material.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/GLEffect.h"
-#include "../include/Engine.h"
-#include "../include/Texture.h"
-#include "../include/glutility.h"
+#include <mineola/GLEffect.h>
+#include <mineola/Engine.h>
+#include <mineola/Texture.h>
+#include <mineola/glutility.h>
 
 namespace mineola {
 

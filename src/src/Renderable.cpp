@@ -1,9 +1,9 @@
 #include "prefix.h"
-#include "../include/Renderable.h"
+#include <mineola/Renderable.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "../include/Engine.h"
-#include "../include/Material.h"
-#include "../include/VertexType.h"
+#include <mineola/Engine.h>
+#include <mineola/Material.h>
+#include <mineola/VertexType.h>
 
 namespace mineola {
 

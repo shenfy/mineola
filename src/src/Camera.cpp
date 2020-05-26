@@ -1,12 +1,12 @@
 #include "prefix.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "../include/glutility.h"
-#include "../include/Camera.h"
-#include "../include/GLEffect.h"
-#include "../include/Engine.h"
-#include "../include/UniformBlock.h"
-#include "../include/Viewport.h"
+#include <mineola/glutility.h>
+#include <mineola/Camera.h>
+#include <mineola/GLEffect.h>
+#include <mineola/Engine.h>
+#include <mineola/UniformBlock.h>
+#include <mineola/Viewport.h>
 
 namespace mineola {
 

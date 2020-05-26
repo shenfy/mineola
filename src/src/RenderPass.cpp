@@ -1,5 +1,5 @@
 #include "prefix.h"
-#include "../include/RenderPass.h"
+#include <mineola/RenderPass.h>
 
 namespace mineola {
   RenderPass CreateDepthRenderPass(const char *render_target) {

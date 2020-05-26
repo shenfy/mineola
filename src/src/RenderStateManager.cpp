@@ -1,5 +1,5 @@
-#include "../include/RenderStateManager.h"
-#include "../include/glutility.h"
+#include <mineola/RenderStateManager.h>
+#include <mineola/glutility.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace mineola {

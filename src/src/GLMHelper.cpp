@@ -1,4 +1,4 @@
-#include "../include/GLMHelper.h"
+#include <mineola/GLMHelper.h>
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
@@ -39,5 +39,5 @@ glm::mat4 ParseMat4(const std::string &str) {
     }
     return result;
 }
-    
+
 }

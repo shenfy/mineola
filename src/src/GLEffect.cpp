@@ -3,14 +3,14 @@
 #include <cstdio>
 #include <cstring>
 #include <unordered_set>
-#include "../include/glutility.h"
-#include "../include/GLShader.h"
-#include "../include/GLEffect.h"
-#include "../include/VertexType.h"
-#include "../include/UniformBlock.h"
-#include "../include/UniformHelper.h"
-#include "../include/Engine.h"
-#include "../include/RenderState.h"
+#include <mineola/glutility.h>
+#include <mineola/GLShader.h>
+#include <mineola/GLEffect.h>
+#include <mineola/VertexType.h>
+#include <mineola/UniformBlock.h>
+#include <mineola/UniformHelper.h>
+#include <mineola/Engine.h>
+#include <mineola/RenderState.h>
 
 namespace mineola {
 

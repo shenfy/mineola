@@ -1,10 +1,10 @@
 #include "prefix.h"
-#include "../include/MeshIO.h"
-#include "../include/PolygonSoupSerialization.h"
-#include "../include/PolygonSoupLoader.h"
-#include "../include/SceneNode.h"
-#include "../include/Engine.h"
-#include "../include/Renderable.h"
+#include <mineola/MeshIO.h>
+#include <mineola/PolygonSoupSerialization.h>
+#include <mineola/PolygonSoupLoader.h>
+#include <mineola/SceneNode.h>
+#include <mineola/Engine.h>
+#include <mineola/Renderable.h>
 
 namespace mineola { namespace mesh_io {
 

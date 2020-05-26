@@ -35,6 +35,9 @@ add_library(mineola STATIC)
 target_sources(mineola PRIVATE ${MINEOLA_SRC})
 target_compile_features(mineola PUBLIC cxx_std_17)
 set_property(TARGET mineola PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_include_directories(mineola PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src/include>
+  $<INSTALL_INTERFACE:include>)
 target_link_libraries(mineola PUBLIC
   Boost::Boost
   imgpp_headers::imgpp_headers

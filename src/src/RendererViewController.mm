@@ -1,6 +1,6 @@
-#import "../include/RendererViewController.h"
-#include "../include/AppHelper.h"
-#include "../include/Engine.h"
+#import <mineola/RendererViewController.h>
+#include <mineola/AppHelper.h>
+#include <mineola/Engine.h>
 
 enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
 
@@ -39,7 +39,7 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
   view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
 
   self.view = view;
-  
+
   // set up UI event handlers
   UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc]
                                            initWithTarget:self action:@selector(handlePan:)];
@@ -61,10 +61,10 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
 - (void) handlePan: (UIPanGestureRecognizer *)recognizer {
   if (recognizer.view != self.view)
     return;
-  
+
   using namespace mineola;
   auto &en = Engine::Instance();
-  
+
   CGPoint pt = [recognizer locationInView:self.view];
   pt.x *= self.view.contentScaleFactor;
   pt.y *= self.view.contentScaleFactor;
@@ -93,7 +93,7 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
   } else {
     // handle fbo name/number change
     bool fboChanged = false, sizeChanged = false;
-    
+
     GLint defaultFBO = -1;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
     if (defaultFBO != _defaultFBO) {  // default FBO changed!
@@ -128,9 +128,9 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
   if (_vcState == kVCStateFBOSet) {
     auto &en = mineola::Engine::Instance();
     en.FrameMove();
-    
+
     en.Render();
-    
+
     if (_frameCount == 0) {
       _frameCount = 1;
     }

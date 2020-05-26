@@ -1,10 +1,10 @@
 #include "prefix.h"
-#include "../include/ShaderParser.h"
+#include <mineola/ShaderParser.h>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <regex>
-#include "../include/Engine.h"
+#include <mineola/Engine.h>
 
 namespace mineola { namespace shader_parser {
   const uint32_t kMaxIncludeDepth = 4;

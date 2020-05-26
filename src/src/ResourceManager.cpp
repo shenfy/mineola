@@ -1,9 +1,9 @@
 #include "prefix.h"
-#include "../include/ResourceManager.h"
+#include <mineola/ResourceManager.h>
 #include <sys/stat.h>
 #include <boost/algorithm/string.hpp>
-#include "../include/FileSystem.h"
-#include "../include/glutility.h"
+#include <mineola/FileSystem.h>
+#include <mineola/glutility.h>
 
 namespace {
 

@@ -1,5 +1,5 @@
 #include "prefix.h"
-#include "../include/PolygonSoup.h"
+#include <mineola/PolygonSoup.h>
 
 namespace mineola {
 

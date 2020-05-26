@@ -1,14 +1,14 @@
 #include "prefix.h"
-#include "../include/CameraController.h"
+#include <mineola/CameraController.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "../include/Engine.h"
-#include "../include/Camera.h"
-#include "../include/Viewport.h"
-#include "../include/Framebuffer.h"
-#include "../include/SceneNode.h"
-#include "../include/MathHelper.h"
+#include <mineola/Engine.h>
+#include <mineola/Camera.h>
+#include <mineola/Viewport.h>
+#include <mineola/Framebuffer.h>
+#include <mineola/SceneNode.h>
+#include <mineola/MathHelper.h>
 
 namespace mineola {
 

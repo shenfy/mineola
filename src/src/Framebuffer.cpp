@@ -2,11 +2,11 @@
 #include <fstream>
 #include <algorithm>
 #include <imgpp/imgpp.hpp>
-#include "../include/glutility.h"
-#include "../include/Framebuffer.h"
-#include "../include/Engine.h"
-#include "../include/GraphicsBuffer.h"
-#include "../include/Viewport.h"
+#include <mineola/glutility.h>
+#include <mineola/Framebuffer.h>
+#include <mineola/Engine.h>
+#include <mineola/GraphicsBuffer.h>
+#include <mineola/Viewport.h>
 
 namespace mineola {
 
