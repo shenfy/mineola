@@ -11,6 +11,7 @@ find_package(Boost REQUIRED)
 find_package(imgpp_headers REQUIRED)
 find_package(glm REQUIRED)
 find_package(fx_gltf REQUIRED)
+find_package(stb REQUIRED)
 
 set(MINEOLA_SRC
   ../src/src/AnimatedEntity.cpp ../src/src/Animation.cpp ../src/src/AppHelper.cpp
@@ -18,7 +19,7 @@ set(MINEOLA_SRC
   ../src/src/Camera.cpp ../src/src/Engine.cpp ../src/src/Entity.cpp ../src/src/FileSystem.cpp
   ../src/src/FPSController.cpp ../src/src/Framebuffer.cpp ../src/src/GLEffect.cpp
   ../src/src/GLMHelper.cpp ../src/src/GLProgram.cpp ../src/src/GLShader.cpp ../src/src/GLTFLoader.cpp
-  ../src/src/GraphicsBuffer.cpp ../src/src/ImgppTextureSrc.cpp
+  ../src/src/GraphicsBuffer.cpp ../src/src/ImgppTextureSrc.cpp ../src/src/STBImagePlugIn.cpp
   ../src/src/KTXImageLoader.cpp ../src/src/Light.cpp ../src/src/Material.cpp ../src/src/MeshIO.cpp
   ../src/src/PBRShaders.cpp ../src/src/PolygonSoup.cpp ../src/src/PolygonSoupLoader.cpp
   ../src/src/PolygonSoupSerialization.cpp ../src/src/PrimitiveHelper.cpp ../src/src/Rbt.cpp
@@ -39,5 +40,6 @@ target_link_libraries(mineola PUBLIC
   imgpp_headers::imgpp_headers
   glm::glm
   fx_gltf::fx_gltf
+  stb::stb
   ${CMAKE_DL_LIBS})
 

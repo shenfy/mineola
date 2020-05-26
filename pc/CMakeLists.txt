@@ -4,6 +4,7 @@ project(mineola VERSION 1.1.0 LANGUAGES C CXX)
 if (EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
   include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 endif()
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -14,6 +15,7 @@ find_package(Boost REQUIRED)
 find_package(glm REQUIRED)
 find_package(fx_gltf REQUIRED)
 find_package(glfw REQUIRED)
+find_package(stb REQUIRED)
 find_package(OpenGL COMPONENTS OpenGL)
 
 set(MINEOLA_SRC
@@ -43,6 +45,7 @@ target_link_libraries(mineola PUBLIC
   Boost::Boost
   glm::glm
   fx_gltf::fx_gltf
+  stb::stb
   ${CMAKE_DL_LIBS})
 
 add_executable(gltfview)

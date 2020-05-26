@@ -8,17 +8,6 @@
 #define BOOST_UUID_RANDOM_PROVIDER_FORCE_POSIX
 #endif
 
-#if defined(__APPLE__)
-  #include <TargetConditionals.h>
-  #if TARGET_IPHONE_SIMULATOR
-    // iOS Simulator
-  #elif TARGET_OS_IPHONE
-    // iOS device
-  #else  // MacOS or others
-    #define MINEOLA_USE_STBIMAGE
-  #endif
-#else
-  #define MINEOLA_USE_STBIMAGE
-#endif
+#define MINEOLA_USE_STBIMAGE
 
 #endif /* MINEOLA_PREFIX_H */
