@@ -79,7 +79,7 @@ inline void Map2GL(
 
 }
 
-bool Mipmappable(uint32_t internal_type) {
+inline bool Mipmappable(uint32_t internal_type) {
   switch (internal_type) {
     // unsized types:
     case GL_RGB:

@@ -1,0 +1,8 @@
+[requires]
+mineola/1.1.0@shenfy/testing
+
+[generators]
+cmake_find_package
+
+[imports]
+lib, *.so -> x86
