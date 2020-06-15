@@ -135,19 +135,7 @@ public:
     return va;
   }
 
-  void UpdateGPUData() {
-    // update pos buffer
-    auto vs = vs_.lock();
-    vs->buffer_ptr->Bind();
-    vs->buffer_ptr->UpdateData(0, vs->Stride() * vs->size, glm::value_ptr(positions_[0]));
-  }
-
-  void FrameMove(double time, double frame_time) override {
-    if (!running_) {
-      return;
-    }
-
-    float d_time = (float)frame_time / 1000.f;  // s
+  void UpdateCPUData(float d_time) {
     static const glm::vec3 G{0.f, -9.8f, 0.f};
 
     int num_verts_x = num_segments_.x + 1;
@@ -191,6 +179,33 @@ public:
 
         positions_[loc] += v_[loc] * d_time;
       }
+    }
+  }
+
+  void UpdateGPUData() {
+    // update pos buffer
+    auto vs = vs_.lock();
+    vs->buffer_ptr->Bind();
+    vs->buffer_ptr->UpdateData(0, vs->Stride() * vs->size, glm::value_ptr(positions_[0]));
+  }
+
+  void FrameMove(double time, double frame_time) override {
+    if (!running_) {
+      return;
+    }
+
+    float total_time = (float)frame_time / 1000.f;  // s
+
+    int steps = (int)(total_time / time_step_);
+    if (steps > 0) {
+      for (int i = 0; i < steps; i++) {
+        UpdateCPUData(time_step_);
+      }
+    }
+
+    float remaining_time = total_time - time_step_ * steps;
+    if (remaining_time > 0.f) {
+      UpdateCPUData(remaining_time);
     }
 
     UpdateGPUData();
@@ -240,9 +255,10 @@ private:
   bool running_{false};
 
   float rest_len_;
-  float k_{980.0f};  // spring stiffness
+  float k_{980.0f * 3.f};  // spring stiffness
   float damp_{.5f};  // damper
   float mass_{1.f};
+  float time_step_{2e-3f};  // 2ms
 };
 
 class MassSpringApp : public AppFrame,
