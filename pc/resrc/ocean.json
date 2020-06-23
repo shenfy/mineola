@@ -1,0 +1,67 @@
+{
+  "materials": [
+    {
+      "name": "mat:water"
+    }
+  ],
+  "lights": [
+    {
+      "index": 0,
+      "proj": "perspective",
+      "fovy": 90,
+      "aspect": 1,
+      "near": 0.1,
+      "far": 100.0,
+      "node": "light",
+      "intensity": "1, 1, 1"
+    }
+  ],
+  "cameras": [
+    {
+      "name": "main",
+      "proj": "perspective",
+      "fovy": 60,
+      "near": 0.1,
+      "far": 100.0,
+      "node": "camera"
+    }
+  ],
+  "nodes": [
+    {
+      "name": "geometry",
+      "translate": "0, 0, 0",
+      "rotate": "0, 0, 0, 1",
+      "scale": "1, 1, 1",
+      "parent": "root"
+    },
+    {
+      "name": "camera",
+      "eye": "0, 0.4, 5",
+      "target": "0, -2, 0",
+      "up": "0, 1, 0",
+      "parent": "root"
+    },
+    {
+      "name": "light",
+      "translate": "0, 4, -10",
+      "rotate": "0, 0, 0, 1",
+      "scale": "1, 1, 1",
+      "parent": "root"
+    }
+  ],
+  "effects": [
+    {
+      "name": "effect:ocean",
+      "vertex": "ocean.vert",
+      "fragment": "ocean.frag",
+      "states": {
+        "depthtest": "on",
+        "depthfunc": "less"
+      }
+    }
+  ],
+  "passes": [
+    {
+    }
+  ]
+}

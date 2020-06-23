@@ -171,7 +171,7 @@ public:
     for (int y = 0; y < num_verts_y; y++) {
       for (int x = 0; x < num_verts_x; x++) {
         auto loc = Loc(x, y, num_verts_x);
-        if (y == num_verts_y - 1) {  // top row fixed
+        if (y == num_verts_y - 1 || x % 4 == 0) {  // top row fixed
           v_[loc] = glm::vec3(0.f, 0.f, 0.f);
           continue;
         }

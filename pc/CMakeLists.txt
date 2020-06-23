@@ -68,3 +68,12 @@ add_custom_command(
   TARGET cloth
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
   COMMENT "Copy resrc folder to build folder")
+
+add_executable(ocean)
+target_sources(ocean PRIVATE
+  src/ocean.cpp src/AppFrame.cpp)
+target_link_libraries(ocean PRIVATE mineola glfw::glfw)
+add_custom_command(
+  TARGET ocean
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
+  COMMENT "Copy resrc folder to build folder")

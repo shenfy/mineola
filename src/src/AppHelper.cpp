@@ -56,7 +56,6 @@ bool LoadBuiltInShaders() {
   "#version 300 es\n"
   "precision mediump float;\n"
   "#include \"mineola_builtin_uniforms\"\n"
-  "uniform sampler2D diffuse_sampler;\n"
   "in vec3 normal_wc;\n"
   "out vec4 fragColor;\n"
   "void main(void)\n"
