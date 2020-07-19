@@ -26,7 +26,8 @@ namespace mineola {
       const char *buffer, uint32_t length,
       bool mipmap, bool srgb);
 
-
+    // The following functions make the assumption that
+    // the image data layout in memory/file is top-to-bottom
     std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *fn);
     std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const char *buffer, uint32_t length);
     std::shared_ptr<ImgppTextureSrc> CreateTextureSrc(const imgpp::Img &img);

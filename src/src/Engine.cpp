@@ -84,6 +84,10 @@ ManagerBase<Camera> &Engine::CameraMgr() {
   return camera_mgr_;
 }
 
+ManagerBase<Font> &Engine::FontMgr() {
+  return font_mgr_;
+}
+
 void Engine::ChangeEffect(const std::string &name, bool force) {
 
   if (override_effect_)  // lock effect in override mode

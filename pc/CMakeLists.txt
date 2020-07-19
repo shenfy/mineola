@@ -34,7 +34,8 @@ set(MINEOLA_SRC
   ../src/src/ShaderParser.cpp ../src/src/Skin.cpp ../src/src/STBImagePlugin.cpp ../src/src/Texture.cpp
   ../src/src/TextureHelper.cpp ../src/src/TurntableController.cpp
   ../src/src/UniformBlock.cpp ../src/src/UniformHelper.cpp ../src/src/UniformWrappers.cpp
-  ../src/src/VertexType.cpp ../src/src/Viewport.cpp ../src/src/glad.c)
+  ../src/src/VertexType.cpp ../src/src/Viewport.cpp ../src/src/TextLabel.cpp ../src/src/BitmapFont.cpp
+  ../src/src/FPSCounter.cpp ../src/src/glad.c)
 
 add_library(mineola STATIC)
 target_sources(mineola PRIVATE ${MINEOLA_SRC})

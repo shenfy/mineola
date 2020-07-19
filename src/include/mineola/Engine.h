@@ -13,6 +13,7 @@
 #include "ManagerBase.h"
 #include "ResourceManager.h"
 #include "RenderStateManager.h"
+#include "Font.h"
 
 namespace imgpp {
 class Img;
@@ -36,6 +37,7 @@ public:
   RenderStateManager &RenderStateMgr();
   ManagerBase<Entity> &EntityMgr();
   ManagerBase<Camera> &CameraMgr();
+  ManagerBase<Font> &FontMgr();
 
   void ChangeEffect(const std::string &name, bool force);
   std::shared_ptr<GLEffect> &CurrentEffect();
@@ -154,6 +156,7 @@ private:
   RenderStateManager render_state_mgr_;
   ManagerBase<Entity> entity_mgr_;
   ManagerBase<Camera> camera_mgr_;
+  ManagerBase<Font> font_mgr_;
   std::shared_ptr<SceneNode> root_node_;
 
   // current state cache

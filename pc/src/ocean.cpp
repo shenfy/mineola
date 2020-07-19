@@ -12,6 +12,8 @@
 #include <mineola/Renderable.h>
 #include <mineola/SceneNode.h>
 #include <mineola/Entity.h>
+#include <mineola/TextLabel.h>
+#include <mineola/FPSCounter.h>
 #define MINEOLA_USE_STBIMAGE
 #include <mineola/GLTFLoader.h>
 #include <mineola/STBImagePlugin.h>
@@ -275,6 +277,27 @@ public:
     auto geometry_node = SceneNode::FindNodeByName("geometry", en.Scene().get());
     if (geometry_node) {
       geometry_node->Renderables().push_back(renderable);
+    }
+
+    // text label
+    auto font = std::make_shared<BitmapFont>();
+    if (!font->LoadFromFile("Arial16.json")) {
+      MLOG("Failed to load font!\n");
+      return false;
+    }
+    en.FontMgr().Add(font->Name(), bd_cast<Font>(font));
+
+    auto text_node = SceneNode::FindNodeByName("text", en.Scene().get());
+    if (text_node) {
+      auto label = std::make_shared<TextLabel>(35, font->Name().c_str());
+      label->SetText("The tide is full, the moon is fair.");
+      text_node->Renderables().push_back(bd_cast<Renderable>(label));
+    }
+
+    auto fps_label = std::make_shared<FPSCounter>();
+    if (fps_label) {
+      fps_label->CreateLabel("Arial_16");
+      en.EntityMgr().Add("fps", bd_cast<Entity>(fps_label));
     }
 
     en.AddKeyboardCallback([water](uint32_t key, uint32_t action) {

@@ -22,6 +22,7 @@ TurntableController::~TurntableController() {
 }
 
 bool TurntableController::Activate() {
+  using namespace boost::placeholders;
   auto &en = Engine::Instance();
   mouse_btn_conn_ = en.AddMouseButtonCallback(
     Engine::mouse_btn_callback_t(&TurntableController::OnMouseButton, this, _1, _2, _3, _4)

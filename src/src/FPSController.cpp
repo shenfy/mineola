@@ -40,6 +40,7 @@ FPSController::~FPSController() {
 }
 
 bool FPSController::Activate() {
+  using namespace boost::placeholders;
   auto &en = Engine::Instance();
   auto shared_this = shared_from_this();
   mouse_btn_conn_ = en.AddMouseButtonCallback(

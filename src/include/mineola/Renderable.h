@@ -38,7 +38,8 @@ public:
 
   enum {
     kQueueOpaque = 0,
-    kQueueTransparent = 1024
+    kQueueTransparent = 1024,
+    kQueueOverlay = 2048
   };
 
 protected:

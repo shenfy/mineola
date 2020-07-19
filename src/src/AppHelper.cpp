@@ -141,6 +141,46 @@ bool LoadBuiltInShaders() {
     return false;
   }
 
+  const char bmfontvs[] = R"(
+  #version 300 es
+  precision mediump float;
+  #include "mineola_builtin_uniforms"
+  in vec2 Pos;
+  in vec2 TexCoord0;
+  out vec2 texcoord;
+  void main(void) {
+    float pixel_width = 2.0 / _viewport_size.x;
+    float pixel_height = 2.0 / _viewport_size.y;
+    vec2 offset = _model_mat[3].xy;
+    gl_Position = vec4(
+      -1.0 + (Pos.x + offset.x) * pixel_width,
+      -1.0 + (Pos.y + offset.y) * pixel_height,
+      0.5, 1);
+    texcoord = TexCoord0;
+  })";
+
+  const char bmfontps[] = R"(
+  #version 300 es
+  precision mediump float;
+  #include "mineola_builtin_uniforms"
+  uniform sampler2D font;
+  in vec2 texcoord;
+  out vec4 frag_color;
+  void main(void) {
+    vec4 color = texture(font, texcoord);
+    frag_color = vec4(color.xyz, step(0.1, color.r));
+  })";
+
+  render_states.clear();
+  render_states.push_back(std::make_unique<DepthTestState>(false));
+  render_states.push_back(std::make_unique<BlendEnableState>(true));
+  render_states.push_back(std::make_unique<BlendFuncState>(
+    render_state::kBlendSrcAlpha, render_state::kBlendOneMinusSrcAlpha));
+  if (!CreateEffectFromMemHelper("mineola:effect:text",
+    bmfontvs, bmfontps, nullptr, std::move(render_states))) {
+    return false;
+  }
+
   return true;
 }
 
