@@ -36,6 +36,25 @@ set(MINEOLA_SRC
   ../src/src/UniformBlock.cpp ../src/src/UniformHelper.cpp ../src/src/UniformWrappers.cpp
   ../src/src/VertexType.cpp ../src/src/Viewport.cpp ../src/src/glad.c)
 
+set(MINEOLA_HDR
+  ../src/include/mineola/AnimatedEntity.h ../src/include/mineola/Animation.h ../src/include/mineola/AppHelper.h
+  ../src/include/mineola/BasisObj.h ../src/include/mineola/CameraController.h
+  ../src/include/mineola/Camera.h ../src/include/mineola/Engine.h ../src/include/mineola/Entity.h ../src/include/mineola/FileSystem.h
+  ../src/include/mineola/Framebuffer.h ../src/include/mineola/glad.h ../src/include/mineola/GLEffect.h
+  ../src/include/mineola/GLMHelper.h ../src/include/mineola/GLProgram.h ../src/include/mineola/GLShader.h ../src/include/mineola/GLTFLoader.h
+  ../src/include/mineola/glutility.h ../src/include/mineola/GraphicsBuffer.h ../src/include/mineola/ImgppTextureSrc.h
+  ../src/include/mineola/khrplatform.h ../src/include/mineola/KTXImageLoader.h ../src/include/mineola/Light.h ../src/include/mineola/ManagerBase.h
+  ../src/include/mineola/Material.h ../src/include/mineola/MathHelper.h ../src/include/mineola/MeshIO.h ../src/include/mineola/Noncopyable.h
+  ../src/include/mineola/PBRShaders.h ../src/include/mineola/PixelType.h ../src/include/mineola/PolygonSoup.h ../src/include/mineola/PolygonSoupLoader.h
+  ../src/include/mineola/PolygonSoupSerialization.h ../src/include/mineola/PrimitiveHelper.h ../src/include/mineola/Rbt.h
+  ../src/include/mineola/Renderable.h ../src/include/mineola/RenderPass.h ../src/include/mineola/RenderState.h
+  ../src/include/mineola/RenderStateFactory.h ../src/include/mineola/RenderStateManager.h
+  ../src/include/mineola/ResourceManager.h ../src/include/mineola/SceneLoader.h ../src/include/mineola/SceneNode.h
+  ../src/include/mineola/ShaderParser.h ../src/include/mineola/Skin.h ../src/include/mineola/STBImagePlugin.h ../src/include/mineola/TextureDesc.h ../src/include/mineola/Texture.h
+  ../src/include/mineola/TextureHelper.h ../src/include/mineola/TypeMapping.h
+  ../src/include/mineola/UniformBlock.h ../src/include/mineola/UniformHelper.h ../src/include/mineola/UniformWrappers.h
+  ../src/include/mineola/VertexType.h ../src/include/mineola/Viewport.h ../src/include/mineola/Visitor.h)
+
 add_library(mineola STATIC)
 target_sources(mineola PRIVATE ${MINEOLA_SRC})
 target_compile_features(mineola PUBLIC cxx_std_17)
@@ -50,6 +69,10 @@ target_link_libraries(mineola PUBLIC
   fx_gltf::fx_gltf
   stb::stb
   ${CMAKE_DL_LIBS})
+set_target_properties(mineola PROPERTIES PUBLIC_HEADER "${MINEOLA_HDR}")
+install(TARGETS mineola EXPORT mineolaTargets
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/mineola)
 
 add_executable(gltfview)
 target_sources(gltfview PRIVATE
