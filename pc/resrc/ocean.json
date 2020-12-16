@@ -7,11 +7,14 @@
   "lights": [
     {
       "index": 0,
-      "proj": "perspective",
-      "fovy": 90,
-      "aspect": 1,
-      "near": 0.1,
-      "far": 100.0,
+      "type": "point_dir",
+      "proj": {
+        "type": "perspective",
+        "fovy": 90,
+        "aspect": 1,
+        "near": 0.1,
+        "far": 100.0
+      },
       "node": "light",
       "intensity": "1, 1, 1"
     }

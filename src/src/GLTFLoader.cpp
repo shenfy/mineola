@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <tuple>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <fx/gltf.h>
 #include <glm/glm.hpp>
@@ -81,6 +82,56 @@ int MapGLTFVecLength(fx::gltf::Accessor::Type type) {
     default:
       return 0;
   }
+}
+
+uint32_t MapGLTFMagFilter(fx::gltf::Sampler::MagFilter type) {
+  switch (type) {
+    case fx::gltf::Sampler::MagFilter::Nearest:
+      return TextureDesc::kNearest;
+    case fx::gltf::Sampler::MagFilter::Linear:
+      return TextureDesc::kLinear;
+    default:
+      return TextureDesc::kLinear;
+  }
+}
+
+uint32_t MapGLTFMinFilter(fx::gltf::Sampler::MinFilter type) {
+  switch (type) {
+    case fx::gltf::Sampler::MinFilter::Nearest:
+      return TextureDesc::kNearest;
+    case fx::gltf::Sampler::MinFilter::Linear:
+      return TextureDesc::kLinear;
+    case fx::gltf::Sampler::MinFilter::NearestMipMapNearest:
+      return TextureDesc::kNearestMipmapNearest;
+    case fx::gltf::Sampler::MinFilter::LinearMipMapNearest:
+      return TextureDesc::kLinearMipmapNearest;
+    case fx::gltf::Sampler::MinFilter::NearestMipMapLinear:
+      return TextureDesc::kNearestMipmapLinear;
+    case fx::gltf::Sampler::MinFilter::LinearMipMapLinear:
+      return TextureDesc::kLinearMipmapLinear;
+    default:
+      return TextureDesc::kLinearMipmapLinear;
+  }
+}
+
+uint32_t MapGLTFWrapMode(fx::gltf::Sampler::WrappingMode mode) {
+  switch (mode) {
+    case fx::gltf::Sampler::WrappingMode::ClampToEdge:
+      return TextureDesc::kClampToEdge;
+    case fx::gltf::Sampler::WrappingMode::MirroredRepeat:
+      return TextureDesc::kMirrorRepeat;
+    case fx::gltf::Sampler::WrappingMode::Repeat:
+      return TextureDesc::kRepeat;
+    default:
+      return TextureDesc::kRepeat;
+  }
+}
+
+std::string AbbrevTextureMode(
+  uint32_t min_filter, uint32_t mag_filter, uint32_t wrap_s, uint32_t wrap_t) {
+  std::stringstream ss;
+  ss << min_filter << mag_filter << wrap_s << wrap_t;
+  return ss.str();
 }
 
 void SetAttribFlag(int semantics, AttribFlags &flags) {
@@ -323,7 +374,8 @@ bool CreateSceneFromGLTFDoc(
   const std::shared_ptr<SceneNode> &parent_node,
   const char *effect_name,
   int layer_mask,
-  const std::vector<std::pair<std::string, std::string>> &inject_textures) {
+  const std::vector<std::pair<std::string, std::string>> &inject_textures,
+  bool use_env_light) {
 
   auto &en = Engine::Instance();
 
@@ -471,28 +523,46 @@ bool CreateSceneFromGLTFDoc(
       }
       bool srgb = srgb_textures.find(tex_idx) != srgb_textures.end();
 
+      uint32_t min_filter = TextureDesc::kLinearMipmapLinear;
+      uint32_t mag_filter = TextureDesc::kLinear;
+      uint32_t wrap_s = TextureDesc::kRepeat;
+      uint32_t wrap_t = TextureDesc::kRepeat;
+      if (t.sampler >= 0 && doc.samplers.size() > t.sampler) {  // parse sampler modes
+        const auto &s = doc.samplers[t.sampler];
+        min_filter = MapGLTFMinFilter(s.minFilter);
+        mag_filter = MapGLTFMagFilter(s.magFilter);
+        wrap_s = MapGLTFWrapMode(s.wrapS);
+        wrap_t = MapGLTFWrapMode(s.wrapT);
+      }
+      auto sampler_abbrev = AbbrevTextureMode(min_filter, mag_filter, wrap_s, wrap_t);
+
       if (img_paths.find(t.source) != img_paths.end()) {  // load from file
         std::string input_path = img_paths[t.source];
         std::string full_path;
         // find file on disk
         if (en.ResrcMgr().LocateFile(input_path.c_str(), full_path)) {
-          if (!en.ResrcMgr().Find(full_path)) {  // not loaded
+          auto texture_name = full_path + ":" + sampler_abbrev;
+          if (!en.ResrcMgr().Find(texture_name)) {  // not loaded
             if (texture_helper::CreateTexture(
-              full_path.c_str(), full_path.c_str(), true, srgb)) {
-              texture_names[(uint32_t)tex_idx] = full_path;
+              texture_name.c_str(), full_path.c_str(), false, true, srgb,
+              min_filter, mag_filter, wrap_s, wrap_t)) {
+              texture_names[(uint32_t)tex_idx] = texture_name;
             } else {
               MLOG("Failed to create texture from file %s\n", full_path.c_str());
             }
           } else {  // already exists
-            texture_names[(uint32_t)tex_idx] = full_path;
+            texture_names[(uint32_t)tex_idx] = texture_name;
           }
         }
       } else if (img_buffers.find(t.source) != img_buffers.end()) {  // load from buffer
-        std::string texture_name = "tex:" + t.name + ":" + std::to_string(tex_idx);
+        std::string texture_name = "tex:" + t.name
+          + ":" + std::to_string(tex_idx)
+          + ":" + sampler_abbrev;
         if (!en.ResrcMgr().Find(texture_name)) {  // not loaded
           if (texture_helper::CreateTexture(
             texture_name.c_str(), img_buffers[t.source].first, img_buffers[t.source].second,
-            true, srgb)) {
+            false, true, srgb,
+            min_filter, mag_filter, wrap_s, wrap_t)) {
             texture_names[(uint32_t)tex_idx] = texture_name;
           } else {
             MLOG("Failed to create texture %s from memory!\n", texture_name.c_str());
@@ -566,6 +636,21 @@ bool CreateSceneFromGLTFDoc(
         material->specularity = m_pbr.metallicFactor;
         material->roughness = m_pbr.roughnessFactor;
       }
+
+      // double side
+      if (m.doubleSided) {
+        material_flags.EnableDoubleSide();
+      }
+
+      // extensions
+      if (!m.extensionsAndExtras.empty() && m.extensionsAndExtras.contains("extensions")) {
+        auto &exts = m.extensionsAndExtras["extensions"];
+        // KHR_materials_unlit
+        if (exts.contains("KHR_materials_unlit")) {
+          material_flags.SetUnlit();
+        }
+      }
+
       materials.push_back(std::make_tuple(name, q_id));
       materials_flags.push_back(material_flags);
 
@@ -688,7 +773,8 @@ bool CreateSceneFromGLTFDoc(
           if (!effect_override) {
             // create or choose proper PBR shader
             const auto &mat_flags = materials_flags[mat_id];
-            auto pbr_effect_name = SelectOrCreatePBREffect(effect_srgb, mat_flags, attrib_flags);
+            auto pbr_effect_name = SelectOrCreatePBREffect(
+              effect_srgb, mat_flags, attrib_flags, use_env_light);
             if (pbr_effect_name.empty()) {
               pbr_effect_name = "mineola:effect:fallback";
             }
@@ -885,7 +971,8 @@ bool LoadScene(
   const std::shared_ptr<SceneNode> &parent_node,
   const char *effect_name,
   int layer_mask,
-  const std::vector<std::pair<std::string, std::string>> &inject_textures) {
+  const std::vector<std::pair<std::string, std::string>> &inject_textures,
+  bool use_env_light) {
   if (fn == nullptr)
     return false;
 
@@ -900,7 +987,7 @@ bool LoadScene(
 
 
   bool result = CreateSceneFromGLTFDoc(gltf_doc,
-    fn, parent_node, effect_name, layer_mask, inject_textures);
+    fn, parent_node, effect_name, layer_mask, inject_textures, use_env_light);
 
   return result;
 }

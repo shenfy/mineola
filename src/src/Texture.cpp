@@ -2,6 +2,7 @@
 #include <mineola/Texture.h>
 #include <algorithm>
 #include <mineola/glutility.h>
+#include <mineola/TextureTypes.h>
 
 namespace {
   enum {kDefaultAlignment = 4};
@@ -85,10 +86,10 @@ bool Texture2D::Create(const TextureDesc &desc) {
 
   //setup sampling parameters
   if (desc_.type == GL_TEXTURE_2D || desc_.type == GL_TEXTURE_2D_ARRAY) {
-    glTexParameteri(desc_.type, GL_TEXTURE_MAG_FILTER, desc_.mag_filter);
-    glTexParameteri(desc_.type, GL_TEXTURE_MIN_FILTER, desc_.min_filter);
-    glTexParameteri(desc_.type, GL_TEXTURE_WRAP_S, desc_.wrap_s);
-    glTexParameteri(desc_.type, GL_TEXTURE_WRAP_T, desc_.wrap_t);
+    glTexParameteri(desc_.type, GL_TEXTURE_MAG_FILTER, gl::MapFilterMode(desc_.mag_filter));
+    glTexParameteri(desc_.type, GL_TEXTURE_MIN_FILTER, gl::MapFilterMode(desc_.min_filter));
+    glTexParameteri(desc_.type, GL_TEXTURE_WRAP_S, gl::MapWrapMode(desc_.wrap_s));
+    glTexParameteri(desc_.type, GL_TEXTURE_WRAP_T, gl::MapWrapMode(desc_.wrap_t));
     glTexParameteri(desc_.type, GL_TEXTURE_MAX_LEVEL, actual_levels - 1);
     glTexParameteri(desc_.type, GL_TEXTURE_COMPARE_MODE,
       desc_.depth_compare ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE);
@@ -264,10 +265,10 @@ bool Texture3D::Create(const TextureDesc &desc) {
   }
 
   //setup sampling parameters
-  glTexParameteri(desc_.type, GL_TEXTURE_MAG_FILTER, desc_.mag_filter);
-  glTexParameteri(desc_.type, GL_TEXTURE_MIN_FILTER, desc_.min_filter);
-  glTexParameteri(desc_.type, GL_TEXTURE_WRAP_S, desc_.wrap_s);
-  glTexParameteri(desc_.type, GL_TEXTURE_WRAP_T, desc_.wrap_t);
+  glTexParameteri(desc_.type, GL_TEXTURE_MAG_FILTER, gl::MapFilterMode(desc_.mag_filter));
+  glTexParameteri(desc_.type, GL_TEXTURE_MIN_FILTER, gl::MapFilterMode(desc_.min_filter));
+  glTexParameteri(desc_.type, GL_TEXTURE_WRAP_S, gl::MapWrapMode(desc_.wrap_s));
+  glTexParameteri(desc_.type, GL_TEXTURE_WRAP_T, gl::MapWrapMode(desc_.wrap_t));
   glTexParameteri(desc_.type, GL_TEXTURE_MAX_LEVEL, actual_levels - 1);
   glTexParameteri(desc_.type, GL_TEXTURE_COMPARE_MODE,
     desc_.depth_compare ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE);

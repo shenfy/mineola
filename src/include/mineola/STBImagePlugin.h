@@ -9,8 +9,8 @@ namespace imgpp {
 }
 
 namespace mineola {
-  bool STBLoadImageFromFile(const char *fn, imgpp::Img &img);
-  bool STBLoadImageFromMem(const char *buffer, uint32_t length, imgpp::Img &img);
+  bool STBLoadImageFromFile(const char *fn, bool bottom_first, imgpp::Img &img);
+  bool STBLoadImageFromMem(const char *buffer, uint32_t length, bool bottom_first, imgpp::Img &img);
 }  // end namespace
 
 #endif  // MINEOLA_USE_STBIMAGE

@@ -8,6 +8,8 @@ namespace mineola {
 
 namespace math { class Rbt; }
 
+class UniformBlock;
+
 class Light {
 public:
   Light(size_t idx);
@@ -15,25 +17,34 @@ public:
 
   size_t Index() const;
 
+  virtual void UpdateLightTransform(const math::Rbt &rbt) = 0;
+
+  virtual void UpdateUniforms(UniformBlock *ub) = 0;
+
+protected:
+  size_t idx_;
+};
+
+class PointDirLight : public Light {
+public:
+  PointDirLight(size_t idx);
+  virtual ~PointDirLight() override;
+
+  void UpdateLightTransform(const math::Rbt &rbt) override;
+  void UpdateUniforms(UniformBlock *ub) override;
+
   void SetProjParams(float fovy, float aspect, float near, float far);
   void SetOrthoProjParams(float left, float right, float bottom, float top, float near, float far);
   void SetProjMatrix(const glm::mat4 &proj_mat);
   void SetIntensity(glm::vec3 intensity);
 
-  const glm::mat4 &GetLightViewMatrix() const;
-  const glm::mat4 &GetLightProjMatrix() const;
-  const glm::vec3 &GetPosition() const;
-  const glm::vec3 &GetIntensity() const;
-  void UpdateLightTransform(const math::Rbt &rbt);
-
 protected:
   glm::mat4 view_mat_;
   glm::mat4 proj_mat_;
   glm::vec3 pos_;
-
-  size_t idx_;
   glm::vec3 intensity_;
 };
+
 
 }
 

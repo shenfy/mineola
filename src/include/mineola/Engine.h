@@ -130,9 +130,9 @@ public:
   const std::weak_ptr<UniformBlock> &BuiltinUniformBlock() const;
 
   // external texture loaders
-  using texture_loader_t = std::add_pointer<bool(const char *, imgpp::Img &img)>::type;
+  using texture_loader_t = std::add_pointer<bool(const char *, bool, imgpp::Img &)>::type;
   using texture_mem_loader_t =
-    std::add_pointer<bool(const char *, uint32_t, imgpp::Img &img)>::type;
+    std::add_pointer<bool(const char *, uint32_t, bool, imgpp::Img &)>::type;
   void SetExtTextureLoaders(texture_loader_t file_loader, texture_mem_loader_t mem_loader);
   texture_loader_t ExtTextureLoader();
   texture_mem_loader_t ExtTextureMemLoader();

@@ -17,7 +17,8 @@ bool LoadScene(
   const std::shared_ptr<SceneNode> &parent_node,
   const char *effect,
   int layer_mask,
-  const std::vector<std::pair<std::string, std::string>> &inject_textures);
+  const std::vector<std::pair<std::string, std::string>> &inject_textures,
+  bool use_env_light);
 
 }} //end namespace
 

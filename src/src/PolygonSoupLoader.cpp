@@ -136,7 +136,9 @@ bool BuildFromPolygonSoup(const PolygonSoup &soup,
   // create texture
   if (!soup.texture_filename.empty())
    texture_helper::CreateTexture(soup.texture_filename.c_str(),
-     soup.texture_filename.c_str(), false, true);
+     soup.texture_filename.c_str(), false, false, true,
+     TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
+     TextureDesc::kRepeat, TextureDesc::kRepeat);
 
   // create material
   auto material = std::make_shared<Material>();

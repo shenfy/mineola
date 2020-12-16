@@ -14,6 +14,8 @@ struct MaterialFlags {
   void EnableEmissiveMap(int uv = 0);
   void EnableBlending();
   void EnableAlphaCutOff();
+  void SetUnlit();
+  void EnableDoubleSide();
   void Clear();
 
   bool HasDiffuseMap() const;
@@ -24,6 +26,8 @@ struct MaterialFlags {
   bool IsBlendingEnabled() const;
   bool IsAlphaCutOffEnabled() const;
   bool HasTextures() const;
+  bool IsDoubleSided() const;
+  bool IsUnlit() const;
 
   std::string Abbrev() const;
 
@@ -38,7 +42,8 @@ struct MaterialFlags {
   enum {
     DIFFUSE_MAP_BIT = 0x1, OCCLUSION_MAP_BIT = 0x2, NORMAL_MAP_BIT = 0x4,
     METALLIC_ROUGHNESS_MAP_BIT = 0x8, EMISSIVE_MAP_BIT = 0x10,
-    ALPHA_BLEND_BIT = 0x20, ALPHA_CUTOFF_BIT = 0x40
+    ALPHA_BLEND_BIT = 0x20, ALPHA_CUTOFF_BIT = 0x40, UNLIT_BIT = 0x80,
+    DOUBLE_SIDE_BIT = 0x100
   };
 };
 
@@ -69,7 +74,7 @@ struct AttribFlags {
 };
 
 std::string SelectOrCreatePBREffect(bool srgb,
-  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags);
+  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light);
 
 } //end namespace
 

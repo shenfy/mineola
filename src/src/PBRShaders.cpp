@@ -71,7 +71,7 @@ void main(void) {
   #endif
   #if defined(HAS_TANGENT)
   vec3 tangent = Dir2WC(model_mat, Tangent);
-  vec3 bitangent = normalize(cross(normal, tangent));
+  vec3 bitangent = normalize(cross(normal, tangent) * Tangent.w);
   tbn = mat3(tangent, bitangent, normal);
   #endif
   #if defined(HAS_COLOR)
@@ -175,6 +175,37 @@ void CalcDotProducts(vec3 light_dir, vec3 view_dir, vec3 normal_dir,
   n_dot_h = clamp(dot(normal_dir, half_dir), 0.0, 1.0);
   v_dot_h = clamp(dot(view_dir, half_dir), 0.0, 1.0);
 }
+vec3 EnvlightDiffuseTerm(vec3 albedo, vec3 normal_wc, float metallic) {
+  vec3 n = normalize(mat3(_env_light_mat_0) * normal_wc);
+  vec4 e = _env_light_sh3_0[0] * 0.886227;
+  e += _env_light_sh3_0[1] * (2.0 * 0.511664 * n.y); // ( 2 * π / 3 ) * 0.488603
+  e += _env_light_sh3_0[2] * (2.0 * 0.511664 * n.z);
+  e += _env_light_sh3_0[3] * (2.0 * 0.511664 * n.x);
+  e += _env_light_sh3_0[4] * (2.0 * 0.429043 * n.x * n.y); // ( π / 4 ) * 1.092548
+  e += _env_light_sh3_0[5] * (2.0 * 0.429043 * n.y * n.z);
+  e += _env_light_sh3_0[6] * (0.743125 * n.z * n.z - 0.247708); // ( π / 4 ) * 0.315392 * 3
+  e += _env_light_sh3_0[7] * (2.0 * 0.429043 * n.x * n.z);
+  e += _env_light_sh3_0[8] * (0.429043 * (n.x * n.x - n.y * n.y)); // ( π / 4 ) * 0.546274
+  vec3 c_diff = mix(albedo * 0.96, vec3(0.0), metallic);
+  return c_diff * e.rgb / PI;
+}
+vec3 EnvLightSpecularTerm(vec3 color_specular, vec3 normal_wc, vec3 view_wc, float roughness) {
+  float n_dot_v = dot(normal_wc, view_wc);
+  vec2 ab = texture(_env_brdf, vec2(n_dot_v, roughness)).rg;
+  vec3 brdf = color_specular * ab.x + ab.y;
+  // Point lobe in off-specular peak direction
+  vec3 r0 = 2.0 * n_dot_v * normal_wc - view_wc;
+  float a = pow2(roughness);
+  vec3 r = normalize(mix(normal_wc, r0, (1.0 - a) * (sqrt(1.0 - a) + a)));
+  r = normalize(mat3(_env_light_mat_0) * r);
+  float theta = acos(r.y);
+  float phi = atan(r.x, r.z);
+  ivec2 tex_size = textureSize(_env_light_probe_0, 0);
+  float mip_count = log2(float(max(tex_size.x, tex_size.y))) + 1.0;
+  float level = (mip_count - 1.0) * roughness;
+  vec3 light = textureLod(_env_light_probe_0, vec2((phi + PI) / PI * 0.5, theta / PI), level).rgb;
+  return light * brdf;
+}
 
 #if defined(SRGB_OUT)
 float L2SRGB(float v) {
@@ -208,6 +239,11 @@ void main(void) {
   if (base_color.a < alpha_threshold) {
     discard;
   }
+  #endif
+
+  #if defined(IS_UNLIT)
+  frag_color = base_color;
+  return;
   #endif
 
   #if defined(HAS_AO_MAP) && defined(AO_TEXCOORD)
@@ -251,6 +287,12 @@ void main(void) {
   return;
   #endif
 
+  #if defined(DOUBLE_SIDE)
+  if (!gl_FrontFacing) {
+    normal_dir = -normal_dir;
+  }
+  #endif
+
   #if defined(USE_SHADING)
   vec3 half_dir;
   float n_dot_l;
@@ -269,6 +311,14 @@ void main(void) {
     + albedo * 0.1
     + diffuse_term * _light_intensity_0.rgb * ao
     + max(specular_term * n_dot_l * _light_intensity_0.rgb, vec3(0.0));
+
+  #if defined(USE_ENV_LIGHT)
+  color_result += EnvlightDiffuseTerm(albedo, normal_dir, metallic) * ao;
+  color_result += EnvLightSpecularTerm(color_specular, normal_dir, view_dir, rough) * ao;
+  #else
+  color_result += albedo * 0.1;
+  #endif
+
   #if defined(SRGB_OUT)
   frag_color = SRGBEncode(vec4(color_result, base_color.a));
   #else
@@ -310,28 +360,35 @@ effect_defines_t CreatePBRShaderMacros(
     result.push_back({"DIFFUSE_TEXCOORD",
       BuildTCName(mat_flags.tex_uvs[MaterialFlags::DIFFUSE_UV_LOC])});
   }
-  if (mat_flags.HasOcclusionMap()) {
-    result.push_back({"HAS_AO_MAP", {}});
-    result.push_back({"AO_TEXCOORD",
-      BuildTCName(mat_flags.tex_uvs[MaterialFlags::OCC_UV_LOC])});
-  }
-  if (mat_flags.HasNormalMap()) {
-    result.push_back({"HAS_NORMAL_MAP", {}});
-    result.push_back({"NORMAL_TEXCOORD",
-      BuildTCName(mat_flags.tex_uvs[MaterialFlags::NORM_UV_LOC])});
-  }
-  if (mat_flags.HasMetallicRoughnessMap()) {
-    result.push_back({"HAS_METALLIC_MAP", {}});
-    result.push_back({"METAL_TEXCOORD",
-      BuildTCName(mat_flags.tex_uvs[MaterialFlags::METAL_ROUGH_UV_LOC])});
-  }
-  if (mat_flags.HasEmissiveMap()) {
-    result.push_back({"HAS_EMISSIVE_MAP", {}});
-    result.push_back({"EMIT_TEXCOORD",
-      BuildTCName(mat_flags.tex_uvs[MaterialFlags::EMIT_UV_LOC])});
-  }
   if (mat_flags.IsAlphaCutOffEnabled()) {
     result.push_back({"USE_ALPHA_MASK", {}});
+  }
+  if (mat_flags.IsUnlit()) {
+    result.push_back({"IS_UNLIT", {}});
+  } else {
+    if (mat_flags.HasOcclusionMap()) {
+      result.push_back({"HAS_AO_MAP", {}});
+      result.push_back({"AO_TEXCOORD",
+        BuildTCName(mat_flags.tex_uvs[MaterialFlags::OCC_UV_LOC])});
+    }
+    if (mat_flags.HasNormalMap()) {
+      result.push_back({"HAS_NORMAL_MAP", {}});
+      result.push_back({"NORMAL_TEXCOORD",
+        BuildTCName(mat_flags.tex_uvs[MaterialFlags::NORM_UV_LOC])});
+    }
+    if (mat_flags.HasMetallicRoughnessMap()) {
+      result.push_back({"HAS_METALLIC_MAP", {}});
+      result.push_back({"METAL_TEXCOORD",
+        BuildTCName(mat_flags.tex_uvs[MaterialFlags::METAL_ROUGH_UV_LOC])});
+    }
+    if (mat_flags.HasEmissiveMap()) {
+      result.push_back({"HAS_EMISSIVE_MAP", {}});
+      result.push_back({"EMIT_TEXCOORD",
+        BuildTCName(mat_flags.tex_uvs[MaterialFlags::EMIT_UV_LOC])});
+    }
+  }
+  if (mat_flags.IsDoubleSided()) {
+    result.push_back({"DOUBLE_SIDE", {}});
   }
   return result;
 }
@@ -374,6 +431,14 @@ void MaterialFlags::EnableAlphaCutOff() {
   flags |= ALPHA_CUTOFF_BIT;
 }
 
+void MaterialFlags::SetUnlit() {
+  flags |= UNLIT_BIT;
+}
+
+void MaterialFlags::EnableDoubleSide() {
+  flags |= DOUBLE_SIDE_BIT;
+}
+
 void MaterialFlags::Clear() {
   flags = 0;
 }
@@ -407,11 +472,21 @@ bool MaterialFlags::IsAlphaCutOffEnabled() const {
 }
 
 bool MaterialFlags::HasTextures() const {
-  return flags != 0;
+  return flags & (
+    DIFFUSE_MAP_BIT | OCCLUSION_MAP_BIT | NORMAL_MAP_BIT | METALLIC_ROUGHNESS_MAP_BIT
+    | EMISSIVE_MAP_BIT);
+}
+
+bool MaterialFlags::IsUnlit() const {
+  return flags & UNLIT_BIT;
+}
+
+bool MaterialFlags::IsDoubleSided() const {
+  return flags & DOUBLE_SIDE_BIT;
 }
 
 std::string MaterialFlags::Abbrev() const {
-  std::string result = "d0o0n0m0e0a";
+  std::string result = "d0o0n0m0e0aud";
   if (HasDiffuseMap()) {
     result[0] = 'D';
     result[1] = tex_uvs[DIFFUSE_UV_LOC] + '0';
@@ -436,6 +511,12 @@ std::string MaterialFlags::Abbrev() const {
     result[10] = 'A';
   } else if (IsAlphaCutOffEnabled()) {
     result[10] = 'C';
+  }
+  if (IsUnlit()) {
+    result[11] = 'U';
+  }
+  if (IsDoubleSided()) {
+    result[12] = 'D';
   }
   return result;
 }
@@ -516,14 +597,16 @@ std::string AttribFlags::Abbrev() const {
 }
 
 std::string SelectOrCreatePBREffect(bool srgb,
-  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags) {
+  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light) {
 
   char srgb_abbre = srgb ? 'S' : 's';
+  char env_light_abbre = use_env_light ? 'E' : 'e';
 
   std::string effect_name = "mineola:effect:pbr:"
     + attrib_flags.Abbrev()
     + mat_flags.Abbrev()
-    + srgb_abbre;
+    + srgb_abbre
+    + env_light_abbre;
 
   auto &en = Engine::Instance();
   auto effect = bd_cast<GLEffect>(en.ResrcMgr().Find(effect_name));
@@ -532,10 +615,20 @@ std::string SelectOrCreatePBREffect(bool srgb,
     if (srgb) {
       macros.push_back({"SRGB_OUT", {}});
     }
+    if (use_env_light) {
+      macros.push_back({"USE_ENV_LIGHT", {}});
+    }
 
     std::vector<std::unique_ptr<RenderState>> render_states;
     render_states.push_back(std::make_unique<DepthTestState>(true));
     render_states.push_back(std::make_unique<DepthFuncState>(render_state::kCmpFuncLess));
+    if (mat_flags.IsDoubleSided()) {
+      render_states.push_back(std::make_unique<CullEnableState>(false));
+    } else {
+      render_states.push_back(std::make_unique<CullEnableState>(true));
+      render_states.push_back(std::make_unique<CullFaceState>(render_state::kCullFaceBack));
+    }
+
     if (mat_flags.IsBlendingEnabled()) {
       render_states.push_back(std::make_unique<BlendEnableState>(true));
       render_states.push_back(std::make_unique<BlendFuncState>(
