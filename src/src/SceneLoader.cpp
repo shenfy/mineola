@@ -314,7 +314,12 @@ bool BuildSceneFromConfig(const char *config_str,
 
       if (type == "built_in") {
         if (source == "mineola:skybox") {
-          if (!prefab_helper::CreateSkybox(layer, *node)) {
+          bool srgb = false;
+          if (prefab.find("options") != prefab.end()) {
+            srgb = prefab["options"]["srgb"].get<bool>();
+          }
+
+          if (!prefab_helper::CreateSkybox(layer, srgb, *node)) {
             MLOG("Prefab skybox not created!\n");
           }
         } else if (source == "mineola:axes") {

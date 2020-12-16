@@ -23,7 +23,7 @@ in vec3 Normal;
 out vec3 normal;
 #endif  // HAS_NORMAL
 #if defined(HAS_TANGENT)
-in vec3 Tangent;
+in vec4 Tangent;
 out mat3 tbn;
 #endif  // HAS_TANGENT
 #if defined(HAS_TEXCOORD)
@@ -70,7 +70,7 @@ void main(void) {
   texcoord1 = TexCoord1;
   #endif
   #if defined(HAS_TANGENT)
-  vec3 tangent = Dir2WC(model_mat, Tangent);
+  vec3 tangent = Dir2WC(model_mat, Tangent.xyz);
   vec3 bitangent = normalize(cross(normal, tangent) * Tangent.w);
   tbn = mat3(tangent, bitangent, normal);
   #endif
@@ -84,7 +84,7 @@ R"(#version 300 es
 precision highp float;
 #include "mineola_builtin_uniforms"
 
-#if defined(HAS_DIFFUSE_MAP)
+#if defined(HAS_ALBEDO_MAP)
 uniform sampler2D diffuse_sampler;  // base color
 #endif
 #if defined(HAS_AO_MAP)
@@ -207,18 +207,12 @@ vec3 EnvLightSpecularTerm(vec3 color_specular, vec3 normal_wc, vec3 view_wc, flo
   return light * brdf;
 }
 
-#if defined(SRGB_OUT)
+#if defined(SRGB_ENCODE)
 float L2SRGB(float v) {
   return v <= 0.0031308 ? 12.92 * v : (1.055 * pow(v, 0.4167) - 0.055);
 }
 vec4 SRGBEncode(vec4 rgba) {
   return vec4(L2SRGB(rgba.r), L2SRGB(rgba.g), L2SRGB(rgba.b), rgba.a);
-}
-float SRGB2L(float v) {
-  return v < 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4);
-}
-vec4 SRGBDecode(vec4 srgba) {
-  return vec4(SRGB2L(srgba.r), SRGB2L(srgba.g), SRGB2L(srgba.b), srgba.a);
 }
 #endif
 
@@ -229,7 +223,7 @@ void main(void) {
   vec4 base_color = vec4(1.0);
   #endif
 
-  #if defined(HAS_DIFFUSE_MAP) && defined(DIFFUSE_TEXCOORD)
+  #if defined(HAS_ALBEDO_MAP) && defined(DIFFUSE_TEXCOORD)
   base_color *= texture(diffuse_sampler, DIFFUSE_TEXCOORD) * vec4(diffuse, alpha);
   #else
   base_color *= vec4(diffuse, alpha);
@@ -278,12 +272,11 @@ void main(void) {
   vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
   normal_pp = normalize(normal_pp * 2.0 - 1.0);
   vec3 normal_dir = normalize(tbn * normal_pp);
-  #define USE_SHADING
   #elif defined(HAS_NORMAL)
   vec3 normal_dir = normalize(normal);
-  #define USE_SHADING
   #else
-  frag_color = SRGBEncode(vec4(base_color.rgb * ao, base_color.a));
+  vec3 normal_dir = vec3(0.0, 0.0, 0.0);
+  frag_color = vec4(base_color.rgb * ao, base_color.a);
   return;
   #endif
 
@@ -293,7 +286,6 @@ void main(void) {
   }
   #endif
 
-  #if defined(USE_SHADING)
   vec3 half_dir;
   float n_dot_l;
   float n_dot_v;
@@ -308,7 +300,6 @@ void main(void) {
   vec3 color_specular = SpecularColor(albedo, metallic);
   vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
   vec3 color_result = emission
-    + albedo * 0.1
     + diffuse_term * _light_intensity_0.rgb * ao
     + max(specular_term * n_dot_l * _light_intensity_0.rgb, vec3(0.0));
 
@@ -319,11 +310,10 @@ void main(void) {
   color_result += albedo * 0.1;
   #endif
 
-  #if defined(SRGB_OUT)
+  #if defined(SRGB_ENCODE)
   frag_color = SRGBEncode(vec4(color_result, base_color.a));
   #else
   frag_color = vec4(color_result, base_color.a);
-  #endif
   #endif
 })";
 
@@ -356,7 +346,7 @@ effect_defines_t CreatePBRShaderMacros(
   }
 
   if (mat_flags.HasDiffuseMap()) {
-    result.push_back({"HAS_DIFFUSE_MAP", {}});
+    result.push_back({"HAS_ALBEDO_MAP", {}});
     result.push_back({"DIFFUSE_TEXCOORD",
       BuildTCName(mat_flags.tex_uvs[MaterialFlags::DIFFUSE_UV_LOC])});
   }
@@ -613,7 +603,7 @@ std::string SelectOrCreatePBREffect(bool srgb,
   if (!effect) {
     auto macros = CreatePBRShaderMacros(mat_flags, attrib_flags);
     if (srgb) {
-      macros.push_back({"SRGB_OUT", {}});
+      macros.push_back({"SRGB_ENCODE", {}});
     }
     if (use_env_light) {
       macros.push_back({"USE_ENV_LIGHT", {}});

@@ -24,6 +24,16 @@ out vec4 color;
 
 const float PI = 3.1415926535897932;
 
+#if defined(SRGB_ENCODE)
+float L2SRGB(float v) {
+  return v <= 0.0031308 ? 12.92 * v : (1.055 * pow(v, 0.4167) - 0.055);
+}
+
+vec4 SRGBEncode(vec4 rgba) {
+  return vec4(L2SRGB(rgba.r), L2SRGB(rgba.g), L2SRGB(rgba.b), rgba.a);
+}
+#endif
+
 void main() {
   vec2 vp = gl_FragCoord.xy / _viewport_size.xy;
   vec4 ndc = vec4(vp * 2.0 - 1.0, 1.0, 1.0);
@@ -34,6 +44,9 @@ void main() {
   float phi = atan(env.x, env.z);
   vec2 uv = vec2((phi + PI) / PI * 0.5, theta / PI);
   color = textureLod(_env_light_probe_0, uv, 0.0);
+  #if defined(SRGB_ENCODE)
+  color = SRGBEncode(color);
+  #endif
 }
 )";
 
@@ -41,14 +54,19 @@ void main() {
 
 namespace mineola::prefab_helper {
 
-bool CreateSkybox(int layer_mask, SceneNode &node) {
+bool CreateSkybox(int layer_mask, bool srgb, SceneNode &node) {
   const char *effect_name = "mineola:effect:skybox";
   using namespace render_state;
   std::vector<std::unique_ptr<RenderState>> states;
   states.push_back(std::make_unique<DepthTestState>(true));
   states.push_back(std::make_unique<DepthFuncState>(kCmpFuncLEqual));
   states.push_back(std::make_unique<CullEnableState>(false));
-  if (!CreateEffectFromMemHelper(effect_name, skybox_vert, skybox_frag, {}, std::move(states))) {
+  effect_defines_t macros;
+  if (srgb) {
+    macros.push_back({"SRGB_ENCODE", {}});
+  }
+  if (!CreateEffectFromMemHelper(effect_name, skybox_vert, skybox_frag,
+    &macros, std::move(states))) {
     return false;
   }
 

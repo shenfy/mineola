@@ -7,7 +7,7 @@ class SceneNode;
 
 namespace prefab_helper {
 
-bool CreateSkybox(int layer_mask, SceneNode &node);
+bool CreateSkybox(int layer_mask, bool srgb, SceneNode &node);
 
 void CreateAxes(int layer_mask, SceneNode &node);
 

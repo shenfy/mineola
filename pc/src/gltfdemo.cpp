@@ -110,7 +110,7 @@ public:
       });
 
       if (has_env_light) {
-        prefab_helper::CreateSkybox(RenderPass::RENDER_LAYER_ALL, *en.Scene());
+        prefab_helper::CreateSkybox(RenderPass::RENDER_LAYER_ALL, true, *en.Scene());
       }
     }
 
@@ -146,6 +146,6 @@ int main(int argc, char *argv[]) {
   std::shared_ptr<mineola_pc::GLTFViewerApp> app(new mineola_pc::GLTFViewerApp());
   app->SetFilename(argv[1]);
   std::cout << "Press P to play animation" << std::endl;
-  app->Run(512, 512);
+  app->Run(900, 900);
   return 0;
 }

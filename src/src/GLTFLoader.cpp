@@ -23,7 +23,7 @@ namespace {
 using namespace mineola;
 using namespace mineola::vertex_type;
 
-uint32_t MapGLTFSemantics(const std::string &semantics_str) {
+int MapGLTFSemantics(const std::string &semantics_str) {
   if (semantics_str == "POSITION") {
     return POSITION;
   } else if (semantics_str == "NORMAL") {
@@ -365,7 +365,6 @@ void ParseAnimationChannel(const fx::gltf::Document &doc,
 
     time_point += 0.04f;  // 0.1s increment
   }
-
 }
 
 bool CreateSceneFromGLTFDoc(
@@ -449,7 +448,7 @@ bool CreateSceneFromGLTFDoc(
       int b_id = doc.bufferViews[bv_id].buffer;
       if (b_id >= 0 &&
         (buffer_view_usages[bv_id] == BufferViewUsage::kVBO ||
-          buffer_view_usages[bv_id] == BufferViewUsage::kIBO)) {
+        buffer_view_usages[bv_id] == BufferViewUsage::kIBO)) {
         buffer_usages[b_id].insert((uint32_t)buffer_view_usages[bv_id]);
       }
     }
@@ -516,7 +515,7 @@ bool CreateSceneFromGLTFDoc(
   // load textures
   std::unordered_map<uint32_t, std::string> texture_names;
   {
-    for (uint32_t tex_idx = 0; tex_idx < doc.textures.size(); ++tex_idx) {
+    for (size_t tex_idx = 0; tex_idx < doc.textures.size(); ++tex_idx) {
       const auto &t = doc.textures[tex_idx];
       if (t.source < 0) {
         continue;
@@ -695,7 +694,7 @@ bool CreateSceneFromGLTFDoc(
 
         // convert attributes to vertex streams and add to va
         for (const auto &attrib : p.attributes) {
-          uint32_t semantics = MapGLTFSemantics(attrib.first);
+          int semantics = MapGLTFSemantics(attrib.first);
           uint32_t accessor_id = attrib.second;
           int32_t buffer_view_id = doc.accessors[accessor_id].bufferView;
           if (buffer_view_id < 0) {
@@ -710,7 +709,7 @@ bool CreateSceneFromGLTFDoc(
           const auto &accessor = doc.accessors[accessor_id];
           int comp_type = MapGLTFComponentType(accessor.componentType);
           int vec_length = MapGLTFVecLength(accessor.type);
-          vs->layout.push_back({semantics, (uint32_t)comp_type, (uint32_t)vec_length});
+          vs->layout.push_back({(uint32_t)semantics, (uint32_t)comp_type, (uint32_t)vec_length});
           vs->type = VST_VERTEX;
           vs->size = accessor.count;
           vs->offset = doc.bufferViews[buffer_view_id].byteOffset + accessor.byteOffset;
@@ -984,7 +983,6 @@ bool LoadScene(
   } else {
     return false;
   }
-
 
   bool result = CreateSceneFromGLTFDoc(gltf_doc,
     fn, parent_node, effect_name, layer_mask, inject_textures, use_env_light);

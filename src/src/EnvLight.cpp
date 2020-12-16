@@ -36,6 +36,9 @@ void EnvLight::UpdateLightTransform(const math::Rbt &rbt) {
 }
 
 bool EnvLight::LoadFromFile(const char *fn) {
+  if (!LoadBRDFIfNecessary()) {
+    return false;
+  }
 
   // load light probe file
   imgpp::CompositeImg light_probe;
@@ -84,8 +87,7 @@ bool EnvLight::LoadBRDFIfNecessary() {
 
     TextureDesc desc;
     if (!CreateTextureDesc(std::move(tex_src), false, false,
-    TextureDesc::kNearestMipmapNearest, TextureDesc::kNearest,
-      // TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
+      TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
       TextureDesc::kClampToEdge, TextureDesc::kClampToEdge, desc)) {
       MLOG("Failed to create env brdf texture desc\n");
       return false;
@@ -117,8 +119,7 @@ bool EnvLight::CreateLightProbeTexture(std::shared_ptr<ImgppTextureSrc> tex_src)
   // create texture desc and check validity
   TextureDesc desc;
   if (!texture_helper::CreateTextureDesc(tex_src, false, true,
-    TextureDesc::kNearestMipmapNearest, TextureDesc::kNearest,
-    // TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
+    TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
     TextureDesc::kRepeat, TextureDesc::kClampToEdge, desc)) {
     MLOG("Failed to create texture desc from env light probe\n");
     return false;
