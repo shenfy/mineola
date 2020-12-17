@@ -189,10 +189,20 @@ vec3 EnvlightDiffuseTerm(vec3 albedo, vec3 normal_wc, float metallic) {
   vec3 c_diff = mix(albedo * 0.96, vec3(0.0), metallic);
   return c_diff * e.rgb / PI;
 }
+vec3 EnvlightBRDFApprox(float n_dot_v, float roughness, vec3 color_specular) {
+  const vec4 c0 = vec4(-1.0, -0.0275, -0.572, 0.022);
+  const vec4 c1 = vec4(1.0, 0.0425, 1.04, -0.04);
+  vec4 r = roughness * c0 + c1;
+  float a004 = min(r.x * r.x, exp2(-9.28 * n_dot_v)) * r.x + r.y;
+  vec2 AB = vec2(-1.04, 1.04) * a004 + r.zw;
+  return color_specular * AB.x + AB.y;
+}
+
 vec3 EnvLightSpecularTerm(vec3 color_specular, vec3 normal_wc, vec3 view_wc, float roughness) {
   float n_dot_v = dot(normal_wc, view_wc);
-  vec2 ab = texture(_env_brdf, vec2(n_dot_v, roughness)).rg;
-  vec3 brdf = color_specular * ab.x + ab.y;
+
+  vec3 brdf = EnvlightBRDFApprox(n_dot_v, roughness, color_specular);
+
   // Point lobe in off-specular peak direction
   vec3 r0 = 2.0 * n_dot_v * normal_wc - view_wc;
   float a = pow2(roughness);

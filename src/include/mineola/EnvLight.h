@@ -23,7 +23,6 @@ public:
   bool LoadFromFolder(const char *path);
 
 private:
-  static bool LoadBRDFIfNecessary();
   bool CreateLightProbeTexture(std::shared_ptr<ImgppTextureSrc> tex_src);
 
 protected:
@@ -31,7 +30,6 @@ protected:
   glm::mat4 mat_;
   math::SH3<glm::vec4> sh3_; // use vec4 for passing to uniform block, actual data is vec3
   std::shared_ptr<Texture2D> light_probe_;
-  static std::weak_ptr<Texture> brdf_;
 };
 
 }

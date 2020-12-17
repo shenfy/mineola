@@ -4,8 +4,7 @@
 namespace mineola {
 
 enum ReservedTextureUnits {
-  kEnvironmentBRDFTextureUnit = 0,
-  kEnvLightProbe0TextureUnit,
+  kEnvLightProbe0TextureUnit = 0,
   kNumReservedTextureUnits
 };
 

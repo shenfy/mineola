@@ -55,6 +55,7 @@ set(MINEOLA_HDR
   ../src/include/mineola/TextureHelper.h ../src/include/mineola/TextureTypes.h ../src/include/mineola/TypeMapping.h
   ../src/include/mineola/UniformBlock.h ../src/include/mineola/UniformHelper.h ../src/include/mineola/UniformWrappers.h
   ../src/include/mineola/EnvLight.h ../src/include/mineola/PrefabHelper.h ../src/include/mineola/SH3.h
+  ../src/include/mineola/ReservedTextureUnits.h
   ../src/include/mineola/VertexType.h ../src/include/mineola/Viewport.h ../src/include/mineola/Visitor.h)
 
 add_library(mineola STATIC)

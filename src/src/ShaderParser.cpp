@@ -61,7 +61,6 @@ namespace mineola { namespace shader_parser {
       };
       uniform mat4 _model_mat;
       uniform sampler2D _env_light_probe_0;
-      uniform sampler2D _env_brdf;
     )";
     shader_str += built_in_uniform_str;
   }

@@ -11,7 +11,6 @@
 #include <mineola/TextureHelper.h>
 #include <mineola/ImgppTextureSrc.h>
 #include <mineola/ReservedTextureUnits.h>
-#include "env_brdf.inl"
 
 namespace mineola {
 
@@ -20,8 +19,6 @@ EnvLight::EnvLight(size_t idx)
 }
 
 EnvLight::~EnvLight() = default;
-
-std::weak_ptr<Texture> EnvLight::brdf_;
 
 void EnvLight::UpdateUniforms(UniformBlock *ub) {
   auto mat_name = "_env_light_mat_" + std::to_string(idx_);
@@ -36,10 +33,6 @@ void EnvLight::UpdateLightTransform(const math::Rbt &rbt) {
 }
 
 bool EnvLight::LoadFromFile(const char *fn) {
-  if (!LoadBRDFIfNecessary()) {
-    return false;
-  }
-
   // load light probe file
   imgpp::CompositeImg light_probe;
   std::unordered_map<std::string, std::string> custom_data;
@@ -71,46 +64,6 @@ bool EnvLight::LoadFromFile(const char *fn) {
       return glm::vec4(v3, 0.0f);
     }
   );
-
-  return true;
-}
-
-bool EnvLight::LoadBRDFIfNecessary() {
-  if (!brdf_.lock()) {
-    using namespace texture_helper;
-
-    auto tex_src = CreateTextureSrc((const char*)env_brdf_pfm, env_brdf_pfm_len, false);
-    if (!tex_src) {
-      MLOG("Failed to create env brdf texture source\n");
-      return false;
-    }
-
-    TextureDesc desc;
-    if (!CreateTextureDesc(std::move(tex_src), false, false,
-      TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
-      TextureDesc::kClampToEdge, TextureDesc::kClampToEdge, desc)) {
-      MLOG("Failed to create env brdf texture desc\n");
-      return false;
-    }
-
-    const char *env_brdf_tex_name = "mineola:lights:env_brdf";
-    if (!CreateTextureFromDesc(env_brdf_tex_name, desc)) {
-      MLOG("Failed to create env brdf texture\n");
-      return false;
-    }
-
-    auto brdf = bd_cast<Texture>(Engine::Instance().ResrcMgr().Find(env_brdf_tex_name));
-    if (!brdf) {
-      MLOG("Failed to find env brdf texture\n");
-      return false;
-    }
-
-    glActiveTexture(GL_TEXTURE0 + kEnvironmentBRDFTextureUnit);
-    brdf->Bind();
-    glActiveTexture(GL_TEXTURE0 + kNumReservedTextureUnits);
-
-    brdf_ = brdf;
-  }
 
   return true;
 }

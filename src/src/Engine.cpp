@@ -363,8 +363,6 @@ void Engine::Render() {
       current_effect_.second->UploadVariable("_model_mat", glm::value_ptr(iter->first));
       int tex_unit = kEnvLightProbe0TextureUnit;
       current_effect_.second->UploadVariable("_env_light_probe_0", &tex_unit);
-      tex_unit = kEnvironmentBRDFTextureUnit;
-      current_effect_.second->UploadVariable("_env_brdf", &tex_unit);
       iter->second->Draw(frame_time_, pass_idx);
     }
 
