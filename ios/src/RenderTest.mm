@@ -6,15 +6,19 @@
 //  Copyright © 2018 Fangyang Shen. All rights reserved.
 //
 #import "RenderTest.h"
+#include <memory>
 #include <string>
 #include <mineola/glutility.h>
 #include <mineola/Engine.h>
 #include <mineola/CameraController.h>
+#include <mineola/SceneNode.h>
 #include <mineola/SceneLoader.h>
-#include <mineola/GLTFLoader.h>
-#include <mineola/AnimatedEntity.h>
 #define MINEOLA_USE_STBIMAGE
 #include <mineola/STBImagePlugin.h>
+#include <mineola/GLTFLoader.h>
+#include <mineola/PrefabHelper.h>
+#include <mineola/EnvLight.h>
+#include <mineola/AnimatedEntity.h>
 
 namespace {
 
@@ -30,6 +34,21 @@ static const std::string kConfigStr = R"({
     }
   ]
 })";
+
+using namespace mineola;
+bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
+  bool result = false;
+
+  node->DFTraverse([&result](auto &node) {
+    for (auto &light: node.Lights()) {
+      if (bd_cast<EnvLight>(light)) {
+        result = true;
+      }
+    }
+  });
+
+  return result;
+}
 
 }
 
@@ -51,8 +70,23 @@ static const std::string kConfigStr = R"({
 
   en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
 
-  BuildSceneFromConfigFile(kSceneFilename.c_str(), {gltf::LoadScene});
-  BuildSceneFromConfig(kConfigStr.c_str(), {gltf::LoadScene});
+  BuildSceneFromConfigFile(kSceneFilename.c_str(), {});
+
+  bool has_env_light = FindEnvLight(en.Scene());
+
+  BuildSceneFromConfig(kConfigStr.c_str(), {
+    std::bind(gltf::LoadScene,
+      std::placeholders::_1,
+      std::placeholders::_2,
+      std::placeholders::_3,
+      std::placeholders::_4,
+      std::placeholders::_5,
+      has_env_light)
+  });
+
+  if (has_env_light) {
+    prefab_helper::CreateSkybox(RenderPass::RENDER_LAYER_ALL, true, *en.Scene());
+  }
 
   _camCtrl = std::make_shared<ArcballController>();
   _camCtrl->BindToNode("camera");

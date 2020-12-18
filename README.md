@@ -20,7 +20,7 @@ We are also using CMake to generate the XCode project.
 $ cd ios
 $ mkdir build
 $ cd build
-$ conan install ..
+$ conan install .. -s os=iOS -s os.version=(same as imgpp) -s arch=armv8
 $ cmake .. -GXcode -DCMAKE_SYSTEM_NAME=iOS
 ```
 Then you can either use cmake/xcode command line tools to build the project or open the generated project "mineola_ios" directly in XCode GUI.

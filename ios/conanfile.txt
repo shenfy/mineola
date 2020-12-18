@@ -1,7 +1,7 @@
 [requires]
 boost/1.69.0
 glm/0.9.8.5@bincrafters/stable
-imgpp_headers/2.0.1@shenfy/testing
+imgpp/2.1.4@shenfy/testing
 fx_gltf/1.1.0@shenfy/testing
 stb/20200203
 
@@ -10,3 +10,4 @@ cmake_find_package
 
 [options]
 boost:header_only=True
+imgpp:no_ext_libs=True

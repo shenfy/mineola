@@ -8,7 +8,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(Boost REQUIRED)
-find_package(imgpp_headers REQUIRED)
+find_package(imgpp REQUIRED)
 find_package(glm REQUIRED)
 find_package(fx_gltf REQUIRED)
 find_package(stb REQUIRED)
@@ -19,17 +19,18 @@ set(MINEOLA_SRC
   ../src/src/Camera.cpp ../src/src/Engine.cpp ../src/src/Entity.cpp ../src/src/FileSystem.cpp
   ../src/src/FPSController.cpp ../src/src/Framebuffer.cpp ../src/src/GLEffect.cpp
   ../src/src/GLMHelper.cpp ../src/src/GLProgram.cpp ../src/src/GLShader.cpp ../src/src/GLTFLoader.cpp
-  ../src/src/GraphicsBuffer.cpp ../src/src/ImgppTextureSrc.cpp ../src/src/STBImagePlugIn.cpp
-  ../src/src/KTXImageLoader.cpp ../src/src/Light.cpp ../src/src/Material.cpp ../src/src/MeshIO.cpp
+  ../src/src/GraphicsBuffer.cpp ../src/src/ImgppTextureSrc.cpp
+  ../src/src/Light.cpp ../src/src/Material.cpp ../src/src/MeshIO.cpp
   ../src/src/PBRShaders.cpp ../src/src/PolygonSoup.cpp ../src/src/PolygonSoupLoader.cpp
   ../src/src/PolygonSoupSerialization.cpp ../src/src/PrimitiveHelper.cpp ../src/src/Rbt.cpp
   ../src/src/Renderable.cpp ../src/src/RenderPass.cpp ../src/src/RenderState.cpp
   ../src/src/RendererViewController.mm
   ../src/src/RenderStateFactory.cpp ../src/src/RenderStateManager.cpp
   ../src/src/ResourceManager.cpp ../src/src/SceneLoader.cpp ../src/src/SceneNode.cpp
-  ../src/src/ShaderParser.cpp ../src/src/Skin.cpp ../src/src/Texture.cpp
-  ../src/src/TextureHelper.cpp ../src/src/TurntableController.cpp
+  ../src/src/ShaderParser.cpp ../src/src/Skin.cpp ../src/src/STBImagePlugin.cpp ../src/src/Texture.cpp
+  ../src/src/TextureHelper.cpp ../src/src/TextureTypes.cpp ../src/src/TurntableController.cpp
   ../src/src/UniformBlock.cpp ../src/src/UniformHelper.cpp ../src/src/UniformWrappers.cpp
+  ../src/src/EnvLight.cpp ../src/src/PrefabHelper.cpp
   ../src/src/VertexType.cpp ../src/src/Viewport.cpp)
 
 add_library(mineola STATIC)
@@ -41,7 +42,7 @@ target_include_directories(mineola PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(mineola PUBLIC
   Boost::Boost
-  imgpp_headers::imgpp_headers
+  imgpp::imgpp
   glm::glm
   fx_gltf::fx_gltf
   stb::stb
@@ -55,10 +56,10 @@ set_target_properties(gltfview PROPERTIES
   MACOSX_BUNDLE_SHORT_VERSION_STRING ${CMAKE_PROJECT_VERSION})
 target_sources(gltfview PRIVATE
   src/AppDelegate.h src/AppDelegate.m src/RenderTest.h src/RenderTest.mm src/main.m)
-set_source_files_properties(src/gltf.json ../pc/resrc/CesiumMan.glb
+set_source_files_properties(../pc/resrc/venice16.ktx src/gltf.json ../pc/resrc/CesiumMan.glb
   PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 target_sources(gltfview PRIVATE
-  src/gltf.json ../pc/resrc/CesiumMan.glb)
+  ../pc/resrc/venice16.ktx src/gltf.json ../pc/resrc/CesiumMan.glb)
 target_compile_features(gltfview PUBLIC cxx_std_17)
 target_link_libraries(gltfview PUBLIC
   mineola
