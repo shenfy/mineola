@@ -9,7 +9,7 @@
       "index": 0,
       "node": "light",
       "type": "env",
-      "source": "venice.ktx",
+      "source": "venice16.ktx",
       "proj": {
         "type": "orthographic",
         "left": -1.0,

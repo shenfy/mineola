@@ -69,7 +69,13 @@ inline void Map2GL(
     }
   }
 
-  if (is_float) data_type = GL_FLOAT;  // (TODO:) support 16bit half float
+  if (is_float) {
+    if (16 == bpc) {
+      data_type = GL_HALF_FLOAT;
+    } else if (32 == bpc) {
+      data_type = GL_FLOAT;
+    }
+  }
   else if (8 == bpc)
     data_type = is_signed ? GL_BYTE : GL_UNSIGNED_BYTE;
   else if (16 == bpc)
