@@ -23,6 +23,8 @@
 #include <mineola/PixelType.h>
 #include <mineola/Framebuffer.h>
 #include <mineola/FileSystem.h>
+#include <mineola/EnvLight.h>
+#include <mineola/PrefabHelper.h>
 
 namespace {
 template <typename Op, typename ...Args>
@@ -46,6 +48,46 @@ T JArray2Vec(const nlohmann::json &j) {
     }
   }
   return result;
+}
+
+using namespace mineola;
+
+int GetLayer(const nlohmann::json &j) {
+  int layer = 0;
+  if (j.find("layer") != j.end()) {
+    const auto &layer_node = j["layer"];
+    if (layer_node.is_array()) {
+      for (int layer_idx : layer_node) {
+        layer |= 1 << layer_idx;
+      }
+    } else {
+      layer = 1 << layer_node.get<int>();
+    }
+  } else {
+    layer = RenderPass::RENDER_LAYER_0;
+  }
+  return layer;
+}
+
+std::pair<std::shared_ptr<SceneNode>, bool> GetNode(const nlohmann::json &j,
+  const std::unordered_map<std::string, std::shared_ptr<SceneNode>> &nodes_dict) {
+
+  auto root = Engine::Instance().Scene();
+  if (j.find("node") != j.end()) {
+    std::string node_name = j["node"].get<std::string>();
+    auto iter = nodes_dict.find(node_name);
+    if (iter != nodes_dict.end()) {
+      return {iter->second, true};
+    } else {
+      auto found_node = SceneNode::FindNodeByName(node_name.c_str(), root.get());
+      if (found_node) {
+        return {found_node, true};
+      } else {
+        MLOG("Node %s not found!\n", node_name.c_str());
+      }
+    }
+  }
+  return {root, false};
 }
 
 }  // namespace
@@ -191,33 +233,22 @@ bool BuildSceneFromConfig(const char *config_str,
         layer = RenderPass::RENDER_LAYER_0;
       }
 
-      std::shared_ptr<SceneNode> node = en.Scene();
-      if (geo.find("node") != geo.end()) {
-        std::string node_name = geo["node"].get<std::string>();
-        auto iter = nodes_dict.find(node_name);
-        if (iter != nodes_dict.end()) {
-          node = iter->second;
-        } else {
-          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
-          if (found_node) {
-            node = found_node;
-          } else {
-            MLOG("Node %s not found!\n", node_name.c_str());
-          }
-        }
-      }
+      auto [node, unused] = GetNode(geo, nodes_dict);
 
       if (geo.find("primitive") != geo.end()) {
         auto va = std::make_shared<vertex_type::VertexArray>();
         std::string primitive = geo["primitive"].get<std::string>();
-        if (primitive == "rect")
+        if (primitive == "rect") {
           primitive_helper::BuildRect(2.f, *va);
-        else if (primitive == "rect_xy")
+        } else if (primitive == "rect_xy") {
           primitive_helper::BuildRectXY(2.f, *va);
-        else if (primitive == "sphere")
+        } else if (primitive == "sphere") {
           primitive_helper::BuildSphere(3, *va);
-        else if (primitive == "cube")
+        } else if (primitive == "cube") {
           primitive_helper::BuildCube(2.f, *va);
+        } else if (primitive == "axes") {
+          primitive_helper::BuildFrameAxes(1.f, *va);
+        }
 
         std::string material = "mineola:material:fallback";
         if (geo.find("material") != geo.end()) {
@@ -270,27 +301,91 @@ bool BuildSceneFromConfig(const char *config_str,
     }
   }
 
+  // create prefabs
+  if (doc.find("prefabs") != doc.end()) {
+    auto &prefabs = doc["prefabs"];
+
+    for (auto &prefab : prefabs) {
+      int layer = GetLayer(prefab);
+      auto [node, unused] = GetNode(prefab, nodes_dict);
+
+      auto type = prefab["type"].get<std::string>();
+      auto source = prefab["source"].get<std::string>();
+
+      if (type == "built_in") {
+        if (source == "mineola:skybox") {
+          bool srgb = false;
+          if (prefab.find("options") != prefab.end()) {
+            srgb = prefab["options"]["srgb"].get<bool>();
+          }
+
+          if (!prefab_helper::CreateSkybox(layer, srgb, *node)) {
+            MLOG("Prefab skybox not created!\n");
+          }
+        } else if (source == "mineola:axes") {
+          prefab_helper::CreateAxes(layer, *node);
+        } else {
+          MLOG("Invalid built-in prefab: %s\n", source.c_str());
+        }
+      } else {
+        MLOG("Invalid prefab type: %s\n", type.c_str());
+      }
+    }
+  }
+
   // attach lights
   if (doc.find("lights") != doc.end()) {
     const auto &lights = doc["lights"];
     for (const auto &light_config : lights) {
+      std::shared_ptr<Light> light;
       size_t index = light_config["index"].get<int>();
-      std::string proj_type = light_config["proj"].get<std::string>();
-      std::shared_ptr<Light> light(new Light(index));
-      if (proj_type == "perspective") {
-        float fovy = light_config["fovy"].get<float>();
-        float aspect = light_config["aspect"].get<float>();
-        float z_near = light_config["near"].get<float>();
-        float z_far = light_config["far"].get<float>();
-        light->SetProjParams(glm::radians(fovy), aspect, z_near, z_far);
-      } else if (proj_type == "orthographic") {
-        float left = light_config["left"].get<float>();
-        float right = light_config["right"].get<float>();
-        float bottom = light_config["bottom"].get<float>();
-        float top = light_config["top"].get<float>();
-        float z_near = light_config["near"].get<float>();
-        float z_far = light_config["far"].get<float>();
-        light->SetOrthoProjParams(left, right, bottom, top, z_near, z_far);
+      auto type = light_config["type"].get<std::string>();
+
+      if (type == "point_dir") {
+        auto point_dir_light = std::make_shared<PointDirLight>(index);
+
+        auto &proj = light_config["proj"];
+        auto proj_type = proj["type"].get<std::string>();
+        if (proj_type == "perspective") {
+          float fovy = proj["fovy"].get<float>();
+          float aspect = proj["aspect"].get<float>();
+          float z_near = proj["near"].get<float>();
+          float z_far = proj["far"].get<float>();
+          point_dir_light->SetProjParams(glm::radians(fovy), aspect, z_near, z_far);
+        } else if (proj_type == "orthographic") {
+          float left = proj["left"].get<float>();
+          float right = proj["right"].get<float>();
+          float bottom = proj["bottom"].get<float>();
+          float top = proj["top"].get<float>();
+          float z_near = proj["near"].get<float>();
+          float z_far = proj["far"].get<float>();
+          point_dir_light->SetOrthoProjParams(left, right, bottom, top, z_near, z_far);
+        } else {
+          MLOG("Invalid light projection type: %s\n", proj_type.c_str());
+          continue;
+        }
+        point_dir_light->SetIntensity(JArray2Vec<glm::vec3>(light_config["intensity"]));
+
+        light = point_dir_light;
+      } else if (type == "env") {
+        auto env_light = std::make_shared<EnvLight>(index);
+
+        auto source = light_config["source"].get<std::string>();
+        std::string envlight_fn;
+        if (en.ResrcMgr().LocateFile(source.c_str(), envlight_fn)) {
+          if (!env_light->LoadFromFile(envlight_fn.c_str())) {
+            MLOG("Failed to load env light from %s\n", source.c_str());
+            continue;
+          }
+        } else {
+          MLOG("Env light source %s not found in search paths!\n", source.c_str());
+          continue;
+        }
+
+        light = env_light;
+      } else {
+        MLOG("Invalid light type!\n");
+        continue;
       }
 
       if (!light) {  // if no light was created
@@ -298,27 +393,8 @@ bool BuildSceneFromConfig(const char *config_str,
         continue;
       }
 
-      if (light_config.find("intensity") != light_config.end()) {
-        glm::vec3 intensity = ParseVec3(light_config["intensity"].get<std::string>());
-        light->SetIntensity(intensity);
-      }
-
-      if (light_config.find("node") != light_config.end()) {
-        auto node_name = light_config["node"].get<std::string>();
-        auto iter = nodes_dict.find(node_name);
-        if (iter != nodes_dict.end()) {
-          iter->second->Lights().push_back(light);
-        } else {
-          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
-          if (found_node) {
-            found_node->Lights().push_back(light);
-          } else {
-            MLOG("Node %s not found!\n", node_name.c_str());
-          }
-        }
-      } else {
-        en.Scene()->Lights().push_back(light);
-      }
+      auto [node, unused] = GetNode(light_config, nodes_dict);
+      node->Lights().push_back(light);
     }
   }
 
@@ -353,21 +429,9 @@ bool BuildSceneFromConfig(const char *config_str,
 
       en.CameraMgr().Add(name, camera);
 
-      if (camera_config.find("node") != camera_config.end()) {
-        auto node_name = camera_config["node"].get<std::string>();
-        auto iter = nodes_dict.find(node_name);
-        if (iter != nodes_dict.end()) {
-          iter->second->Cameras().push_back(camera);
-        } else {
-          auto found_node = SceneNode::FindNodeByName(node_name.c_str(), en.Scene().get());
-          if (found_node) {
-            found_node->Cameras().push_back(camera);
-          } else {
-            MLOG("Node %s not found!\n", node_name.c_str());
-          }
-        }
-      } else {
-        en.Scene()->Cameras().push_back(camera);
+      auto [node, found] = GetNode(camera_config, nodes_dict);
+      if (found) {
+        node->Cameras().push_back(camera);
       }
     }
   }
@@ -419,6 +483,11 @@ bool BuildSceneFromConfig(const char *config_str,
         is_srgb = texture["srgb"].get<bool>();
       }
 
+      bool bottom_first = false;
+      if (texture.find("bottom_first") != texture.end()) {
+        bottom_first = texture["bottom_first"].get<bool>();
+      }
+
       if (texture.find("filename") != texture.end()) {
         // a texture from file
         auto filename = texture["filename"].get<std::string>();
@@ -426,7 +495,11 @@ bool BuildSceneFromConfig(const char *config_str,
         if (texture.find("mipmap") != texture.end()) {
           mipmap = texture["mipmap"].get<bool>();
         }
-        texture_helper::CreateTexture(texture_name.c_str(), filename.c_str(), mipmap, is_srgb);
+        texture_helper::CreateTexture(
+          texture_name.c_str(), filename.c_str(),
+          bottom_first, mipmap, is_srgb,
+          TextureDesc::kLinearMipmapLinear, TextureDesc::kLinear,
+          TextureDesc::kRepeat, TextureDesc::kRepeat);
       } else {
         // empty texture
         uint32_t type = GL_TEXTURE_2D, width = 1, height = 1, depth = 1;

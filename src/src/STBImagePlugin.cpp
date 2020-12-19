@@ -17,7 +17,11 @@
 
 namespace mineola {
 
-bool STBLoadImageFromFile(const char *fn, imgpp::Img &img) {
+bool STBLoadImageFromFile(const char *fn, bool bottom_first, imgpp::Img &img) {
+  if (bottom_first) {
+    return false;  // JPG & PNG are top first
+  }
+
   int x = 0, y = 0, n = 0;
   uint8_t *data = stbi_load(fn, &x, &y, &n, 0);
   if (data != nullptr) {
@@ -30,7 +34,11 @@ bool STBLoadImageFromFile(const char *fn, imgpp::Img &img) {
   return false;
 }
 
-bool STBLoadImageFromMem(const char *buffer, uint32_t length, imgpp::Img &img) {
+bool STBLoadImageFromMem(const char *buffer, uint32_t length, bool bottom_first, imgpp::Img &img) {
+  if (bottom_first) {
+    return false;  // JPG & PNG are top first
+  }
+
   int x = 0, y = 0, n = 0;
   uint8_t *data = stbi_load_from_memory((const uint8_t*)buffer, (int)length, &x, &y, &n, 0);
   if (data != nullptr) {

@@ -261,7 +261,15 @@ public:
     en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
     en.ResrcMgr().AddSearchPath("resrc");
 
-    BuildSceneFromConfigFile(kSceneFilename.c_str(), {gltf::LoadScene});
+    BuildSceneFromConfigFile(kSceneFilename.c_str(), {
+      std::bind(gltf::LoadScene,
+        std::placeholders::_1,
+        std::placeholders::_2,
+        std::placeholders::_3,
+        std::placeholders::_4,
+        std::placeholders::_5,
+        false)
+    });
 
     // add geometry
     auto water = std::make_shared<WaterSurface>();

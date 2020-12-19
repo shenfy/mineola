@@ -14,6 +14,7 @@
 #include <mineola/UniformBlock.h>
 #include <mineola/Light.h>
 #include <mineola/Viewport.h>
+#include <mineola/ReservedTextureUnits.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -264,21 +265,7 @@ void Engine::Render() {
     // update light uniforms
     root_node_->DFTraverse([&builtin_ub](SceneNode &node) {
       for (auto &light : node.Lights()) {
-        size_t light_idx = light->Index();
-        glm::vec4 pos = glm::vec4(light->GetPosition(), 0.0f);
-        const glm::mat4 &view_mat = light->GetLightViewMatrix();
-        const glm::mat4 &proj_mat = light->GetLightProjMatrix();
-        std::string var_name_base = "_light_";
-        std::string var_name = var_name_base + "pos_" + std::to_string(light_idx);
-        builtin_ub->UpdateVariable(var_name.c_str(), glm::value_ptr(pos));
-        var_name = var_name_base + "view_mat_" + std::to_string(light_idx);
-        builtin_ub->UpdateVariable(var_name.c_str(), glm::value_ptr(view_mat));
-        var_name = var_name_base + "proj_mat_" + std::to_string(light_idx);
-        builtin_ub->UpdateVariable(var_name.c_str(), glm::value_ptr(proj_mat));
-        pos = glm::vec4(light->GetIntensity(), 0.0f);
-        var_name = var_name_base + "intensity_" + std::to_string(light_idx);
-        builtin_ub->UpdateVariable(var_name.c_str(), glm::value_ptr(pos));
-
+        light->UpdateUniforms(builtin_ub.get());
       }
     });
   }
@@ -374,6 +361,8 @@ void Engine::Render() {
       CHKGLERR
       iter->second->PreRender(frame_time_, pass_idx);
       current_effect_.second->UploadVariable("_model_mat", glm::value_ptr(iter->first));
+      int tex_unit = kEnvLightProbe0TextureUnit;
+      current_effect_.second->UploadVariable("_env_light_probe_0", &tex_unit);
       iter->second->Draw(frame_time_, pass_idx);
     }
 
@@ -420,6 +409,8 @@ void Engine::Init() {
     {"_viewport_size", 4 * (uint32_t)sizeof(float)},
     {"_light_pos_0", 4 * (uint32_t)sizeof(float)},
     {"_light_intensity_0", 4 * (uint32_t)sizeof(float)},
+    {"_env_light_mat_0", 16 * (uint32_t)sizeof(float)},
+    {"_env_light_sh3_0[0]", 9 * 4 * (uint32_t)sizeof(float)},
     {"_time", 4 * (uint32_t)sizeof(float)},
     {"_delta_time", 4 * (uint32_t)sizeof(float)},
   };

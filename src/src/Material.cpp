@@ -5,6 +5,7 @@
 #include <mineola/Engine.h>
 #include <mineola/Texture.h>
 #include <mineola/glutility.h>
+#include <mineola/ReservedTextureUnits.h>
 
 namespace mineola {
 
@@ -23,7 +24,7 @@ void Material::UploadToShader(GLEffect *effect) {
   }
 
   // upload textures
-  int32_t tex_unit = 0;
+  int32_t tex_unit = kNumReservedTextureUnits;
   for (auto iter = texture_slots.begin(); iter != texture_slots.end(); ++iter) {
     static std::vector<int32_t> tex_units;
     if (iter->second.size() > tex_units.size()) {

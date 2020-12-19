@@ -12,12 +12,12 @@ class MineolaConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     requires = ("boost/1.69.0",
         "glm/0.9.8.5@bincrafters/stable",
-        "imgpp/2.0.1@shenfy/testing",
+        "imgpp/2.1.4@shenfy/testing",
         "fx_gltf/1.1.0@shenfy/testing",
         "stb/20200203",
         "glfw/3.3.2")
     options = {"shared": [False]}
-    default_options = {"shared": False, "boost:header_only": True}
+    default_options = {"shared": False, "boost:header_only": True, "imgpp:no_ext_libs": True}
     generators = "cmake_paths", "cmake_find_package"
 
     _pc_subfolder = 'pc'

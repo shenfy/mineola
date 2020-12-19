@@ -7,13 +7,19 @@
   "lights": [
     {
       "index": 0,
-      "proj": "perspective",
-      "fovy": 90,
-      "aspect": 1,
-      "near": 0.1,
-      "far": 20.0,
       "node": "light",
-      "intensity": "3, 3, 3"
+      "type": "env",
+      "source": "venice16.ktx",
+      "proj": {
+        "type": "orthographic",
+        "left": -1.0,
+        "right": 1.0,
+        "bottom": -1.0,
+        "top": 1.0,
+        "near": 0.1,
+        "far": 10.0
+      },
+      "intensity": [1, 1, 1]
     }
   ],
   "cameras": [
@@ -36,8 +42,8 @@
     },
     {
       "name": "camera",
-      "eye": "0, 0.8, 2",
-      "target": "0, 0.8, 0",
+      "eye": "0, 0, 1",
+      "target": "0, 0, 0",
       "up": "0, 1, 0",
       "parent": "root"
     },
@@ -46,7 +52,7 @@
       "translate": "0.1, 0.1, 0.0",
       "rotate": "0, 0, 0, 1",
       "scale": "1, 1, 1",
-      "parent": "camera"
+      "parent": "root"
     }
   ],
   "passes": [

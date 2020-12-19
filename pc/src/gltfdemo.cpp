@@ -3,12 +3,15 @@
 #include <iostream>
 #include <mineola/AppHelper.h>
 #include <mineola/CameraController.h>
+#include <mineola/SceneNode.h>
 #include <mineola/SceneLoader.h>
 #include <mineola/MeshIO.h>
 #include <mineola/FileSystem.h>
 #define MINEOLA_USE_STBIMAGE
 #include <mineola/STBImagePlugin.h>
 #include <mineola/GLTFLoader.h>
+#include <mineola/PrefabHelper.h>
+#include <mineola/EnvLight.h>
 #include <mineola/AnimatedEntity.h>
 
 namespace {
@@ -27,6 +30,21 @@ static const std::string kConfigSuffix = R"(",
     }
   ]
 })";
+
+using namespace mineola;
+bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
+  bool result = false;
+
+  node->DFTraverse([&result](auto &node) {
+    for (auto &light: node.Lights()) {
+      if (bd_cast<EnvLight>(light)) {
+        result = true;
+      }
+    }
+  });
+
+  return result;
+}
 
 }
 
@@ -75,10 +93,25 @@ public:
     en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
 
     if (!gltf_filename_.empty()) {
-      BuildSceneFromConfigFile(kSceneFilename.c_str(), {gltf::LoadScene});
+      BuildSceneFromConfigFile(kSceneFilename.c_str(), {});
+
+      bool has_env_light = FindEnvLight(en.Scene());
+
       auto cfg = kConfigPrefix + gltf_filename_ + kConfigSuffix;
 
-      BuildSceneFromConfig(cfg.c_str(), {gltf::LoadScene});
+      BuildSceneFromConfig(cfg.c_str(), {
+        std::bind(gltf::LoadScene,
+          std::placeholders::_1,
+          std::placeholders::_2,
+          std::placeholders::_3,
+          std::placeholders::_4,
+          std::placeholders::_5,
+          has_env_light)
+      });
+
+      if (has_env_light) {
+        prefab_helper::CreateSkybox(RenderPass::RENDER_LAYER_ALL, true, *en.Scene());
+      }
     }
 
     cam_ctrl_.reset(new ArcballController);
@@ -113,6 +146,6 @@ int main(int argc, char *argv[]) {
   std::shared_ptr<mineola_pc::GLTFViewerApp> app(new mineola_pc::GLTFViewerApp());
   app->SetFilename(argv[1]);
   std::cout << "Press P to play animation" << std::endl;
-  app->Run(512, 512);
+  app->Run(900, 900);
   return 0;
 }

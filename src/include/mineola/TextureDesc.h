@@ -18,6 +18,11 @@ public:
 
 // TODO: handle swizzle
 struct TextureDesc {
+  enum : uint32_t {kNearest, kLinear,
+    kNearestMipmapNearest, kNearestMipmapLinear,
+    kLinearMipmapNearest, kLinearMipmapLinear};
+  enum : uint32_t {kClampToEdge, kRepeat, kMirrorRepeat};
+
   bool compressed {false};  // is compressed texture
   uint32_t type; // e.g. GL_TEXTURE_2D, etc.
   uint32_t access;

@@ -56,6 +56,8 @@ bool AppFrame::CreateRenderWindow() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
+  // glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+
   // Create an OpenGL window
   window_ = glfwCreateWindow(window_width_, window_height_, "Render", NULL, NULL);
   if (!window_) {

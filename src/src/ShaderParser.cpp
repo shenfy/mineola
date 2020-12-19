@@ -39,23 +39,29 @@ namespace mineola { namespace shader_parser {
   }
 
   void InsertBuiltInUniformBlock(std::string &shader_str) {
-    static const char built_in_uniform_str[] = "layout(std140) uniform mineola_builtin_uniforms {\n"
-      "  mat4 _view_mat;\n"
-      "  mat4 _view_mat_inv;\n"
-      "  mat4 _proj_mat;\n"
-      "  mat4 _proj_mat_inv;\n"
-      "  mat4 _proj_view_mat;\n"
-      "  mat4 _light_view_mat_0;\n"
-      "  mat4 _light_proj_mat_0;\n"
-      "  // only _viewport_size.xy have valid value\n"
-      "  vec4 _viewport_size;\n"
-      "  vec4 _light_pos_0;\n"
-      "  vec4 _light_intensity_0;\n"
-      "  // in milliseconds\n"
-      "  vec4 _time;\n"
-      "  vec4 _delta_time;\n"
-      "};\n"
-      "uniform mat4 _model_mat;\n";
+    static const char built_in_uniform_str[] = R"(
+      layout(std140) uniform mineola_builtin_uniforms {
+        mat4 _view_mat;
+        mat4 _view_mat_inv;
+        mat4 _proj_mat;
+        mat4 _proj_mat_inv;
+        mat4 _proj_view_mat;
+        mat4 _light_view_mat_0;
+        mat4 _light_proj_mat_0;
+        // only _viewport_size.xy have valid value
+        vec4 _viewport_size;
+        vec4 _light_pos_0;
+        vec4 _light_intensity_0;
+        // a rotational matrix
+        mat4 _env_light_mat_0;
+        vec4 _env_light_sh3_0[9];
+        // in milliseconds
+        vec4 _time;
+        vec4 _delta_time;
+      };
+      uniform mat4 _model_mat;
+      uniform sampler2D _env_light_probe_0;
+    )";
     shader_str += built_in_uniform_str;
   }
 

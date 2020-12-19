@@ -1,11 +1,40 @@
-#ifndef MINEOLA_PIXELTYPE_H
-#define MINEOLA_PIXELTYPE_H
+#include "prefix.h"
+#include <mineola/TextureTypes.h>
+#include <mineola/glutility.h>
 
-namespace mineola { namespace pixel_type {
+namespace mineola { namespace gl {
 
-inline void Map2GL(
-  uint8_t bpc, uint32_t channel, bool is_signed, bool is_float, bool srgb,  //inputs
-  uint32_t &internal_type, uint32_t &pixel_type, uint32_t &data_type) {   //outputs
+uint32_t MapFilterMode(uint32_t filter_mode) {
+  static const uint32_t modes[] = {
+    GL_NEAREST,
+    GL_LINEAR,
+    GL_NEAREST_MIPMAP_NEAREST,
+    GL_NEAREST_MIPMAP_LINEAR,
+    GL_LINEAR_MIPMAP_NEAREST,
+    GL_LINEAR_MIPMAP_LINEAR};
+  if (filter_mode < sizeof(modes)) {
+    return modes[filter_mode];
+  }
+  return GL_NEAREST_MIPMAP_NEAREST;
+}
+
+uint32_t MapWrapMode(uint32_t wrap_mode) {
+  static const uint32_t modes[] = {
+    GL_CLAMP_TO_EDGE,
+    GL_REPEAT,
+    GL_MIRRORED_REPEAT
+  };
+  if (wrap_mode < sizeof(modes)) {
+    return modes[wrap_mode];
+  }
+  return GL_REPEAT;
+}
+
+std::tuple<uint32_t, uint32_t, uint32_t> MapPixelType(
+  uint8_t bpc, uint32_t channel, bool is_signed, bool is_float, bool srgb) {
+
+  uint32_t internal_type = 0, pixel_type = 0, data_type = 0;
+
   if (1 == channel) {
     pixel_type = GL_RED;
     if (8 == bpc) {
@@ -69,13 +98,7 @@ inline void Map2GL(
     }
   }
 
-  if (is_float) {
-    if (16 == bpc) {
-      data_type = GL_HALF_FLOAT;
-    } else if (32 == bpc) {
-      data_type = GL_FLOAT;
-    }
-  }
+  if (is_float) data_type = GL_FLOAT;  // (TODO:) support 16bit half float
   else if (8 == bpc)
     data_type = is_signed ? GL_BYTE : GL_UNSIGNED_BYTE;
   else if (16 == bpc)
@@ -83,35 +106,7 @@ inline void Map2GL(
   else if (32 == bpc)
     data_type = is_signed ? GL_INT : GL_UNSIGNED_INT;
 
+  return {internal_type, pixel_type, data_type};
 }
 
-inline bool Mipmappable(uint32_t internal_type) {
-  switch (internal_type) {
-    // unsized types:
-    case GL_RGB:
-    case GL_RGBA:
-    case GL_LUMINANCE_ALPHA:
-    case GL_LUMINANCE:
-    case GL_ALPHA:
-    // sized types both color-renderable and texture-filterable:
-    case GL_R8:
-    case GL_RG8:
-    case GL_RGB8:
-    case GL_RGB565:
-    case GL_RGBA8:
-    case GL_SRGB8_ALPHA8:
-    case GL_RGB5_A1:
-    case GL_RGBA4:
-    case GL_RGB10_A2: {
-      return true;
-    }
-
-    default: {
-      return false;
-    }
-  }
-}
-
-}} //namespace
-
-#endif
+}}  // end namespace

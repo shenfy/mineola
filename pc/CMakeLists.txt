@@ -25,15 +25,16 @@ set(MINEOLA_SRC
   ../src/src/FPSController.cpp ../src/src/Framebuffer.cpp ../src/src/GLEffect.cpp
   ../src/src/GLMHelper.cpp ../src/src/GLProgram.cpp ../src/src/GLShader.cpp ../src/src/GLTFLoader.cpp
   ../src/src/GraphicsBuffer.cpp ../src/src/ImgppTextureSrc.cpp
-  ../src/src/KTXImageLoader.cpp ../src/src/Light.cpp ../src/src/Material.cpp ../src/src/MeshIO.cpp
+  ../src/src/Light.cpp ../src/src/Material.cpp ../src/src/MeshIO.cpp
   ../src/src/PBRShaders.cpp ../src/src/PolygonSoup.cpp ../src/src/PolygonSoupLoader.cpp
   ../src/src/PolygonSoupSerialization.cpp ../src/src/PrimitiveHelper.cpp ../src/src/Rbt.cpp
   ../src/src/Renderable.cpp ../src/src/RenderPass.cpp ../src/src/RenderState.cpp
   ../src/src/RenderStateFactory.cpp ../src/src/RenderStateManager.cpp
   ../src/src/ResourceManager.cpp ../src/src/SceneLoader.cpp ../src/src/SceneNode.cpp
   ../src/src/ShaderParser.cpp ../src/src/Skin.cpp ../src/src/STBImagePlugin.cpp ../src/src/Texture.cpp
-  ../src/src/TextureHelper.cpp ../src/src/TurntableController.cpp
+  ../src/src/TextureHelper.cpp ../src/src/TextureTypes.cpp ../src/src/TurntableController.cpp
   ../src/src/UniformBlock.cpp ../src/src/UniformHelper.cpp ../src/src/UniformWrappers.cpp
+  ../src/src/EnvLight.cpp ../src/src/PrefabHelper.cpp
   ../src/src/VertexType.cpp ../src/src/Viewport.cpp ../src/src/glad.c)
 
 set(MINEOLA_HDR
@@ -43,7 +44,7 @@ set(MINEOLA_HDR
   ../src/include/mineola/Framebuffer.h ../src/include/mineola/glad.h ../src/include/mineola/GLEffect.h
   ../src/include/mineola/GLMHelper.h ../src/include/mineola/GLProgram.h ../src/include/mineola/GLShader.h ../src/include/mineola/GLTFLoader.h
   ../src/include/mineola/glutility.h ../src/include/mineola/GraphicsBuffer.h ../src/include/mineola/ImgppTextureSrc.h
-  ../src/include/mineola/khrplatform.h ../src/include/mineola/KTXImageLoader.h ../src/include/mineola/Light.h ../src/include/mineola/ManagerBase.h
+  ../src/include/mineola/khrplatform.h ../src/include/mineola/Light.h ../src/include/mineola/ManagerBase.h
   ../src/include/mineola/Material.h ../src/include/mineola/MathHelper.h ../src/include/mineola/MeshIO.h ../src/include/mineola/Noncopyable.h
   ../src/include/mineola/PBRShaders.h ../src/include/mineola/PixelType.h ../src/include/mineola/PolygonSoup.h ../src/include/mineola/PolygonSoupLoader.h
   ../src/include/mineola/PolygonSoupSerialization.h ../src/include/mineola/PrimitiveHelper.h ../src/include/mineola/Rbt.h
@@ -51,8 +52,10 @@ set(MINEOLA_HDR
   ../src/include/mineola/RenderStateFactory.h ../src/include/mineola/RenderStateManager.h
   ../src/include/mineola/ResourceManager.h ../src/include/mineola/SceneLoader.h ../src/include/mineola/SceneNode.h
   ../src/include/mineola/ShaderParser.h ../src/include/mineola/Skin.h ../src/include/mineola/STBImagePlugin.h ../src/include/mineola/TextureDesc.h ../src/include/mineola/Texture.h
-  ../src/include/mineola/TextureHelper.h ../src/include/mineola/TypeMapping.h
+  ../src/include/mineola/TextureHelper.h ../src/include/mineola/TextureTypes.h ../src/include/mineola/TypeMapping.h
   ../src/include/mineola/UniformBlock.h ../src/include/mineola/UniformHelper.h ../src/include/mineola/UniformWrappers.h
+  ../src/include/mineola/EnvLight.h ../src/include/mineola/PrefabHelper.h ../src/include/mineola/SH3.h
+  ../src/include/mineola/ReservedTextureUnits.h
   ../src/include/mineola/VertexType.h ../src/include/mineola/Viewport.h ../src/include/mineola/Visitor.h)
 
 add_library(mineola STATIC)
