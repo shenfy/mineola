@@ -1,6 +1,7 @@
 #include "prefix.h"
 #include <mineola/Skin.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <mineola/Engine.h>
 #include <mineola/SceneNode.h>
 #include <mineola/GLEffect.h>
@@ -49,6 +50,7 @@ void Skin::CalculateMatrices() {
   for (size_t idx = 0; idx < joint_nodes_.size(); ++idx) {
     auto node = joint_nodes_[idx].lock();
     auto global_joint_mat = node->WorldRbt().ToMatrix();
+    global_joint_mat = glm::scale(global_joint_mat, node->WorldScale());
 
     joint_mats_[idx] = global_joint_mat * inv_bind_mats_[idx];
   }
