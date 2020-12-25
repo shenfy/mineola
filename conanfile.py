@@ -10,33 +10,29 @@ class MineolaConan(ConanFile):
     description = "Light-weight OpenGL ES Rendering Engine"
     topics = ("Computer Graphics", "Computer Vision", "Image Processing")
     settings = "os", "compiler", "build_type", "arch"
-    requires = ("boost/1.69.0",
-        "glm/0.9.8.5@bincrafters/stable",
-        "imgpp/2.1.4@shenfy/testing",
-        "fx_gltf/1.1.0@shenfy/testing",
-        "stb/20200203",
-        "glfw/3.3.2")
+
     options = {"shared": [False]}
     default_options = {"shared": False, "boost:header_only": True, "imgpp:no_ext_libs": True}
     generators = "cmake_paths", "cmake_find_package"
+    exports_sources = "src/*"
 
-    _pc_subfolder = 'pc'
-
-    def export_sources(self):
-        self.copy('../src/*', dst='src')
-        self.copy('CMakeLists.txt', dst=self._pc_subfolder)
-        self.copy('include/*', dst=self._pc_subfolder)
-        self.copy('src/*', dst=self._pc_subfolder)
-        self.copy('resrc/*', dst=self._pc_subfolder)
+    def requirements(self):
+        self.requires("boost/1.69.0")
+        self.requires("glm/0.9.8.5@bincrafters/stable")
+        self.requires("imgpp/2.1.4@shenfy/testing")
+        self.requires("fx_gltf/1.1.0@shenfy/testing")
+        self.requires("stb/20200203")
+        if self.settings.os != 'iOS' and self.settings.os != 'Android':
+            # We use glfw for window creation on PC
+            self.requires("glfw/3.3.2")
 
     def _configure(self):
         cmake = CMake(self)
-        if (pathlib.Path(self.source_folder) / 'CMakeLists.txt').exists():
-            # this is true when building inside the repository
-            cmake.configure()
-        else:
-            # this is true when sources are exported
-            cmake.configure(source_folder=self._pc_subfolder)
+        if self.settings.os == 'Android':
+            if 'NDK' in os.environ:
+                cmake.definitions['CMAKE_TOOLCHAIN_FILE'] = os.environ['NDK']
+            cmake.definitions['ANDROID_STL'] = 'c++_static'
+        cmake.configure(source_folder="src")
         return cmake
 
     def build(self):
