@@ -554,7 +554,8 @@ bool CreateSceneFromGLTFDoc(
           }
         }
       } else if (img_buffers.find(t.source) != img_buffers.end()) {  // load from buffer
-        std::string texture_name = "tex:" + t.name
+        std::string texture_name = "tex:" + model_name
+          + ":" + t.name
           + ":" + std::to_string(tex_idx)
           + ":" + sampler_abbrev;
         if (!en.ResrcMgr().Find(texture_name)) {  // not loaded
