@@ -91,8 +91,10 @@ void ExternalFramebuffer::SetParams(uint32_t fbo_id, uint32_t width, uint32_t he
   attach_points_.push_back(GL_COLOR_ATTACHMENT0);
   #endif
   // create default viewport covering the entire framebuffer
+  auto vp = std::make_shared<Viewport>();
+  vp->OnSize(width_, height_);
   viewports_.clear();
-  viewports_.push_back(std::make_shared<Viewport>());
+  viewports_.push_back(std::move(vp));
 }
 
 uint32_t ExternalFramebuffer::Width() const {
@@ -152,18 +154,22 @@ void InternalFramebuffer::AttachTexture(uint32_t attach_point,
       }
       depth_texture_ = std::move(texture_ptr);
     } else {
+      color_textures_.erase(attach_point);
+
       glFramebufferTexture2D(GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0 + (attach_point - AT_COLOR0), GL_TEXTURE_2D,
         texture_ptr->Handle(), level);
 
-      if (color_textures_.size() == 0) {  //first texture
+      if (color_textures_.size() == 0) {
+        // first texture, update dimensions
+        const TextureDesc &desc = texture_ptr->Desc();
+        bpp_ = type_mapping::NumChannels(desc.format) * type_mapping::SizeOfGLType(desc.data_type);
+        width_ = desc.width >> level;
+        height_ = desc.height >> level;
+        array_size_ = desc.array_size;
+
         //resize PBOs
         if (pbos_.size() != 0) {
-          const TextureDesc &desc = texture_ptr->Desc();
-          bpp_ = type_mapping::NumChannels(desc.format) * type_mapping::SizeOfGLType(desc.data_type);
-          width_ = desc.width >> level;
-          height_ = desc.height >> level;
-          array_size_ = desc.array_size;
           uint32_t num_channels = type_mapping::NumChannels(desc.format);
           uint32_t bpc = type_mapping::SizeOfGLType(desc.data_type) << 3;
           uint32_t pitch = imgpp::ImgROI::CalcPitch(width_, num_channels, bpc, 4);
@@ -177,13 +183,22 @@ void InternalFramebuffer::AttachTexture(uint32_t attach_point,
         for (auto iter = viewports_.begin(); iter != viewports_.end(); ++iter)
           (*iter)->OnSize(width_, height_);
       }
+
       color_textures_[attach_point] = std::move(texture_ptr);
-      attach_points_.push_back(GL_COLOR_ATTACHMENT0 + (attach_point - AT_COLOR0));
-      std::sort(attach_points_.begin(), attach_points_.end());
+
+      auto gl_attach_point = GL_COLOR_ATTACHMENT0 + (attach_point - AT_COLOR0);
+      if (
+        std::find(
+          attach_points_.begin(),
+          attach_points_.end(),
+          gl_attach_point
+        ) == attach_points_.end()
+      ) {
+        attach_points_.push_back(gl_attach_point);
+        std::sort(attach_points_.begin(), attach_points_.end());
+      }
     }
-#if defined(__ANDROID_API__) || defined(MINEOLA_DESKTOP)
     Unbind();
-#endif
     CHKGLERR
   }
 }
