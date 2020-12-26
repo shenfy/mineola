@@ -5,25 +5,26 @@ OpenGL ES based minimal rendering engine.
 
 We have switched to using [Conan](https://conan.io) to manage dependencies. To build mineola under Linux, please run conan and cmake to generate makefile and build the project:
 ```bash
-$ cd pc
 $ mkdir build
 $ cd build
 $ conan install ..
-$ cmake ..
-$ make -j8
+$ cmake ../src
 ```
 
 ## Build for iOS on MacOS
 
 We are also using CMake to generate the XCode project.
+
+First create an iOS conan profile following [imgpp](https://github.com/shenfy/imgpp#build-from-source-for-ios-w-conan).
+
+Then:
 ```bash
-$ cd ios
 $ mkdir build
 $ cd build
-$ conan install .. -s os=iOS -s os.version=(same as imgpp) -s arch=armv8
-$ cmake .. -GXcode -DCMAKE_SYSTEM_NAME=iOS
+$ conan install --profile ios ..
+$ cmake ../src -GXcode -DCMAKE_SYSTEM_NAME=iOS
 ```
-Then you can either use cmake/xcode command line tools to build the project or open the generated project "mineola_ios" directly in XCode GUI.
+Then you can either use cmake/xcode command line tools to build the project or open the generated project `mineola` directly in XCode GUI.
 
 ## Build for Android
 
