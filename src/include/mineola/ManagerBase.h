@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <string>
 #include <algorithm>
-#include "Visitor.h"
 
 namespace mineola {
 
@@ -95,7 +94,7 @@ void ManagerBase<T, TPtr>::Remove(const std::string &name) {
 template <typename T, typename TPtr> template <typename TT>
 void ManagerBase<T, TPtr>::Traverse(TT &visitor) {
   for (auto iter = map_.begin(); iter != map_.end(); ++iter)
-    iter->second->Accept(visitor);
+    visitor(iter->first, iter->second);
 }
 
 template <typename T, typename TPtr> template <typename TT>
