@@ -104,11 +104,4 @@ void Camera::OnSize(const Viewport *viewport) {
   }
 }
 
-Resizer::Resizer(uint32_t width, uint32_t height)
-  : width_(width), height_(height) {
-}
-
-Resizer::~Resizer() {
-}
-
 }

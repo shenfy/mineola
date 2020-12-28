@@ -150,7 +150,6 @@ set(MINEOLA_HDR
   include/mineola/UniformWrappers.h
   include/mineola/VertexType.h
   include/mineola/Viewport.h
-  include/mineola/Visitor.h
   include/mineola/AABB.h)
 
 if (MINEOLA_iOS)
