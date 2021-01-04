@@ -278,16 +278,21 @@ void main(void) {
   vec3 light_dir = normalize(light_wc);
   vec3 view_dir = normalize(eye_wc.xyz - pos_wc);
 
-  #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
-  vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
-  normal_pp = normalize(normal_pp * 2.0 - 1.0);
-  vec3 normal_dir = normalize(tbn * normal_pp);
-  #elif defined(HAS_NORMAL)
-  vec3 normal_dir = normalize(normal);
+  #if defined(HAS_NORMAL)
+    // On the iOS platform, fs must use all varying variables, otherwise
+    // the shader won't compile.
+    vec3 normal_dir = normal;
+    #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
+      vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
+      normal_pp = normalize(normal_pp * 2.0 - 1.0);
+      normal_dir = normalize(tbn * normal_pp);
+    #else
+      normal_dir = normalize(normal_dir);
+    #endif
   #else
-  vec3 normal_dir = vec3(0.0, 0.0, 0.0);
-  frag_color = vec4(base_color.rgb * ao, base_color.a);
-  return;
+    vec3 normal_dir = vec3(0.0, 0.0, 0.0);
+    frag_color = vec4(base_color.rgb * ao, base_color.a);
+    return;
   #endif
 
   #if defined(DOUBLE_SIDE)
