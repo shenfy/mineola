@@ -15,6 +15,7 @@ public:
   void AddSearchPath(const char *path);
   bool LocateFile(const char *filename, std::string &found_path);
   void PopSearchPath(const char *path = nullptr);
+  void Release() override;
 
 protected:
   std::vector<std::string> paths_;

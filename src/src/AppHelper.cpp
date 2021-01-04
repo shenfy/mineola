@@ -153,7 +153,7 @@ bool InitEngine() {
   }
 
   // create default material
-  std::shared_ptr<Material> mat(new Material);
+  auto mat = std::make_shared<Material>();
   mat->alpha = 1.0f;
   mat->specularity = 30.0f;
   mat->ambient = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -162,11 +162,6 @@ bool InitEngine() {
   mat->emit = glm::vec3(0.f, 0.f, 0.f);
   mat->texture_slots["diffuse_sampler"] = {"mineola:texture:fallback"};
   en.ResrcMgr().Add("mineola:material:fallback", bd_cast<Resource>(mat));
-
-  // gl switches
-  glEnable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glDepthFunc(GL_LESS);
 
   return true;
 }

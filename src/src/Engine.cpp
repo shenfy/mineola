@@ -57,7 +57,6 @@ Engine::Engine()
   ext_texture_mem_loader_(nullptr),
   terminate_signaled_(false) {
   timer_.reset(new Timer);
-  timer_->Start();
 
   root_node_ = std::make_shared<SceneNode>();
 }
@@ -225,11 +224,6 @@ double Engine::Now() {
 
 void Engine::FrameMove() {
   //calc time since last frame
-  static bool bFirstTime = true;
-  if (bFirstTime) {
-    timer_->Start();
-    bFirstTime = false;
-  }
   double now = timer_->Snapshot();
   frame_time_ = now - time_;
 
@@ -386,10 +380,22 @@ void Engine::Render() {
 
 // create default framebuffer, etc.
 void Engine::Init() {
+  render_state_mgr_ = {};
+
   // create an external framebuffer with unintialized size
   auto framebuffer = std::make_shared<ExternalFramebuffer>();
   resrc_mgr_.Add("mineola:framebuffer:screen", bd_cast<Resource>(framebuffer));
   scr_framebuffer_ = framebuffer;
+
+  override_effect_ = false;
+  override_camera_ = false;
+  override_render_target_ = false;
+  override_material_ = "";
+
+  ext_texture_loader_ = nullptr;
+  ext_texture_mem_loader_ = nullptr;
+
+  terminate_signaled_ = false;
 
   texture_helper::CreateFallbackTexture2D();
 
@@ -433,6 +439,8 @@ void Engine::Init() {
 }
 
 void Engine::Start() {
+  timer_->Start();
+  time_ = Now();
 	entity_mgr_.Transform([](const std::string &, std::shared_ptr<Entity> &entity) {
 		entity->Start();
 	});
@@ -443,14 +451,29 @@ void Engine::Release() {
   entity_mgr_.Transform([](const std::string &, std::shared_ptr<Entity> &entity) {
   	entity->Destroy();
   });
-  entity_mgr_.ReleaseResources();
-  resrc_mgr_.ReleaseResources();
-  camera_mgr_.ReleaseResources();
+  entity_mgr_.Release();
+  resrc_mgr_.Release();
+  camera_mgr_.Release();
   current_effect_ = {"", nullptr};
   current_camera_ = {"", nullptr};
   current_framebuffer_ = {"", nullptr};
   current_viewport_ = 0;
   scr_framebuffer_.reset();
+
+  render_passes_.clear();
+
+  keyboard_sig_.disconnect_all_slots();
+  mouse_button_sig_.disconnect_all_slots();
+  mouse_move_sig_.disconnect_all_slots();
+  mouse_scroll_sig_.disconnect_all_slots();
+  pass_begin_sig_.disconnect_all_slots();
+  pass_end_sig_.disconnect_all_slots();
+  frame_move_sig_.disconnect_all_slots();
+  size_change_sig_.disconnect_all_slots();
+  pinch_sig_.disconnect_all_slots();
+
+  effect_files_cache_.clear();
+  builtin_uniform_block_.reset();
 
   #ifdef MINEOLA_LOG_TO_FILE
   log_.close();
