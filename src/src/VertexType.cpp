@@ -22,7 +22,8 @@ uint32_t VertexStream::Stride() {
 
 VertexArray::VertexArray() :
   vao_updated_(false),
-  primitive_type_(GL_TRIANGLES) {
+  primitive_type_(GL_TRIANGLES),
+  is_indexed_(false) {
 }
 
 VertexArray::~VertexArray() {
@@ -41,13 +42,25 @@ void VertexArray::AddVertexStream(std::shared_ptr<VertexStream> vertex_stream_pt
 void VertexArray::SetIndexStream(std::shared_ptr<VertexStream> index_stream_ptr) {
   index_stream_ptr_ = std::move(index_stream_ptr);
   vao_updated_ = false;
+  is_indexed_ = true;
+}
+
+void VertexArray::SetIndexed(bool indexed) {
+  is_indexed_ = indexed;
+}
+
+void VertexArray::MarkVertexUpdated() {
+  vao_updated_ = false;
 }
 
 bool VertexArray::UpdateVAO() {
-  if (!vao_ptr_)
+  if (!vao_ptr_) {
     vao_ptr_.reset(new VertexArrayObject);
-  if (!vao_ptr_)
+  }
+
+  if (!vao_ptr_) {
     return false;
+  }
 
   vao_ptr_->Bind();
   //bind vertex buffers
@@ -74,7 +87,7 @@ bool VertexArray::UpdateVAO() {
   }
 
   //bind index buffer
-  if (index_stream_ptr_->buffer_ptr != last_buffer) {
+  if (index_stream_ptr_ && index_stream_ptr_->buffer_ptr != last_buffer) {
     index_stream_ptr_->buffer_ptr->Bind();
   }
 
@@ -85,17 +98,24 @@ bool VertexArray::UpdateVAO() {
 }
 
 bool VertexArray::Draw() {
-  if (!vao_updated_ && !UpdateVAO())
+  if (!vao_updated_ && !UpdateVAO()) {
     return false;
+  }
 
   if (vao_ptr_) {
     vao_ptr_->Bind();
 
     CHKGLERR_RET
-    //render
-    glDrawElements(primitive_type_, index_stream_ptr_->size,
-      type_mapping::Map2GLType(index_stream_ptr_->layout[0].format),
-      reinterpret_cast<GLvoid*>((uintptr_t)index_stream_ptr_->offset));
+
+    if (is_indexed_ && index_stream_ptr_) {
+      // render
+      glDrawElements(primitive_type_, index_stream_ptr_->size,
+        type_mapping::Map2GLType(index_stream_ptr_->layout[0].format),
+        reinterpret_cast<GLvoid*>((uintptr_t)index_stream_ptr_->offset));
+    } else {
+      glDrawArrays(primitive_type_, 0, vertex_stream_ptrs_[0]->size);
+    }
+
     CHKGLERR_RET
 
     vao_ptr_->Unbind();
