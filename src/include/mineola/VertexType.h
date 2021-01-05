@@ -97,9 +97,12 @@ public:
   void AddVertexStream(std::shared_ptr<VertexStream> vertex_stream);
   void SetIndexStream(std::shared_ptr<VertexStream> index_stream);
 
+  void MarkVertexUpdated();
   bool Draw();
 
   int &PrimitiveType();
+
+  void SetIndexed(bool indexed);
 
 protected:
   bool UpdateVAO();
@@ -109,6 +112,7 @@ protected:
   std::shared_ptr<VertexArrayObject> vao_ptr_;
   bool vao_updated_;
   int primitive_type_;
+  bool is_indexed_;
 };
 
 }} //namespaces
