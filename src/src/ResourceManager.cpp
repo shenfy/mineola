@@ -75,4 +75,9 @@ void ResourceManager::PopSearchPath(const char *path) {
   }
 }
 
+void ResourceManager::Release() {
+  ReleaseResources();
+  paths_.clear();
+}
+
 }

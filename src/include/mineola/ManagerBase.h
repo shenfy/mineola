@@ -29,6 +29,7 @@ public:
   void Transform(const TT &op);
 
   void ReleaseResources();
+  virtual void Release();
 
 protected:
   std::unordered_map<std::string, TPtr> map_;
@@ -109,6 +110,12 @@ template <typename T, typename TPtr>
 void ManagerBase<T, TPtr>::ReleaseResources() {
   map_.clear();
 }
+
+template <typename T, typename TPtr>
+void ManagerBase<T, TPtr>::Release() {
+  ReleaseResources();
+}
+
 
 } //namespaces
 

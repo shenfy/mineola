@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mineola VERSION 1.1.0 LANGUAGES C CXX)
+project(mineola VERSION 1.2.0 LANGUAGES C CXX)
 
 # Conan boilerplates
 if (EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
@@ -214,7 +214,7 @@ endif()
 
 # PC examples
 if (MINEOLA_PC)
-  find_package(glfw3 REQUIRED)
+  find_package(glfw REQUIRED)
 
   add_executable(gltfview)
   target_sources(gltfview PRIVATE
