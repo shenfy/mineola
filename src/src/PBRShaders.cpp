@@ -246,6 +246,10 @@ void main(void) {
   #endif
 
   #if defined(IS_UNLIT)
+  // On the iOS platform, fs must use all varying variables, otherwise
+  // the shader won't compile.
+  vec3 temp = normal;
+  temp = pos_wc;
   frag_color = base_color;
   return;
   #endif
@@ -290,7 +294,6 @@ void main(void) {
       normal_dir = normalize(normal_dir);
     #endif
   #else
-    vec3 normal_dir = vec3(0.0, 0.0, 0.0);
     frag_color = vec4(base_color.rgb * ao, base_color.a);
     return;
   #endif
