@@ -227,6 +227,26 @@ vec4 SRGBEncode(vec4 rgba) {
 #endif
 
 void main(void) {
+  // On the iOS platform, fs must use all varying variables, otherwise
+  // the shader won't compile.
+  vec3 temp = pos_wc;
+
+  #if defined(HAS_NORMAL)
+  temp = normal;
+  #endif
+  #if defined(HAS_TEXCOORD)
+  vec2 temp2 = texcoord0;
+  #endif
+  #if defined(HAS_TEXCOORD2)
+  temp2 = texcoord1;
+  #endif
+  #if defined(HAS_TANGENT)
+  mat3 temp3 = tbn;
+  #endif
+  #if defined(HAS_COLOR)
+  temp = vcolor;
+  #endif
+
   #if defined(HAS_COLOR)
   vec4 base_color = vec4(vcolor, 1.0);
   #else
@@ -246,10 +266,6 @@ void main(void) {
   #endif
 
   #if defined(IS_UNLIT)
-  // On the iOS platform, fs must use all varying variables, otherwise
-  // the shader won't compile.
-  vec3 temp = normal;
-  temp = pos_wc;
   frag_color = base_color;
   return;
   #endif
@@ -283,15 +299,12 @@ void main(void) {
   vec3 view_dir = normalize(eye_wc.xyz - pos_wc);
 
   #if defined(HAS_NORMAL)
-    // On the iOS platform, fs must use all varying variables, otherwise
-    // the shader won't compile.
-    vec3 normal_dir = normal;
     #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
       vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
       normal_pp = normalize(normal_pp * 2.0 - 1.0);
-      normal_dir = normalize(tbn * normal_pp);
+      vec3 normal_dir = normalize(tbn * normal_pp);
     #else
-      normal_dir = normalize(normal_dir);
+      vec3 normal_dir = normalize(normal);
     #endif
   #else
     frag_color = vec4(base_color.rgb * ao, base_color.a);
