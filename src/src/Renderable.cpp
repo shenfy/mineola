@@ -1,6 +1,5 @@
 #include "prefix.h"
 #include <mineola/Renderable.h>
-#include <glm/gtc/type_ptr.hpp>
 #include <mineola/Engine.h>
 #include <mineola/Material.h>
 #include <mineola/VertexType.h>
@@ -63,6 +62,14 @@ void Renderable::SetMaterial(size_t index, const char *material_name) {
 
 const std::string &Renderable::GetMaterialName(size_t index) const {
   return material_names_[index];
+}
+
+void Renderable::SetBbox(const AABB &bbox) {
+  bbox_ = std::optional<AABB>{bbox};
+}
+
+const std::optional<AABB> &Renderable::Bbox() const {
+  return bbox_;
 }
 
 void Renderable::PreRender(double frame_time, uint32_t pass) {

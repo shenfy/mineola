@@ -1,4 +1,6 @@
 #include "prefix.h"
+#include <vector>
+#include <glm/gtc/matrix_transform.hpp>
 #include <mineola/Light.h>
 #include <mineola/Camera.h>
 #include <mineola/SceneNode.h>
@@ -196,4 +198,36 @@ namespace mineola {
         return node.Name() == name_str;
       });
   }
+
+std::optional<AABB> SceneNode::ComputeAABB() const {
+  std::optional<AABB> result;
+  for (auto &child : Children()) {
+    auto aabb = child->ComputeAABB();
+    if (aabb) {
+      if (result) {
+        result->Combine(*aabb);
+      } else {
+        result = *aabb;
+      }
+    }
+  }
+  
+  for (auto &renderable : renderables_) {
+    if (renderable->Bbox()) {
+      if (result) {
+        result->Combine(*renderable->Bbox());
+      } else {
+        result = *renderable->Bbox();
+      }
+    }
+  }
+  
+  if (result) {
+    auto model_mat = glm::scale(rbt_.ToMatrix(), scale_);
+    result->Transform(model_mat);
+  }
+
+  return result;
+}
+
 }

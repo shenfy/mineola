@@ -90,7 +90,8 @@ set(MINEOLA_SRC
   src/UniformHelper.cpp
   src/UniformWrappers.cpp
   src/VertexType.cpp
-  src/Viewport.cpp)
+  src/Viewport.cpp
+  src/AABB.cpp)
 
 set(MINEOLA_HDR
   include/mineola/AnimatedEntity.h
@@ -149,7 +150,8 @@ set(MINEOLA_HDR
   include/mineola/UniformWrappers.h
   include/mineola/VertexType.h
   include/mineola/Viewport.h
-  include/mineola/Visitor.h)
+  include/mineola/Visitor.h
+  include/mineola/AABB.h)
 
 if (MINEOLA_iOS)
   # We provide a RendererViewController on iOS
