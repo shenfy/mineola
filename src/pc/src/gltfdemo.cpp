@@ -99,7 +99,7 @@ public:
     en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
 
     if (!gltf_filename_.empty()) {
-      // Load base scene
+      en.ResrcMgr().AddSearchPath("resrc");
       BuildSceneFromConfigFile(kSceneFilename.c_str(), {});
 
       // Load gltf

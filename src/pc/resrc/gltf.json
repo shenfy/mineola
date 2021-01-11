@@ -1,15 +1,24 @@
 {
-  "materials": [
+  "geometries": [
     {
-      "name": "mat:0"
+      "primitive": "rect",
+      "effect": "effect:shadow",
+      "material": "material:shadow",
+      "queue": 1,
+      "node": "shadow"
     }
   ],
   "lights": [
     {
       "index": 0,
-      "node": "light",
+      "node": "envlight",
       "type": "env",
-      "source": "venice16.ktx",
+      "source": "venice16.ktx"
+    },
+    {
+      "index": 0,
+      "node": "dirlight",
+      "type": "point_dir",
       "proj": {
         "type": "orthographic",
         "left": -1.0,
@@ -41,22 +50,83 @@
       "parent": "root"
     },
     {
+      "name": "shadow",
+      "parent": "root"
+    },
+    {
       "name": "camera",
       "eye": "0, 0, 1",
       "target": "0, 0, 0",
       "up": "0, 1, 0",
       "parent": "root"
     },
-     {
-      "name": "light",
+    {
+      "name": "envlight",
       "translate": "0.1, 0.1, 0.0",
       "rotate": "0, 0, 0, 1",
       "scale": "1, 1, 1",
+      "parent": "root"
+    },
+    {
+      "name": "dirlight",
+      "eye": "0.0, 2.0, 0.0",
+      "target": "0.0, 0.0, 0.0",
+      "up": "1.0, 0.0, 0.0",
       "parent": "root"
     }
   ],
   "passes": [
     {
+      "sfx": "shadowmap",
+      "target": "rt:shadowmap"
+    },
+    {
+    }
+  ],
+  "textures": [
+    {
+      "name": "rt:shadowmap:depth",
+      "dimensions": [1024, 1024],
+      "depth_bits": 24,
+      "depth_compare": true
+    },
+    {
+      "name": "rt:shadowmap:color",
+      "dimensions": "rt:shadowmap:depth",
+      "channe": 1
+    }
+  ],
+  "render_targets": [
+    {
+      "name": "rt:shadowmap",
+      "color_texture": "rt:shadowmap:color",
+      "depth_texture": "rt:shadowmap:depth"
+    }
+  ],
+  "effects": [
+    {
+      "name": "effect:shadow",
+      "vertex": "shadow.vert",
+      "fragment": "shadow.frag",
+      "states": {
+        "cullenable": "on",
+        "depthtest": "on",
+        "depthfunc": "less",
+        "blendenable": "on",
+        "blendfunc": "src_alpha,one_minus_src_alpha"
+      }
+    }
+  ],
+  "materials": [
+    {
+      "name": "material:shadow",
+      "uniforms": [
+        {
+          "name": "shadowmap",
+          "type": "texture",
+          "texture_names": ["rt:shadowmap:depth"]
+        }
+      ]
     }
   ]
 }
