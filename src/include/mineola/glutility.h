@@ -41,6 +41,8 @@ inline const char *getFramebufferStatusString(uint32_t status) {
   case GL_FRAMEBUFFER_COMPLETE: return 0;
   case GL_FRAMEBUFFER_UNDEFINED: return "Framebuffer undefined";
   case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: return "Framebuffer incomplete attachment";
+  case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: return "Framebuffer incomplete missing attachment";
+  case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS: return "Framebuffer incomplete dimensions";
   case GL_FRAMEBUFFER_UNSUPPORTED: return "Framebuffer unsupported";
   case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: return "Framebuffer incomplete multisample";
   default: return "Unknown framebuffer status code";

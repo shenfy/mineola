@@ -93,6 +93,7 @@ public:
     en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
 
     if (!gltf_filename_.empty()) {
+      en.ResrcMgr().AddSearchPath("resrc");
       BuildSceneFromConfigFile(kSceneFilename.c_str(), {});
 
       bool has_env_light = FindEnvLight(en.Scene());

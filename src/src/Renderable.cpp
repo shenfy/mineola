@@ -52,6 +52,18 @@ void Renderable::SetEffect(const char *effect_name) {
   effect_name_ = effect_name;
 }
 
+void Renderable::SetShadowmapEffect(std::string effect_name) {
+  shadowmap_effect_name_ = std::move(effect_name);
+}
+
+std::optional<const char *> Renderable::GetShadowmapEffectName() const {
+  if (shadowmap_effect_name_) {
+    return shadowmap_effect_name_->c_str();
+  } else {
+    return std::nullopt;
+  }
+}
+
 size_t Renderable::NumVertexArray() const {
   return vertex_arrays_.size();
 }
@@ -72,10 +84,20 @@ const std::optional<AABB> &Renderable::Bbox() const {
   return bbox_;
 }
 
-void Renderable::PreRender(double frame_time, uint32_t pass) {
-  Engine::Instance().ChangeEffect(effect_name_, false);
+void Renderable::PreRender(double frame_time, uint32_t pass_idx) {
+  auto &en = Engine::Instance();
+  auto &pass = en.RenderPasses()[pass_idx];
+  switch (pass.sfx) {
+  case RenderPass::SFX_PASS_SHADOWMAP:
+    en.ChangeEffect(*shadowmap_effect_name_, false);
+    break;
+  default:
+    en.ChangeEffect(effect_name_, false);
+    break;
+  }
+
   if (skin_) {
-    skin_->PreRender(frame_time, pass);
+    skin_->PreRender(frame_time, pass_idx);
   }
 }
 

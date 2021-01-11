@@ -79,6 +79,30 @@ void main(void) {
   #endif
 })";
 
+const char pbr_shadow_vs_str[] =
+R"(#version 300 es
+precision highp float;
+#include "mineola_builtin_uniforms"
+
+in vec3 Pos;
+
+#if defined(HAS_SKIN)
+#include "mineola_skinned_animation"
+#endif
+
+void main(void) {
+  #if defined(HAS_SKIN)
+  mat4 model_mat = BlendWeight.x * _joint_mats[int(BlendIdx.x)]
+    + BlendWeight.y * _joint_mats[int(BlendIdx.y)]
+    + BlendWeight.z * _joint_mats[int(BlendIdx.z)]
+    + BlendWeight.w * _joint_mats[int(BlendIdx.w)];
+  #else
+  mat4 model_mat = _model_mat;
+  #endif
+  vec4 pos = model_mat * vec4(Pos, 1.0);
+  gl_Position = _light_proj_mat_0 * _light_view_mat_0 * pos;
+})";
+
 const char pbr_fs_str[] =
 R"(#version 300 es
 precision highp float;
@@ -348,6 +372,12 @@ void main(void) {
   #endif
 })";
 
+const char pbr_shadow_fs_str[] =
+R"(#version 300 es
+precision highp float;
+void main() {
+})";
+
 std::string BuildTCName(uint8_t idx) {
   std::string result("texcoord0");
   result[8] = idx + '0';
@@ -412,6 +442,21 @@ effect_defines_t CreatePBRShaderMacros(
     result.push_back({"DOUBLE_SIDE", {}});
   }
   return result;
+}
+
+std::vector<std::unique_ptr<RenderState>> CreatePBRShaderCommonStates(
+  const MaterialFlags &mat_flags
+) {
+  std::vector<std::unique_ptr<RenderState>> render_states;
+  render_states.push_back(std::make_unique<DepthTestState>(true));
+  render_states.push_back(std::make_unique<DepthFuncState>(render_state::kCmpFuncLess));
+  if (mat_flags.IsDoubleSided()) {
+    render_states.push_back(std::make_unique<CullEnableState>(false));
+  } else {
+    render_states.push_back(std::make_unique<CullEnableState>(true));
+    render_states.push_back(std::make_unique<CullFaceState>(render_state::kCullFaceBack));
+  }
+  return render_states;
 }
 
 }  // namespace
@@ -617,7 +662,7 @@ std::string AttribFlags::Abbrev() const {
   return result;
 }
 
-std::string SelectOrCreatePBREffect(bool srgb,
+std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(bool srgb,
   const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light) {
 
   char srgb_abbre = srgb ? 'S' : 's';
@@ -628,6 +673,7 @@ std::string SelectOrCreatePBREffect(bool srgb,
     + mat_flags.Abbrev()
     + srgb_abbre
     + env_light_abbre;
+  std::string shadowmap_effect_name = effect_name + "s";
 
   auto &en = Engine::Instance();
   auto effect = bd_cast<GLEffect>(en.ResrcMgr().Find(effect_name));
@@ -640,16 +686,7 @@ std::string SelectOrCreatePBREffect(bool srgb,
       macros.push_back({"USE_ENV_LIGHT", {}});
     }
 
-    std::vector<std::unique_ptr<RenderState>> render_states;
-    render_states.push_back(std::make_unique<DepthTestState>(true));
-    render_states.push_back(std::make_unique<DepthFuncState>(render_state::kCmpFuncLess));
-    if (mat_flags.IsDoubleSided()) {
-      render_states.push_back(std::make_unique<CullEnableState>(false));
-    } else {
-      render_states.push_back(std::make_unique<CullEnableState>(true));
-      render_states.push_back(std::make_unique<CullFaceState>(render_state::kCullFaceBack));
-    }
-
+    auto render_states = CreatePBRShaderCommonStates(mat_flags);
     if (mat_flags.IsBlendingEnabled()) {
       render_states.push_back(std::make_unique<BlendEnableState>(true));
       render_states.push_back(std::make_unique<BlendFuncState>(
@@ -660,11 +697,19 @@ std::string SelectOrCreatePBREffect(bool srgb,
 
     if (!CreateEffectFromMemHelper(effect_name.c_str(),
       pbr_vs_str, pbr_fs_str, &macros, std::move(render_states))) {
-      return {};
+      return std::nullopt;
+    }
+
+    render_states = CreatePBRShaderCommonStates(mat_flags);
+    render_states.push_back(std::make_unique<BlendEnableState>(false));
+
+    if (!CreateEffectFromMemHelper(shadowmap_effect_name.c_str(),
+      pbr_shadow_vs_str, pbr_shadow_fs_str, &macros, std::move(render_states))) {
+      return std::nullopt;
     }
   }
 
-  return effect_name;
+  return std::make_pair(std::move(effect_name), std::move(shadowmap_effect_name));
 }
 
 }  // namespace

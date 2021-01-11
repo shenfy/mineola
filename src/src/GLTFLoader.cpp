@@ -780,18 +780,27 @@ bool CreateSceneFromGLTFDoc(
           if (!effect_override) {
             // create or choose proper PBR shader
             const auto &mat_flags = materials_flags[mat_id];
-            auto pbr_effect_name = SelectOrCreatePBREffect(
+            auto pbr_effects = SelectOrCreatePBREffect(
               effect_srgb, mat_flags, attrib_flags, use_env_light);
-            if (pbr_effect_name.empty()) {
-              pbr_effect_name = "mineola:effect:fallback";
+
+            std::string pbr_effect, shadowmap_effect;
+            if (!pbr_effects) {
+              pbr_effect = "mineola:effect:fallback";
+              shadowmap_effect = "mineola:effect:shadowmap_fallback";
+            } else {
+              std::tie(pbr_effect, shadowmap_effect) = std::move(*pbr_effects);
             }
-            renderable->SetEffect(pbr_effect_name.c_str());
+
+            renderable->SetEffect(pbr_effect.c_str());
+            renderable->SetShadowmapEffect(std::move(shadowmap_effect));
           } else {  // effect override
             renderable->SetEffect(effect_name);
+            renderable->SetShadowmapEffect("mineola:effect:shadowmap_fallback");
           }
         } else {
           renderable->AddVertexArray(va, "mineola:material:fallback");
           renderable->SetEffect("mineola:effect:fallback");
+          renderable->SetShadowmapEffect("mineola:effect:shadowmap_fallback");
         }
 
         renderable->SetLayerMask(layer_mask);

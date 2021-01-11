@@ -3,6 +3,7 @@
 
 #include <string>
 #include <array>
+#include <optional>
 
 namespace mineola {
 
@@ -73,7 +74,7 @@ struct AttribFlags {
   };
 };
 
-std::string SelectOrCreatePBREffect(bool srgb,
+std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(bool srgb,
   const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light);
 
 } //end namespace

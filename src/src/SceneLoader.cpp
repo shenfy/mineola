@@ -219,6 +219,11 @@ bool BuildSceneFromConfig(const char *config_str,
         effect = geo["effect"].get<std::string>();
       }
 
+      std::optional<std::string> shadowmap_effect;
+      if (geo.find("shadowmap_effect") != geo.end()) {
+        shadowmap_effect = geo["shadowmap_effect"].get<std::string>();
+      }
+
       int layer = 0;
       if (geo.find("layer") != geo.end()) {
         const auto &layer_node = geo["layer"];
@@ -231,6 +236,11 @@ bool BuildSceneFromConfig(const char *config_str,
         }
       } else {
         layer = RenderPass::RENDER_LAYER_0;
+      }
+
+      int16_t queue = Renderable::kQueueOpaque;
+      if (geo.find("queue") != geo.end()) {
+        queue = geo["queue"].get<int16_t>();
       }
 
       auto [node, unused] = GetNode(geo, nodes_dict);
@@ -263,8 +273,6 @@ bool BuildSceneFromConfig(const char *config_str,
             mat->specular = glm::vec3(0.2f, 0.2f, 0.2f);
             mat->emit = glm::vec3(0.f, 0.f, 0.f);
 
-            if (geo.find("shadowmap") != geo.end() && geo["shadowmap"].get<bool>())
-              mat->texture_slots["shadowmap"] = {"mineola:rt:shadowmap:depth_texture"};
             en.ResrcMgr().Add(material, mat);
           }
         }
@@ -272,7 +280,11 @@ bool BuildSceneFromConfig(const char *config_str,
         auto renderable = std::make_shared<Renderable>();
         renderable->AddVertexArray(va, material.c_str());
         renderable->SetEffect(effect.c_str());
+        if (shadowmap_effect) {
+          renderable->SetShadowmapEffect(std::move(*shadowmap_effect));
+        }
         renderable->SetLayerMask(layer);
+        renderable->SetQueueId(queue);
         node->Renderables().push_back(renderable);
       }
       else {
@@ -280,9 +292,6 @@ bool BuildSceneFromConfig(const char *config_str,
         std::string found_fn;
         if (en.ResrcMgr().LocateFile(filename.c_str(), found_fn)) {
           std::vector<std::pair<std::string, std::string>> inject_textures;
-          if (geo.find("shadowmap") != geo.end() && geo["shadowmap"].get<bool>()) {
-            inject_textures.push_back({"shadowmap", "mineola:rt:shadowmap:depth_texture"});
-          }
 
           // add file directory to search paths
           std::string input_path, input_fn;
@@ -483,12 +492,12 @@ bool BuildSceneFromConfig(const char *config_str,
         is_srgb = texture["srgb"].get<bool>();
       }
 
-      bool bottom_first = false;
-      if (texture.find("bottom_first") != texture.end()) {
-        bottom_first = texture["bottom_first"].get<bool>();
-      }
-
       if (texture.find("filename") != texture.end()) {
+        bool bottom_first = false;
+        if (texture.find("bottom_first") != texture.end()) {
+          bottom_first = texture["bottom_first"].get<bool>();
+        }
+
         // a texture from file
         auto filename = texture["filename"].get<std::string>();
         bool mipmap = false;
@@ -687,17 +696,28 @@ bool BuildSceneFromConfig(const char *config_str,
         fb->AttachTexture(Framebuffer::AT_DEPTH, rt["depth_texture"].get<std::string>().c_str());
       }
 
+
+      bool has_color_texture = false;
       if (rt.find("color_texture") != rt.end()) {
+        has_color_texture = true;
         fb->AttachTexture(Framebuffer::AT_COLOR0, rt["color_texture"].get<std::string>().c_str());
       } else if (rt.find("color_textures") != rt.end()) {
+        has_color_texture = true;
         uint32_t idx = 0;
         for (const auto &tex_desc : rt["color_textures"]) {
           fb->AttachTexture(Framebuffer::AT_COLOR0 + idx, tex_desc.get<std::string>().c_str());
+          ++idx;
         }
       }
 
       auto status = fb->CheckStatus();
       const char *s = getFramebufferStatusString(status);
+      // On Ubuntu 18.04 using NVIDIA card, if a framebuffer has no color attachment,
+      // CheckStatus won't report error, but rendering will fail silently.
+      // We check that case here.
+      if (!s && !has_color_texture) {
+        s = getFramebufferStatusString(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
+      }
       if (s) {
         MLOG("Error: %s!\n", s);
       } else {

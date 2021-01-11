@@ -38,6 +38,27 @@ bool LoadBuiltInShaders() {
     return false;
   }
 
+  const char shadowmapvs[] = R"(#version 300 es
+  precision mediump float;
+  #include "mineola_builtin_uniforms"
+  in vec3 Pos;
+  void main() {
+    vec4 pos = _model_mat * vec4(Pos, 1.0);
+    gl_Position = _light_proj_mat_0 * _light_view_mat_0 * pos;
+  }
+  )";
+
+  const char shadowmapps[] = R"(#version 300 es
+  precision mediump float;
+  void main() {
+  }
+  )";
+
+  if (!CreateEffectFromMemHelper("mineola:effect:shadowmap_fallback",
+    shadowmapvs, shadowmapps, nullptr, std::move(render_states))) {
+    return false;
+  }
+
   const char diffusevs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
