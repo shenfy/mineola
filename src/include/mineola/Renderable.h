@@ -4,9 +4,11 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <optional>
 #include "VertexType.h"
 #include "BasisObj.h"
 #include "Skin.h"
+#include "AABB.h"
 
 namespace mineola {
 
@@ -36,6 +38,9 @@ public:
 
   void SetSkin(std::shared_ptr<Skin> skin);
 
+  void SetBbox(const AABB &bbox);
+  const std::optional<AABB> &Bbox() const;
+
   enum {
     kQueueOpaque = 0,
     kQueueTransparent = 1024
@@ -48,6 +53,7 @@ protected:
   std::vector<std::shared_ptr<vertex_type::VertexArray> > vertex_arrays_;
   std::vector<std::string> material_names_;
   std::shared_ptr<Skin> skin_;
+  std::optional<AABB> bbox_;
 };
 
 } //namespaces

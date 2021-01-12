@@ -5,7 +5,9 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <optional>
 #include "Rbt.h"
+#include "AABB.h"
 
 namespace mineola {
   class Renderable;
@@ -60,6 +62,8 @@ namespace mineola {
     void DFTraverse(const VisitorT &visitor) const;
     template<class VisitorT>
     void DFTraverse(const VisitorT &visitor);
+
+    std::optional<AABB> ComputeAABB() const;
 
     // bfs search
     template<class UnaryPredicate>

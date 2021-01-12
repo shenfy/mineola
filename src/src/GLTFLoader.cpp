@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fx/gltf.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <mineola/Material.h>
 #include <mineola/Engine.h>
 #include <mineola/Renderable.h>
@@ -520,7 +521,7 @@ bool CreateSceneFromGLTFDoc(
       if (t.source < 0) {
         continue;
       }
-      bool srgb = srgb_textures.find(tex_idx) != srgb_textures.end();
+      bool srgb = srgb_textures.find((uint32_t)tex_idx) != srgb_textures.end();
 
       uint32_t min_filter = TextureDesc::kLinearMipmapLinear;
       uint32_t mag_filter = TextureDesc::kLinear;
@@ -719,6 +720,12 @@ bool CreateSceneFromGLTFDoc(
           va->AddVertexStream(vs);
 
           SetAttribFlag(semantics, attrib_flags);
+
+          // set AABB
+          if (semantics == POSITION && vec_length == 3) {
+            renderable->SetBbox(AABB(glm::make_vec3(accessor.min.data()),
+                                     glm::make_vec3(accessor.max.data())));
+          }
         }
 
         // add index array to va
