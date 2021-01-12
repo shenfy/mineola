@@ -368,26 +368,55 @@ void ParseAnimationChannel(const fx::gltf::Document &doc,
   }
 }
 
+enum class PBREffectType {
+  kBuiltInLinear,
+  kBuiltInSrgb,
+  kCustom
+};
+
+PBREffectType EffectNameToType(const std::string &effect_name) {
+  if (effect_name == "mineola:effect:pbr_srgb") {
+    return PBREffectType::kBuiltInSrgb;
+  }
+
+  if (effect_name == "mineola:effect:pbr") {
+    return PBREffectType::kBuiltInLinear;
+  }
+
+  return PBREffectType::kCustom;
+}
+
+enum class PBRShadowmapEffectType {
+  kNone,
+  kBuiltIn,
+  kCustom
+};
+
+PBRShadowmapEffectType ShadowmapEffectNameToType(
+  const std::optional<std::string> &shadowmap_effect_name
+) {
+  if (!shadowmap_effect_name) {
+    return PBRShadowmapEffectType::kNone;
+  }
+
+  auto &name = *shadowmap_effect_name;
+  if (name == "mineola:effect:pbr_srgb" || name == "mineola:effect:pbr") {
+    return PBRShadowmapEffectType::kBuiltIn;
+  }
+
+  return PBRShadowmapEffectType::kCustom;
+}
+
 bool CreateSceneFromGLTFDoc(
   const fx::gltf::Document &doc,
-  std::string model_name,
+  const std::string &model_name,
   const std::shared_ptr<SceneNode> &parent_node,
-  const char *effect_name,
+  std::string effect_name,
+  std::optional<std::string> shadowmap_effect_name,
   int layer_mask,
-  const std::vector<std::pair<std::string, std::string>> &inject_textures,
   bool use_env_light) {
 
   auto &en = Engine::Instance();
-
-  bool effect_override = false;
-  bool effect_srgb = false;
-  if (effect_name != nullptr && strlen(effect_name) != 0) {
-    if (strcmp(effect_name, "mineola:effect:pbr_srgb") == 0) {
-      effect_srgb = true;
-    } else if (strcmp(effect_name, "mineola:effect:pbr") != 0) {
-      effect_override = true;
-    }
-  }
 
   // infer buffer view targets from various sources
   std::vector<BufferViewUsage> buffer_view_usages(doc.bufferViews.size());
@@ -673,6 +702,9 @@ bool CreateSceneFromGLTFDoc(
   // load meshes
   std::vector<std::vector<std::shared_ptr<Renderable>>> meshes;
   {
+    auto effect_type = EffectNameToType(effect_name);
+    auto shadownmap_effect_type = ShadowmapEffectNameToType(shadowmap_effect_name);
+
     for (size_t mesh_idx = 0; mesh_idx < doc.meshes.size(); ++mesh_idx) {
       const auto &m = doc.meshes[mesh_idx];
 
@@ -771,39 +803,55 @@ bool CreateSceneFromGLTFDoc(
           break;
         };
 
-        // set material
+        // set material, queue, layer
         int32_t mat_id = p.material;
         if (mat_id >= 0) {
           renderable->AddVertexArray(va, std::get<0>(materials[mat_id]).c_str());
           renderable->SetQueueId(std::get<1>(materials[mat_id]));
-
-          if (!effect_override) {
-            // create or choose proper PBR shader
-            const auto &mat_flags = materials_flags[mat_id];
-            auto pbr_effects = SelectOrCreatePBREffect(
-              effect_srgb, mat_flags, attrib_flags, use_env_light);
-
-            std::string pbr_effect, shadowmap_effect;
-            if (!pbr_effects) {
-              pbr_effect = "mineola:effect:fallback";
-              shadowmap_effect = "mineola:effect:shadowmap_fallback";
-            } else {
-              std::tie(pbr_effect, shadowmap_effect) = std::move(*pbr_effects);
-            }
-
-            renderable->SetEffect(pbr_effect.c_str());
-            renderable->SetShadowmapEffect(std::move(shadowmap_effect));
-          } else {  // effect override
-            renderable->SetEffect(effect_name);
-            renderable->SetShadowmapEffect("mineola:effect:shadowmap_fallback");
-          }
         } else {
           renderable->AddVertexArray(va, "mineola:material:fallback");
-          renderable->SetEffect("mineola:effect:fallback");
-          renderable->SetShadowmapEffect("mineola:effect:shadowmap_fallback");
+        }
+        renderable->SetLayerMask(layer_mask);
+
+        // set effect
+        if (mat_id < 0) {
+          // invalid material
+          effect_name = "mineola:effect:fallback";
+          if (shadowmap_effect_name) {
+            *shadowmap_effect_name = "mineola:effect:shadowmap_fallback";
+          }
+        } else if (
+          effect_type != PBREffectType::kCustom ||
+          shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn
+        ) {
+          // create or choose proper PBR shader
+          const auto &mat_flags = materials_flags[mat_id];
+          auto pbr_effects = SelectOrCreatePBREffect(
+            effect_type == PBREffectType::kBuiltInSrgb, mat_flags, attrib_flags, use_env_light);
+
+          if (!pbr_effects) {
+            // creation failed, use fallback
+            if (effect_type != PBREffectType::kCustom) {
+              effect_name = "mineola:effect:fallback";
+            }
+            if (shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn) {
+              *shadowmap_effect_name = "mineola:effect:shadowmap_fallback";
+            }
+          } else {
+            if (effect_type != PBREffectType::kCustom) {
+              effect_name = std::move(std::get<0>(*pbr_effects));
+            }
+            if (shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn) {
+              *shadowmap_effect_name = std::get<1>(*pbr_effects);
+            }
+          }
         }
 
-        renderable->SetLayerMask(layer_mask);
+        renderable->SetEffect(std::move(effect_name));
+        if (shadowmap_effect_name) {
+          renderable->SetShadowmapEffect(std::move(*shadowmap_effect_name));
+        }
+
         mesh.push_back(renderable);
       }
 
@@ -985,12 +1033,14 @@ namespace mineola { namespace gltf {
 bool LoadScene(
   const char *fn,
   const std::shared_ptr<SceneNode> &parent_node,
-  const char *effect_name,
+  std::string effect_name,
+  std::optional<std::string> shadowmap_effect_name,
   int layer_mask,
-  const std::vector<std::pair<std::string, std::string>> &inject_textures,
-  bool use_env_light) {
-  if (fn == nullptr)
+  bool use_env_light)
+{
+  if (fn == nullptr) {
     return false;
+  }
 
   fx::gltf::Document gltf_doc;
   if (boost::algorithm::ends_with(fn, ".gltf")) {
@@ -1001,8 +1051,8 @@ bool LoadScene(
     return false;
   }
 
-  bool result = CreateSceneFromGLTFDoc(gltf_doc,
-    fn, parent_node, effect_name, layer_mask, inject_textures, use_env_light);
+  bool result = CreateSceneFromGLTFDoc(gltf_doc, fn, parent_node,
+    std::move(effect_name), std::move(shadowmap_effect_name), layer_mask, use_env_light);
 
   return result;
 }

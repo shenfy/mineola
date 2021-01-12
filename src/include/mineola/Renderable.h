@@ -23,7 +23,7 @@ public:
 
   void AddVertexArray(std::shared_ptr<vertex_type::VertexArray> va,
             const char *material_name);
-  void SetEffect(const char *effect_name);
+  void SetEffect(std::string effect_name);
   const char *GetEffectName() const;
 
   void SetShadowmapEffect(std::string effect_name);

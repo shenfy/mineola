@@ -24,7 +24,7 @@ static const std::string kConfigPrefix = R"({
 
 static const std::string kConfigSuffix = R"(",
       "effect": "mineola:effect:pbr_srgb",
-      "shadowmap": false,
+      "shadowmap_effect": "mineola:effect:pbr_srgb",
       "node": "geometry",
       "layer": 0
     }

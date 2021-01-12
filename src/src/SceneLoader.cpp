@@ -30,8 +30,10 @@ namespace {
 template <typename Op, typename ...Args>
 bool RunSequential(const std::vector<Op> &ops, Args &&...args) {
   for (size_t i = 0; i < ops.size(); ++i) {
-    if (ops[i](std::forward<Args>(args)...))
+    // don't perfect forward to avoid rvalues getting consumed early
+    if (ops[i](args...)) {
       return true;
+    }
   }
   return false;
 }
@@ -279,27 +281,24 @@ bool BuildSceneFromConfig(const char *config_str,
 
         auto renderable = std::make_shared<Renderable>();
         renderable->AddVertexArray(va, material.c_str());
-        renderable->SetEffect(effect.c_str());
+        renderable->SetEffect(std::move(effect));
         if (shadowmap_effect) {
           renderable->SetShadowmapEffect(std::move(*shadowmap_effect));
         }
         renderable->SetLayerMask(layer);
         renderable->SetQueueId(queue);
         node->Renderables().push_back(renderable);
-      }
-      else {
+      } else {
         std::string filename = geo["filename"].get<std::string>();
         std::string found_fn;
         if (en.ResrcMgr().LocateFile(filename.c_str(), found_fn)) {
-          std::vector<std::pair<std::string, std::string>> inject_textures;
-
           // add file directory to search paths
           std::string input_path, input_fn;
           std::tie(input_path, input_fn) = file_system::SplitPath(found_fn);
           en.ResrcMgr().AddSearchPath(input_path.c_str());
 
           if (!RunSequential(geometry_loaders, found_fn.c_str(), node,
-            effect.c_str(), layer, inject_textures)) {
+            effect, shadowmap_effect, layer)) {
             MLOG("Geometry %s not loaded!\n", filename.c_str());
           }
           en.ResrcMgr().PopSearchPath(input_path.c_str());

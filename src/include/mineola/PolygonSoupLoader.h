@@ -11,8 +11,7 @@ class Renderable;
 namespace primitive_helper {
 
 bool BuildFromPolygonSoup(const PolygonSoup &soup,
-  const char *name, const char *effect_name,
-  Renderable &renderable);
+  const char *name, Renderable &renderable);
 
 }}  // end namespace
 

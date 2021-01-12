@@ -48,8 +48,8 @@ void Renderable::AddVertexArray(
   material_names_.push_back(material_name);
 }
 
-void Renderable::SetEffect(const char *effect_name) {
-  effect_name_ = effect_name;
+void Renderable::SetEffect(std::string effect_name) {
+  effect_name_ = std::move(effect_name);
 }
 
 void Renderable::SetShadowmapEffect(std::string effect_name) {
