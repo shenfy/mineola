@@ -77,30 +77,6 @@
   ],
   "passes": [
     {
-      "sfx": "shadowmap",
-      "target": "rt:shadowmap"
-    },
-    {
-    }
-  ],
-  "textures": [
-    {
-      "name": "rt:shadowmap:depth",
-      "dimensions": [1024, 1024],
-      "depth_bits": 24,
-      "depth_compare": true
-    },
-    {
-      "name": "rt:shadowmap:color",
-      "dimensions": "rt:shadowmap:depth",
-      "channe": 1
-    }
-  ],
-  "render_targets": [
-    {
-      "name": "rt:shadowmap",
-      "color_texture": "rt:shadowmap:color",
-      "depth_texture": "rt:shadowmap:depth"
     }
   ],
   "effects": [
@@ -124,7 +100,7 @@
         {
           "name": "shadowmap",
           "type": "texture",
-          "texture_names": ["rt:shadowmap:depth"]
+          "texture_names": ["mineola:rt:shadowmap:depth_texture"]
         }
       ]
     }
