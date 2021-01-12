@@ -11,6 +11,7 @@
 #include <mineola/STBImagePlugin.h>
 #include <mineola/GLTFLoader.h>
 #include <mineola/PrefabHelper.h>
+#include <mineola/TextureHelper.h>
 #include <mineola/EnvLight.h>
 #include <mineola/AnimatedEntity.h>
 
@@ -97,6 +98,10 @@ public:
     Engine &en = GetEngine();
 
     en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
+    if (!texture_helper::CreateShadowmapRenderTarget(1024, 1024)) {
+      std::cout << "Failed to create shadowmap render target" << std::endl;
+    }
+    en.RenderPasses().push_back(CreateShadowmapPass());
 
     if (!gltf_filename_.empty()) {
       en.ResrcMgr().AddSearchPath("resrc");

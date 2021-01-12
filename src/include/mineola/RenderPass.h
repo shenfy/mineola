@@ -40,6 +40,8 @@ struct RenderPass {
   std::string override_material;
 };
 
+RenderPass CreateShadowmapPass();
+
 } //end namespace
 
 #endif
