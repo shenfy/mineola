@@ -7,6 +7,21 @@
 
 namespace mineola {
 
+struct SFXFlags {
+  void EnableSrgbEncoding();
+  void EnableReceiveShadow();
+
+  bool UsesSrgbEncoding() const;
+  bool ReceivesShadow() const;
+
+  std::string Abbrev() const;
+
+  uint8_t flags{0};
+  enum {
+    SRGB_ENCODE_BIT = 0x1, RECEIVE_SHADOW_BIT = 0x2
+  };
+};
+
 struct MaterialFlags {
   void EnableDiffuseMap(int uv = 0);
   void EnableOcclusionMap(int uv = 0);
@@ -74,8 +89,9 @@ struct AttribFlags {
   };
 };
 
-std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(bool srgb,
-  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light);
+std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(
+  const SFXFlags &sfx_flags, const MaterialFlags &mat_flags,
+  const AttribFlags &attrib_flags, bool use_env_light);
 
 } //end namespace
 

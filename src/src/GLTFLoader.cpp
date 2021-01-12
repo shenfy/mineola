@@ -368,22 +368,24 @@ void ParseAnimationChannel(const fx::gltf::Document &doc,
   }
 }
 
-enum class PBREffectType {
-  kBuiltInLinear,
-  kBuiltInSrgb,
-  kCustom
-};
-
-PBREffectType EffectNameToType(const std::string &effect_name) {
-  if (effect_name == "mineola:effect:pbr_srgb") {
-    return PBREffectType::kBuiltInSrgb;
+std::optional<SFXFlags> EffectNameToSFXFlags(const std::string &effect_name) {
+  const static std::string builtin_pbr_prefix = "mineola:effect:pbr";
+  if (effect_name.substr(0, builtin_pbr_prefix.length()) != builtin_pbr_prefix) {
+    return std::nullopt;
   }
 
-  if (effect_name == "mineola:effect:pbr") {
-    return PBREffectType::kBuiltInLinear;
-  }
+  std::vector<std::string> str_vec;
+  boost::algorithm::split(str_vec, effect_name, boost::algorithm::is_any_of(":"));
 
-  return PBREffectType::kCustom;
+  SFXFlags result;
+  for (auto &str: str_vec) {
+    if (str == "srgb") {
+      result.EnableSrgbEncoding();
+    } else if (str == "shadowed") {
+      result.EnableReceiveShadow();
+    }
+  }
+  return result;
 }
 
 enum class PBRShadowmapEffectType {
@@ -400,7 +402,7 @@ PBRShadowmapEffectType ShadowmapEffectNameToType(
   }
 
   auto &name = *shadowmap_effect_name;
-  if (name == "mineola:effect:pbr_srgb" || name == "mineola:effect:pbr") {
+  if (name == "mineola:effect:pbr") {
     return PBRShadowmapEffectType::kBuiltIn;
   }
 
@@ -702,7 +704,7 @@ bool CreateSceneFromGLTFDoc(
   // load meshes
   std::vector<std::vector<std::shared_ptr<Renderable>>> meshes;
   {
-    auto effect_type = EffectNameToType(effect_name);
+    auto sfx_flags = EffectNameToSFXFlags(effect_name);
     auto shadownmap_effect_type = ShadowmapEffectNameToType(shadowmap_effect_name);
 
     for (size_t mesh_idx = 0; mesh_idx < doc.meshes.size(); ++mesh_idx) {
@@ -820,25 +822,23 @@ bool CreateSceneFromGLTFDoc(
           if (shadowmap_effect_name) {
             *shadowmap_effect_name = "mineola:effect:shadowmap_fallback";
           }
-        } else if (
-          effect_type != PBREffectType::kCustom ||
-          shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn
-        ) {
+        } else if (sfx_flags || shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn) {
           // create or choose proper PBR shader
           const auto &mat_flags = materials_flags[mat_id];
+          auto sfx_flags_or_default = sfx_flags ? *sfx_flags : SFXFlags();
           auto pbr_effects = SelectOrCreatePBREffect(
-            effect_type == PBREffectType::kBuiltInSrgb, mat_flags, attrib_flags, use_env_light);
+            sfx_flags_or_default, mat_flags, attrib_flags, use_env_light);
 
           if (!pbr_effects) {
             // creation failed, use fallback
-            if (effect_type != PBREffectType::kCustom) {
+            if (sfx_flags) {
               effect_name = "mineola:effect:fallback";
             }
             if (shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn) {
               *shadowmap_effect_name = "mineola:effect:shadowmap_fallback";
             }
           } else {
-            if (effect_type != PBREffectType::kCustom) {
+            if (sfx_flags) {
               effect_name = std::move(std::get<0>(*pbr_effects));
             }
             if (shadownmap_effect_type == PBRShadowmapEffectType::kBuiltIn) {

@@ -60,6 +60,7 @@ namespace mineola { namespace shader_parser {
         vec4 _delta_time;
       };
       uniform mat4 _model_mat;
+      uniform sampler2DShadow _shadowmap0;
       uniform sampler2D _env_light_probe_0;
     )";
     shader_str += built_in_uniform_str;
@@ -76,6 +77,19 @@ namespace mineola { namespace shader_parser {
       uniform mat4 _joint_mats[kMaxJoints];
     )";
     shader_str += skinning_uniform_str;
+  }
+
+  void InsertHardShadowSnippet(std::string &shader_str) {
+    static const char hard_shadow[] = R"(
+    // 0.0 means totally in shadow, 1.0 means totally out of shadow
+    float HardShadow(vec3 pos_wc, float bias) {
+      vec4 shadowmap_clip = _light_proj_mat_0 * _light_view_mat_0 * vec4(pos_wc, 1.0);
+      vec3 shadowmap_vp = shadowmap_clip.xyz / shadowmap_clip.w * 0.5 + 0.5;
+      shadowmap_vp.z += bias;
+      return texture(_shadowmap0, shadowmap_vp);
+    }
+    )";
+    shader_str += hard_shadow;
   }
 
   std::string BuildDefineString(const effect_defines_t *defines) {
@@ -109,15 +123,20 @@ namespace mineola { namespace shader_parser {
       line_number++;
       std::string include_filename;
       if (IsIncludedFile(line, line_number, include_filename)) {
-        if (defines)
-          for (auto &pair : *defines)
-            if (include_filename == pair.first)
+        if (defines) {
+          for (auto &pair : *defines) {
+            if (include_filename == pair.first) {
               include_filename = pair.second;
+            }
+          }
+        }
 
         if (include_filename == "mineola_builtin_uniforms") {
           InsertBuiltInUniformBlock(shader_str);
         } else if (include_filename == "mineola_skinned_animation") {
           InsertSkinningVariables(shader_str);
+        } else if (include_filename == "mineola_hard_shadow") {
+          InsertHardShadowSnippet(shader_str);
         } else {
           std::string found_fn;
           if (!Engine::Instance().ResrcMgr().LocateFile(include_filename.c_str(), found_fn)) {

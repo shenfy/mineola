@@ -13,6 +13,7 @@ using namespace mineola;
 const char pbr_vs_str[] =
 R"(#version 300 es
 precision highp float;
+precision highp sampler2DShadow;
 #include "mineola_builtin_uniforms"
 
 in vec3 Pos;
@@ -82,6 +83,7 @@ void main(void) {
 const char pbr_shadow_vs_str[] =
 R"(#version 300 es
 precision highp float;
+precision highp sampler2DShadow;
 #include "mineola_builtin_uniforms"
 
 in vec3 Pos;
@@ -106,6 +108,7 @@ void main(void) {
 const char pbr_fs_str[] =
 R"(#version 300 es
 precision highp float;
+precision highp sampler2DShadow;
 #include "mineola_builtin_uniforms"
 
 #if defined(HAS_ALBEDO_MAP)
@@ -149,6 +152,10 @@ in mat3 tbn;
 #endif
 #if defined(HAS_COLOR)
 in vec3 vcolor;
+#endif
+
+#if defined(RECEIVE_SHADOW)
+#include "mineola_hard_shadow"
 #endif
 
 out vec4 frag_color;
@@ -354,9 +361,14 @@ void main(void) {
   float a2 = pow2(a);
   vec3 color_specular = SpecularColor(albedo, metallic);
   vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
+  #if defined(RECEIVE_SHADOW)
+  float shadow_term = HardShadow(pos_wc, -1e-3);
+  #else
+  float shadow_term = 1.0;
+  #endif
   vec3 color_result = emission
-    + diffuse_term * _light_intensity_0.rgb * ao
-    + max(specular_term * n_dot_l * _light_intensity_0.rgb, vec3(0.0));
+    + diffuse_term * _light_intensity_0.rgb * shadow_term * ao
+    + max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
 
   #if defined(USE_ENV_LIGHT)
   color_result += EnvlightDiffuseTerm(albedo, normal_dir, metallic) * ao;
@@ -374,7 +386,6 @@ void main(void) {
 
 const char pbr_shadow_fs_str[] =
 R"(#version 300 es
-precision highp float;
 void main() {
 })";
 
@@ -384,9 +395,17 @@ std::string BuildTCName(uint8_t idx) {
   return result;
 }
 
-effect_defines_t CreatePBRShaderMacros(
+effect_defines_t CreatePBRShaderMacros(const SFXFlags &sfx_flags,
   const MaterialFlags &mat_flags, const AttribFlags &attrib_flags) {
   effect_defines_t result;
+
+  if (sfx_flags.UsesSrgbEncoding()) {
+    result.push_back({"SRGB_ENCODE", {}});
+  }
+  if (sfx_flags.ReceivesShadow()) {
+    result.push_back({"RECEIVE_SHADOW", {}});
+  }
+
   if (attrib_flags.HasNormal()) {
     result.push_back({"HAS_NORMAL", {}});
   }
@@ -463,6 +482,33 @@ std::vector<std::unique_ptr<RenderState>> CreatePBRShaderCommonStates(
 
 
 namespace mineola {
+
+void SFXFlags::EnableSrgbEncoding() {
+  flags |= SRGB_ENCODE_BIT;
+}
+
+void SFXFlags::EnableReceiveShadow() {
+  flags |= RECEIVE_SHADOW_BIT;
+}
+
+bool SFXFlags::UsesSrgbEncoding() const {
+  return flags & SRGB_ENCODE_BIT;
+}
+
+bool SFXFlags::ReceivesShadow() const {
+  return flags & RECEIVE_SHADOW_BIT;
+}
+
+std::string SFXFlags::Abbrev() const {
+  std::string result = "ss";
+  if (UsesSrgbEncoding()) {
+    result[0] = 'S';
+  }
+  if (ReceivesShadow()) {
+    result[1] = 'S';
+  }
+  return result;
+}
 
 void MaterialFlags::EnableDiffuseMap(int uv) {
   flags |= DIFFUSE_MAP_BIT;
@@ -662,26 +708,23 @@ std::string AttribFlags::Abbrev() const {
   return result;
 }
 
-std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(bool srgb,
-  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light) {
+std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(
+  const SFXFlags &sfx_flags, const MaterialFlags &mat_flags,
+  const AttribFlags &attrib_flags, bool use_env_light) {
 
-  char srgb_abbre = srgb ? 'S' : 's';
   char env_light_abbre = use_env_light ? 'E' : 'e';
 
   std::string effect_name = "mineola:effect:pbr:"
+    + sfx_flags.Abbrev()
     + attrib_flags.Abbrev()
     + mat_flags.Abbrev()
-    + srgb_abbre
     + env_light_abbre;
   std::string shadowmap_effect_name = effect_name + "s";
 
   auto &en = Engine::Instance();
   auto effect = bd_cast<GLEffect>(en.ResrcMgr().Find(effect_name));
   if (!effect) {
-    auto macros = CreatePBRShaderMacros(mat_flags, attrib_flags);
-    if (srgb) {
-      macros.push_back({"SRGB_ENCODE", {}});
-    }
+    auto macros = CreatePBRShaderMacros(sfx_flags, mat_flags, attrib_flags);
     if (use_env_light) {
       macros.push_back({"USE_ENV_LIGHT", {}});
     }

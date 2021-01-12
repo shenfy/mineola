@@ -3,8 +3,7 @@
     {
       "primitive": "rect",
       "effect": "effect:shadow",
-      "material": "material:shadow",
-      "queue": 1,
+      "queue": 1025,
       "node": "shadow"
     }
   ],
@@ -91,18 +90,6 @@
         "blendenable": "on",
         "blendfunc": "src_alpha,one_minus_src_alpha"
       }
-    }
-  ],
-  "materials": [
-    {
-      "name": "material:shadow",
-      "uniforms": [
-        {
-          "name": "shadowmap",
-          "type": "texture",
-          "texture_names": ["mineola:rt:shadowmap:depth_texture"]
-        }
-      ]
     }
   ]
 }
