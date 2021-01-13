@@ -18,6 +18,7 @@ void main() {
 
 auto skybox_frag = R"(#version 300 es
 precision highp float;
+precision highp sampler2DShadow;
 #include "mineola_builtin_uniforms"
 
 out vec4 color;
