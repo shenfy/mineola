@@ -133,3 +133,6 @@ fastlane/readme.md
 
 # MacOS
 .DS_Store
+
+# VSCode
+.vscode
