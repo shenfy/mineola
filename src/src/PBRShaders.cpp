@@ -155,7 +155,8 @@ in vec3 vcolor;
 #endif
 
 #if defined(RECEIVE_SHADOW)
-#include "mineola_hard_shadow"
+#define PCF_SOFT_DISK_RADIUS 10.0
+#include "mineola_pcf_soft_shadow"
 #endif
 
 out vec4 frag_color;
@@ -363,7 +364,7 @@ void main(void) {
   vec3 color_specular = SpecularColor(albedo, metallic);
   vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
   #if defined(RECEIVE_SHADOW)
-  float shadow_term = HardShadow(pos_wc, -1e-3);
+  float shadow_term = PCFSoftShadow(pos_wc, -1e-3);
   #else
   float shadow_term = 1.0;
   #endif

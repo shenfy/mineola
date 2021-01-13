@@ -16,6 +16,7 @@ bool LoadBuiltInShaders() {
   const char defaultvs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "void main(void)\n"
@@ -40,6 +41,7 @@ bool LoadBuiltInShaders() {
 
   const char shadowmapvs[] = R"(#version 300 es
   precision mediump float;
+  precision highp sampler2DShadow;
   #include "mineola_builtin_uniforms"
   in vec3 Pos;
   void main() {
@@ -62,6 +64,7 @@ bool LoadBuiltInShaders() {
   const char diffusevs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "in vec3 Normal;\n"
@@ -76,6 +79,7 @@ bool LoadBuiltInShaders() {
   const char diffuseps[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 normal_wc;\n"
   "out vec4 fragColor;\n"
@@ -94,6 +98,7 @@ bool LoadBuiltInShaders() {
   const char diffuse_tex_vs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "in vec3 Normal;\n"
@@ -111,6 +116,7 @@ bool LoadBuiltInShaders() {
   const char diffuse_tex_ps[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "uniform sampler2D diffuse_sampler;\n"
   "in vec3 normal_wc;\n"
@@ -132,6 +138,7 @@ bool LoadBuiltInShaders() {
   const char ambient_tex_vs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "in vec2 TexCoord0;\n"
@@ -146,6 +153,7 @@ bool LoadBuiltInShaders() {
   const char ambient_tex_ps[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "uniform sampler2D diffuse_sampler;\n"
   "in vec2 texcoord;\n"
