@@ -297,14 +297,15 @@ void main(void) {
   // vec3 light_dir = normalize(light_wc - pos_wc);
   vec3 light_dir = normalize(light_wc);
   vec3 view_dir = normalize(eye_wc.xyz - pos_wc);
+  vec3 normal_dir = vec3(0.0);
 
   #if defined(HAS_NORMAL)
     #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
       vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
       normal_pp = normalize(normal_pp * 2.0 - 1.0);
-      vec3 normal_dir = normalize(tbn * normal_pp);
+      normal_dir = normalize(tbn * normal_pp);
     #else
-      vec3 normal_dir = normalize(normal);
+      normal_dir = normalize(normal);
     #endif
   #else
     frag_color = vec4(base_color.rgb * ao, base_color.a);
