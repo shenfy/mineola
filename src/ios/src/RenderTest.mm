@@ -66,16 +66,6 @@ bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
 
   auto &en = Engine::Instance();
 
-  en.AddFrameMoveCallback([](float aa, float bb) {
-    Engine::Instance().EntityMgr().Transform([](const std::string &name, auto &entity) {
-      auto anim_entity = bd_cast<AnimatedEntity>(entity);
-      if (anim_entity) {
-        anim_entity->SetPlayMode(AnimatedEntity::kPlayLoop);
-        anim_entity->Play();
-      }
-    });
-  });
-
   std::string resource_path = [[[NSBundle mainBundle] resourcePath] UTF8String];
   en.ResrcMgr().AddSearchPath(resource_path.c_str());
 
@@ -109,6 +99,16 @@ bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
   bd_cast<ArcballController>(_camCtrl)->SetSpeed(0.1f);
 
   en.ChangeCamera("main", false);
+}
+
+- (void) started {
+  Engine::Instance().EntityMgr().Transform([](const std::string &name, auto &entity) {
+    auto anim_entity = bd_cast<AnimatedEntity>(entity);
+    if (anim_entity) {
+      anim_entity->SetPlayMode(AnimatedEntity::kPlayLoop);
+      anim_entity->Play();
+    }
+  });
 }
 
 @end

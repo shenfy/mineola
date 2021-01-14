@@ -14,7 +14,7 @@
 @protocol RenderDelegate <NSObject>
 @optional
 - (void) initScene;
-
+- (void) started;
 @end
 
 #endif

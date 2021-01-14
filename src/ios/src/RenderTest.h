@@ -12,5 +12,6 @@
 @interface RenderTest : NSObject <RenderDelegate>
 
 - (void) initScene;
+- (void) started;
 
 @end

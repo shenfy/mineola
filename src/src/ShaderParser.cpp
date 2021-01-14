@@ -103,7 +103,7 @@ namespace mineola { namespace shader_parser {
     #endif
 
     #ifndef PCF_SOFT_DISK_RADIUS
-    #define PCF_SOFT_DISK_RADIUS 10.0
+    #define PCF_SOFT_DISK_RADIUS 30.0
     #endif
 
     const float PCF_SOFT_PI = 3.14159265359;
