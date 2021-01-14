@@ -5,10 +5,8 @@
 enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
 
 @interface RendererViewController () {
-  int _defaultFBO;
+  int _currentFBO;
   int _width, _height;
-  int _frameCount;
-  int _vcState;
 }
 
 @end
@@ -18,11 +16,9 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
 - (id)init {
   self = [super init];
   if (self) {
-    self->_defaultFBO = -1;
+    self->_currentFBO = -1;
     self->_width = 0;
     self->_height = 0;
-    self->_frameCount = 0;
-    self->_vcState = kVCStateStart;
   }
   return self;
 }
@@ -33,12 +29,25 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
 
   self.preferredFramesPerSecond = 30;
 
-  GLKView *view = [[GLKView alloc] init];
+  // Create an OpenGL ES context and assign it to the view loaded from storyboard
+  GLKView *view = (GLKView *)self.view;;
   view.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+  [EAGLContext setCurrentContext:view.context];
+
+  // Configure renderbuffers created by the view
   view.drawableColorFormat = GLKViewDrawableColorFormatRGBA8888;
   view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
 
-  self.view = view;
+  // Init mineola
+  auto &en = mineola::Engine::Instance();
+  mineola::InitEngine();
+  if (self.renderDelegate && [self.renderDelegate respondsToSelector:@selector(initScene)]) {
+    [self.renderDelegate initScene];
+  }
+  mineola::StartEngine();
+  if (self.renderDelegate && [self.renderDelegate respondsToSelector:@selector(started)]) {
+    [self.renderDelegate started];
+  }
 
   // set up UI event handlers
   UIPanGestureRecognizer *panRecognizer = [[UIPanGestureRecognizer alloc]
@@ -82,60 +91,30 @@ enum {kVCStateStart = 0, kVCStateInit, kVCStateFBOSet, kVCStateFBOInvalid};
     // Dispose of any resources that can be recreated.
 }
 
-- (void)update {
-  if (_vcState == kVCStateStart) {
-    mineola::InitEngine();
-    if (self.renderDelegate && [self.renderDelegate respondsToSelector:@selector(initScene)]) {
-      [self.renderDelegate initScene];
-    }
-    mineola::StartEngine();
-    _vcState = kVCStateInit;
-  } else {
-    // handle fbo name/number change
-    bool fboChanged = false, sizeChanged = false;
-
-    GLint defaultFBO = -1;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    if (defaultFBO != _defaultFBO) {  // default FBO changed!
-      _defaultFBO = defaultFBO;
-      NSLog(@"default fbo changed to: %d", _defaultFBO);
-      fboChanged = true;
-    }
-    // handle resize
-    GLKView *view = (GLKView *)self.view;
-    if (view.drawableWidth != self->_width || view.drawableHeight != self->_height) {
-      _width = (int)view.drawableWidth;
-      _height = (int)view.drawableHeight;
-      NSLog(@"size changed to: %d x %d", _width, _height);
-      sizeChanged = true;
-    }
-
-    if (fboChanged) {
-      if (defaultFBO == 0) {
-        _vcState = kVCStateFBOInvalid;
-      } else {
-        mineola::SetScreenFramebuffer(_defaultFBO, _width, _height);
-        mineola::ResizeScreen(_width, _height);
-        _vcState = kVCStateFBOSet;
-      }
-    } else if (sizeChanged) {
-      mineola::ResizeScreen(_width, _height);
-    }
-  }
-}
-
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
-  if (_vcState == kVCStateFBOSet) {
-    auto &en = mineola::Engine::Instance();
-    en.FrameMove();
+  // Process screen fbo change and resize events.
+  // These events are not explicitly fired by iOS,
+  // so we have to query the fbo and size before every rendering.
+  auto &en = mineola::Engine::Instance();
 
-    en.Render();
-
-    if (_frameCount == 0) {
-      _frameCount = 1;
-    }
+  // Resize, should be checked before screen fbo change,
+  // because otherwise a fbo of size (0, 0) will be set.
+  if (view.drawableWidth != _width || view.drawableHeight != _height) {
+    _width = (int)view.drawableWidth;
+    _height = (int)view.drawableHeight;
+    mineola::ResizeScreen(_width, _height);
   }
 
+  // Screen fbo change
+  GLint currentFBO = -1;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
+  if (currentFBO != _currentFBO) {
+    _currentFBO = currentFBO;
+    mineola::SetScreenFramebuffer(_currentFBO, uint32_t(_width), uint32_t(_height));
+  }
+
+  en.FrameMove();
+  en.Render();
 }
 
 /*
