@@ -31,6 +31,10 @@ struct MaterialFlags {
   void EnableBlending();
   void EnableAlphaCutOff();
   void SetUnlit();
+  void SetUseClearcoat();
+  void EnableClearcoatTex(int uv);
+  void EnableClearcoatRoughTex(int uv);
+  void EnableClearcoatNormalTex(int uv);
   void EnableDoubleSide();
   void Clear();
 
@@ -44,22 +48,29 @@ struct MaterialFlags {
   bool HasTextures() const;
   bool IsDoubleSided() const;
   bool IsUnlit() const;
+  bool UseClearcoat() const;
+  bool HasClearcoatTex() const;
+  bool HasClearcoatRoughTex() const;
+  bool HasClearcoatNormalTex() const;
 
   std::string Abbrev() const;
 
-  uint8_t flags {0};
+  uint16_t flags {0};
 
-  enum {kNumTextures = 5};
-  std::array<uint8_t, kNumTextures> tex_uvs {0, 0, 0, 0, 0};
+  enum {kNumTextures = 8};
+  std::array<uint8_t, kNumTextures> tex_uvs {0, 0, 0, 0, 0, 0, 0, 0};
 
   enum {DIFFUSE_UV_LOC = 0, OCC_UV_LOC = 1, NORM_UV_LOC = 2,
-    METAL_ROUGH_UV_LOC = 3, EMIT_UV_LOC = 4};
+    METAL_ROUGH_UV_LOC = 3, EMIT_UV_LOC = 4, CLEARCOAT_TEX_UV_LOC = 5,
+    CLEARCOAT_ROUGH_TEX_UV_LOC = 6, CLEARCOAT_NORM_TEX_UV_LOC = 7
+  };
 
   enum {
     DIFFUSE_MAP_BIT = 0x1, OCCLUSION_MAP_BIT = 0x2, NORMAL_MAP_BIT = 0x4,
     METALLIC_ROUGHNESS_MAP_BIT = 0x8, EMISSIVE_MAP_BIT = 0x10,
     ALPHA_BLEND_BIT = 0x20, ALPHA_CUTOFF_BIT = 0x40, UNLIT_BIT = 0x80,
-    DOUBLE_SIDE_BIT = 0x100
+    DOUBLE_SIDE_BIT = 0x100, CLEARCOAT_BIT = 0x200, CLEARCOAT_TEX_BIT = 0x400,
+    CLEARCOAT_ROUGH_TEX_BIT = 0x800, CLEARCOAT_NORM_TEX_BIT = 0x1000
   };
 };
 

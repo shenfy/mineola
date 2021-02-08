@@ -130,6 +130,19 @@ uniform sampler2D emissive_sampler;  // emission map
 #if defined(USE_ALPHA_MASK)
 uniform float alpha_threshold;  // alpha cut-off threshold
 #endif
+#if defined(USE_CLEARCOAT)
+uniform float clearcoat_factor;
+uniform float clearcoat_roughness_factor;
+#if defined(HAS_CLEARCOAT_TEX)
+uniform sampler2D clearcoat_sampler;
+#endif
+#if defined(HAS_CLEARCOAT_ROUGH_TEX)
+uniform sampler2D clearcoat_roughness_sampler;
+#endif
+#if defined(HAS_CLEARCOAT_NORM_TEX)
+uniform sampler2D clearcoat_normal_sampler;
+#endif
+#endif
 
 uniform vec3 diffuse;  // albedo coefficient
 uniform float alpha;  // albedo transparency
@@ -459,6 +472,24 @@ effect_defines_t CreatePBRShaderMacros(const SFXFlags &sfx_flags,
       result.push_back({"EMIT_TEXCOORD",
         BuildTCName(mat_flags.tex_uvs[MaterialFlags::EMIT_UV_LOC])});
     }
+    if (mat_flags.UseClearcoat()) {
+      result.push_back({"USE_CLEARCOAT", {}});
+      if (mat_flags.HasClearcoatTex()) {
+        result.push_back({"HAS_CLEARCOAT_TEX", {}});
+        result.push_back({"CLEARCOAT_TEX_TEXCOORD",
+          BuildTCName(mat_flags.tex_uvs[MaterialFlags::CLEARCOAT_TEX_UV_LOC])});
+      }
+      if (mat_flags.HasClearcoatRoughTex()) {
+        result.push_back({"HAS_CLEARCOAT_ROUGH_TEX", {}});
+        result.push_back({"CLEARCOAT_ROUGH_TEX_TEXCOORD",
+          BuildTCName(mat_flags.tex_uvs[MaterialFlags::CLEARCOAT_ROUGH_TEX_UV_LOC])});
+      }
+      if (mat_flags.HasClearcoatNormalTex()) {
+        result.push_back({"HAS_CLEARCOAT_NORM_TEX", {}});
+        result.push_back({"CLEARCOAT_NORM_TEX_TEXCOORD",
+          BuildTCName(mat_flags.tex_uvs[MaterialFlags::CLEARCOAT_NORM_TEX_UV_LOC])});
+      }
+    }
   }
   if (mat_flags.IsDoubleSided()) {
     result.push_back({"DOUBLE_SIDE", {}});
@@ -550,6 +581,25 @@ void MaterialFlags::SetUnlit() {
   flags |= UNLIT_BIT;
 }
 
+void MaterialFlags::SetUseClearcoat() {
+  flags |= CLEARCOAT_BIT;
+}
+
+void MaterialFlags::EnableClearcoatTex(int uv) {
+  flags |= CLEARCOAT_TEX_BIT;
+  tex_uvs[CLEARCOAT_TEX_UV_LOC] = uv;
+}
+
+void MaterialFlags::EnableClearcoatRoughTex(int uv) {
+  flags |= CLEARCOAT_ROUGH_TEX_BIT;
+  tex_uvs[CLEARCOAT_ROUGH_TEX_UV_LOC] = uv;
+}
+
+void MaterialFlags::EnableClearcoatNormalTex(int uv) {
+  flags |= CLEARCOAT_NORM_TEX_BIT;
+  tex_uvs[CLEARCOAT_NORM_TEX_UV_LOC] = uv;
+}
+
 void MaterialFlags::EnableDoubleSide() {
   flags |= DOUBLE_SIDE_BIT;
 }
@@ -589,11 +639,27 @@ bool MaterialFlags::IsAlphaCutOffEnabled() const {
 bool MaterialFlags::HasTextures() const {
   return flags & (
     DIFFUSE_MAP_BIT | OCCLUSION_MAP_BIT | NORMAL_MAP_BIT | METALLIC_ROUGHNESS_MAP_BIT
-    | EMISSIVE_MAP_BIT);
+    | EMISSIVE_MAP_BIT|CLEARCOAT_TEX_BIT|CLEARCOAT_ROUGH_TEX_BIT|CLEARCOAT_NORM_TEX_BIT);
 }
 
 bool MaterialFlags::IsUnlit() const {
   return flags & UNLIT_BIT;
+}
+
+bool MaterialFlags::UseClearcoat() const {
+  return flags & CLEARCOAT_BIT;
+}
+
+bool MaterialFlags::HasClearcoatTex() const {
+  return flags & CLEARCOAT_TEX_BIT;
+}
+
+bool MaterialFlags::HasClearcoatRoughTex() const {
+  return flags & CLEARCOAT_ROUGH_TEX_BIT;
+}
+
+bool MaterialFlags::HasClearcoatNormalTex() const {
+  return flags & CLEARCOAT_NORM_TEX_BIT;
 }
 
 bool MaterialFlags::IsDoubleSided() const {
@@ -601,7 +667,7 @@ bool MaterialFlags::IsDoubleSided() const {
 }
 
 std::string MaterialFlags::Abbrev() const {
-  std::string result = "d0o0n0m0e0aud";
+  std::string result = "d0o0n0m0e0audct0r0n0";
   if (HasDiffuseMap()) {
     result[0] = 'D';
     result[1] = tex_uvs[DIFFUSE_UV_LOC] + '0';
@@ -632,6 +698,21 @@ std::string MaterialFlags::Abbrev() const {
   }
   if (IsDoubleSided()) {
     result[12] = 'D';
+  }
+  if (UseClearcoat()) {
+    result[13] = 'C';
+    if (HasClearcoatTex()) {
+      result[14] = 'T';
+      result[15] = tex_uvs[CLEARCOAT_TEX_UV_LOC] + '0';
+    }
+    if (HasClearcoatRoughTex()) {
+      result[16] = 'R';
+      result[17] = tex_uvs[CLEARCOAT_ROUGH_TEX_UV_LOC] + '0';
+    }
+    if (HasClearcoatNormalTex()) {
+      result[18] = 'N';
+      result[19] = tex_uvs[CLEARCOAT_NORM_TEX_UV_LOC] + '0';
+    }
   }
   return result;
 }
