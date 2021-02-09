@@ -448,6 +448,7 @@ void LoadClearcoat(const nlohmann::json &clearcoat_json,
   if (!clearcoat.normalTexture.empty()) {
     material->texture_slots["clearcoat_normal_sampler"] =
       {texture_names[(uint32_t)clearcoat.normalTexture.index]};
+    material->uniform_slots["clearcoat_normal_scale"] = uniform_helper::Wrap(clearcoat.normalTexture.scale);
     material_flags.EnableClearcoatNormalTex((uint8_t)clearcoat.normalTexture.texCoord);
   }
 }
