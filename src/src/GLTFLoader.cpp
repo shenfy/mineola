@@ -632,6 +632,7 @@ bool CreateSceneFromGLTFDoc(
       if (!m.normalTexture.empty()) {
         material->texture_slots["normal_sampler"] =
           {texture_names[(uint32_t)m.normalTexture.index]};
+        material->uniform_slots["normal_scale"] = uniform_helper::Wrap(m.normalTexture.scale);
         material_flags.EnableNormalMap((uint8_t)m.normalTexture.texCoord);
       }
       if (!m.occlusionTexture.empty()) {

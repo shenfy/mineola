@@ -119,6 +119,7 @@ uniform sampler2D lightmap_sampler;  // occlusion map
 #endif
 #if defined(HAS_NORMAL_MAP)
 uniform sampler2D normal_sampler;  // normal map
+uniform float normal_scale;
 #endif
 #if defined(HAS_METALLIC_MAP)
 uniform sampler2D metallic_roughness_sampler;  // metallic roughness
@@ -334,7 +335,7 @@ void main(void) {
   #if defined(HAS_NORMAL)
     #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
       vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
-      normal_pp = normalize(normal_pp * 2.0 - 1.0);
+      normal_pp = normalize((normal_pp * 2.0 - 1.0) * vec3(normal_scale, normal_scale, 1.0));
       normal_dir = normalize(tbn * normal_pp);
     #else
       normal_dir = normalize(normal);
