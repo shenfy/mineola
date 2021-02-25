@@ -1,6 +1,7 @@
 #ifndef MINEOLA_GLTFLOADER_H
 #define MINEOLA_GLTFLOADER_H
 
+#include <optional>
 #include "VertexType.h"
 
 namespace imgpp {
@@ -15,9 +16,9 @@ namespace gltf {
 bool LoadScene(
   const char *fn,
   const std::shared_ptr<SceneNode> &parent_node,
-  const char *effect,
+  std::string effect,
+  std::optional<std::string> shadowmap_effect,
   int layer_mask,
-  const std::vector<std::pair<std::string, std::string>> &inject_textures,
   bool use_env_light);
 
 }} //end namespace

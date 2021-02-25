@@ -19,6 +19,7 @@
 #include <mineola/PrefabHelper.h>
 #include <mineola/EnvLight.h>
 #include <mineola/AnimatedEntity.h>
+#include <mineola/TextureHelper.h>
 
 namespace {
 
@@ -27,8 +28,8 @@ static const std::string kConfigStr = R"({
   "geometries": [
     {
       "filename": "CesiumMan.glb",
-      "effect": "mineola:effect:pbr_srgb",
-      "shadowmap": false,
+      "effect": "mineola:effect:pbr:srgb:shadowed",
+      "shadowmap_effect": "mineola:effect:pbr",
       "node": "geometry",
       "layer": 0
     }
@@ -69,6 +70,10 @@ bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
   en.ResrcMgr().AddSearchPath(resource_path.c_str());
 
   en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
+  if (!texture_helper::CreateShadowmapRenderTarget(1024, 1024)) {
+    MLOG("Failed to create shadowmap render target\n");
+  }
+  en.RenderPasses().push_back(CreateShadowmapPass());
 
   BuildSceneFromConfigFile(kSceneFilename.c_str(), {});
 
@@ -94,8 +99,10 @@ bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
   bd_cast<ArcballController>(_camCtrl)->SetSpeed(0.1f);
 
   en.ChangeCamera("main", false);
+}
 
-  en.EntityMgr().Transform([](const std::string &name, auto &entity) {
+- (void) started {
+  Engine::Instance().EntityMgr().Transform([](const std::string &name, auto &entity) {
     auto anim_entity = bd_cast<AnimatedEntity>(entity);
     if (anim_entity) {
       anim_entity->SetPlayMode(AnimatedEntity::kPlayLoop);

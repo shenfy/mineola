@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <istream>
 
 namespace mineola {
@@ -13,9 +14,9 @@ using GeometryLoaderT = std::function<
   bool (
     const char *,  // path
     const std::shared_ptr<SceneNode> &,  // dst SceneNode
-    const char *,  // effect name
-    int,  // layer id
-    const std::vector<std::pair<std::string, std::string>> &  // inject textures
+    std::string,  // effect name
+    std::optional<std::string>, // shadowmap effect name
+    int  // layer id
   )
 >;
 using GeometryLoaderVecT = std::vector<GeometryLoaderT>;

@@ -203,10 +203,10 @@ if (MINEOLA_iOS)
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${CMAKE_PROJECT_VERSION})
   target_sources(gltfview PRIVATE
     ios/src/AppDelegate.h ios/src/AppDelegate.m ios/src/RenderTest.h ios/src/RenderTest.mm ios/src/main.m)
-  set_source_files_properties(pc/resrc/venice16.ktx ios/src/gltf.json pc/resrc/CesiumMan.glb
+  set_source_files_properties(pc/resrc/shadow.frag pc/resrc/shadow.vert pc/resrc/venice16.ktx ios/src/gltf.json pc/resrc/CesiumMan.glb
     PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   target_sources(gltfview PRIVATE
-    pc/resrc/venice16.ktx ios/src/gltf.json pc/resrc/CesiumMan.glb)
+      pc/resrc/shadow.frag pc/resrc/shadow.vert pc/resrc/venice16.ktx ios/src/gltf.json pc/resrc/CesiumMan.glb)
   target_compile_features(gltfview PUBLIC cxx_std_17)
   target_link_libraries(gltfview PUBLIC
     mineola

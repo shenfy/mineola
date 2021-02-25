@@ -60,6 +60,7 @@ namespace mineola { namespace shader_parser {
         vec4 _delta_time;
       };
       uniform mat4 _model_mat;
+      uniform sampler2DShadow _shadowmap0;
       uniform sampler2D _env_light_probe_0;
     )";
     shader_str += built_in_uniform_str;
@@ -76,6 +77,80 @@ namespace mineola { namespace shader_parser {
       uniform mat4 _joint_mats[kMaxJoints];
     )";
     shader_str += skinning_uniform_str;
+  }
+
+  void InsertHardShadowSnippet(std::string &shader_str) {
+    static const char hard_shadow[] = R"(
+    // 0.0 means totally in shadow, 1.0 means totally out of shadow
+    float HardShadow(vec3 pos_wc, float bias) {
+      vec4 shadowmap_clip = _light_proj_mat_0 * _light_view_mat_0 * vec4(pos_wc, 1.0);
+      vec3 shadowmap_vp = shadowmap_clip.xyz / shadowmap_clip.w * 0.5 + 0.5;
+      shadowmap_vp.z += bias;
+      return texture(_shadowmap0, shadowmap_vp);
+    }
+    )";
+    shader_str += hard_shadow;
+  }
+
+  void InsertPCFSoftShadowSnippet(std::string &shader_str) {
+    static const char soft_shadow[] = R"(
+    #ifndef PCF_SOFT_NUM_SAMPLES
+    #define PCF_SOFT_NUM_SAMPLES 20
+    #endif
+
+    #ifndef PCF_SOFT_NUM_RINGS
+    #define PCF_SOFT_NUM_RINGS 7
+    #endif
+
+    #ifndef PCF_SOFT_DISK_RADIUS
+    #define PCF_SOFT_DISK_RADIUS 30.0
+    #endif
+
+    const float PCF_SOFT_PI = 3.14159265359;
+    const float PCF_SOFT_PI2 = 6.28318530718;
+
+    highp float PCFSoftRand( const in vec2 uv ) {
+      const highp float a = 12.9898, b = 78.233, c = 43758.5453;
+      highp float dt = dot( uv.xy, vec2( a,b ) ), sn = mod( dt, PCF_SOFT_PI );
+      return fract(sin(sn) * c);
+    }
+
+    vec2 poisson_disk_[PCF_SOFT_NUM_SAMPLES];
+
+    void InitPoissonSamples( const in vec2 random_seed ) {
+      float angle_step = PCF_SOFT_PI2 * float( PCF_SOFT_NUM_RINGS ) / float( PCF_SOFT_NUM_SAMPLES );
+      float radius_step = 1.0 / float( PCF_SOFT_NUM_SAMPLES );
+      float angle = PCFSoftRand( random_seed ) * PCF_SOFT_PI2;
+      float radius = radius_step;
+      // jsfiddle that shows sample pattern: https://jsfiddle.net/a16ff1p7/
+      for( int i = 0; i < PCF_SOFT_NUM_SAMPLES; i ++ ) {
+        poisson_disk_[i] = vec2( cos( angle ), sin( angle ) ) * pow( radius, 0.75 );
+        radius += radius_step;
+        angle += angle_step;
+      }
+    }
+
+    // 0.0 means totally in shadow, 1.0 means totally out of shadow
+    float PCFSoftShadow(vec3 pos_wc, float bias) {
+      vec4 shadowmap_clip = _light_proj_mat_0 * _light_view_mat_0 * vec4(pos_wc, 1.0);
+      vec3 shadowmap_vp = shadowmap_clip.xyz / shadowmap_clip.w * 0.5 + 0.5;
+      shadowmap_vp.z += bias;
+
+      InitPoissonSamples(shadowmap_vp.xy);
+
+      float shadow = 0.0;
+      vec2 texel_size = 1.0 / vec2(textureSize(_shadowmap0, 0));
+      for( int i = 0; i < PCF_SOFT_NUM_SAMPLES; i ++ ) {
+        vec2 coord = poisson_disk_[ i ] * texel_size.x * PCF_SOFT_DISK_RADIUS;
+        vec2 coord_flip = -poisson_disk_[ i ].yx * texel_size.x * PCF_SOFT_DISK_RADIUS;
+        shadow += texture(_shadowmap0, vec3(shadowmap_vp.xy + coord, shadowmap_vp.z));
+        shadow += texture(_shadowmap0, vec3(shadowmap_vp.xy + coord_flip, shadowmap_vp.z));
+      }
+      shadow = shadow / ( 2.0 * float( PCF_SOFT_NUM_SAMPLES ) );
+      return shadow;
+    }
+    )";
+    shader_str += soft_shadow;
   }
 
   std::string BuildDefineString(const effect_defines_t *defines) {
@@ -109,15 +184,22 @@ namespace mineola { namespace shader_parser {
       line_number++;
       std::string include_filename;
       if (IsIncludedFile(line, line_number, include_filename)) {
-        if (defines)
-          for (auto &pair : *defines)
-            if (include_filename == pair.first)
+        if (defines) {
+          for (auto &pair : *defines) {
+            if (include_filename == pair.first) {
               include_filename = pair.second;
+            }
+          }
+        }
 
         if (include_filename == "mineola_builtin_uniforms") {
           InsertBuiltInUniformBlock(shader_str);
         } else if (include_filename == "mineola_skinned_animation") {
           InsertSkinningVariables(shader_str);
+        } else if (include_filename == "mineola_hard_shadow") {
+          InsertHardShadowSnippet(shader_str);
+        } else if (include_filename == "mineola_pcf_soft_shadow") {
+          InsertPCFSoftShadowSnippet(shader_str);
         } else {
           std::string found_fn;
           if (!Engine::Instance().ResrcMgr().LocateFile(include_filename.c_str(), found_fn)) {

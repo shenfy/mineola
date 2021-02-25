@@ -11,6 +11,7 @@
 #include <mineola/STBImagePlugin.h>
 #include <mineola/GLTFLoader.h>
 #include <mineola/PrefabHelper.h>
+#include <mineola/TextureHelper.h>
 #include <mineola/EnvLight.h>
 #include <mineola/AnimatedEntity.h>
 
@@ -23,8 +24,8 @@ static const std::string kConfigPrefix = R"({
       "filename": ")";
 
 static const std::string kConfigSuffix = R"(",
-      "effect": "mineola:effect:pbr_srgb",
-      "shadowmap": false,
+      "effect": "mineola:effect:pbr:srgb:shadowed",
+      "shadowmap_effect": "mineola:effect:pbr",
       "node": "geometry",
       "layer": 0
     }
@@ -97,9 +98,13 @@ public:
     Engine &en = GetEngine();
 
     en.SetExtTextureLoaders(STBLoadImageFromFile, STBLoadImageFromMem);
+    if (!texture_helper::CreateShadowmapRenderTarget(1024, 1024)) {
+      std::cout << "Failed to create shadowmap render target" << std::endl;
+    }
+    en.RenderPasses().push_back(CreateShadowmapPass());
 
     if (!gltf_filename_.empty()) {
-      // Load base scene
+      en.ResrcMgr().AddSearchPath("resrc");
       BuildSceneFromConfigFile(kSceneFilename.c_str(), {});
 
       // Load gltf

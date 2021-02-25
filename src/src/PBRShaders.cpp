@@ -13,6 +13,7 @@ using namespace mineola;
 const char pbr_vs_str[] =
 R"(#version 300 es
 precision highp float;
+precision highp sampler2DShadow;
 #include "mineola_builtin_uniforms"
 
 in vec3 Pos;
@@ -79,9 +80,35 @@ void main(void) {
   #endif
 })";
 
+const char pbr_shadow_vs_str[] =
+R"(#version 300 es
+precision highp float;
+precision highp sampler2DShadow;
+#include "mineola_builtin_uniforms"
+
+in vec3 Pos;
+
+#if defined(HAS_SKIN)
+#include "mineola_skinned_animation"
+#endif
+
+void main(void) {
+  #if defined(HAS_SKIN)
+  mat4 model_mat = BlendWeight.x * _joint_mats[int(BlendIdx.x)]
+    + BlendWeight.y * _joint_mats[int(BlendIdx.y)]
+    + BlendWeight.z * _joint_mats[int(BlendIdx.z)]
+    + BlendWeight.w * _joint_mats[int(BlendIdx.w)];
+  #else
+  mat4 model_mat = _model_mat;
+  #endif
+  vec4 pos = model_mat * vec4(Pos, 1.0);
+  gl_Position = _light_proj_mat_0 * _light_view_mat_0 * pos;
+})";
+
 const char pbr_fs_str[] =
 R"(#version 300 es
 precision highp float;
+precision highp sampler2DShadow;
 #include "mineola_builtin_uniforms"
 
 #if defined(HAS_ALBEDO_MAP)
@@ -125,6 +152,11 @@ in mat3 tbn;
 #endif
 #if defined(HAS_COLOR)
 in vec3 vcolor;
+#endif
+
+#if defined(RECEIVE_SHADOW)
+#define PCF_SOFT_DISK_RADIUS 10.0
+#include "mineola_pcf_soft_shadow"
 #endif
 
 out vec4 frag_color;
@@ -331,9 +363,14 @@ void main(void) {
   float a2 = pow2(a);
   vec3 color_specular = SpecularColor(albedo, metallic);
   vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
+  #if defined(RECEIVE_SHADOW)
+  float shadow_term = PCFSoftShadow(pos_wc, -1e-3);
+  #else
+  float shadow_term = 1.0;
+  #endif
   vec3 color_result = emission
-    + diffuse_term * _light_intensity_0.rgb * ao
-    + max(specular_term * n_dot_l * _light_intensity_0.rgb, vec3(0.0));
+    + diffuse_term * _light_intensity_0.rgb * shadow_term * ao
+    + max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
 
   #if defined(USE_ENV_LIGHT)
   color_result += EnvlightDiffuseTerm(albedo, normal_dir, metallic) * ao;
@@ -349,15 +386,28 @@ void main(void) {
   #endif
 })";
 
+const char pbr_shadow_fs_str[] =
+R"(#version 300 es
+void main() {
+})";
+
 std::string BuildTCName(uint8_t idx) {
   std::string result("texcoord0");
   result[8] = idx + '0';
   return result;
 }
 
-effect_defines_t CreatePBRShaderMacros(
+effect_defines_t CreatePBRShaderMacros(const SFXFlags &sfx_flags,
   const MaterialFlags &mat_flags, const AttribFlags &attrib_flags) {
   effect_defines_t result;
+
+  if (sfx_flags.UsesSrgbEncoding()) {
+    result.push_back({"SRGB_ENCODE", {}});
+  }
+  if (sfx_flags.ReceivesShadow()) {
+    result.push_back({"RECEIVE_SHADOW", {}});
+  }
+
   if (attrib_flags.HasNormal()) {
     result.push_back({"HAS_NORMAL", {}});
   }
@@ -415,10 +465,52 @@ effect_defines_t CreatePBRShaderMacros(
   return result;
 }
 
+std::vector<std::unique_ptr<RenderState>> CreatePBRShaderCommonStates(
+  const MaterialFlags &mat_flags
+) {
+  std::vector<std::unique_ptr<RenderState>> render_states;
+  render_states.push_back(std::make_unique<DepthTestState>(true));
+  render_states.push_back(std::make_unique<DepthFuncState>(render_state::kCmpFuncLess));
+  if (mat_flags.IsDoubleSided()) {
+    render_states.push_back(std::make_unique<CullEnableState>(false));
+  } else {
+    render_states.push_back(std::make_unique<CullEnableState>(true));
+    render_states.push_back(std::make_unique<CullFaceState>(render_state::kCullFaceBack));
+  }
+  return render_states;
+}
+
 }  // namespace
 
 
 namespace mineola {
+
+void SFXFlags::EnableSrgbEncoding() {
+  flags |= SRGB_ENCODE_BIT;
+}
+
+void SFXFlags::EnableReceiveShadow() {
+  flags |= RECEIVE_SHADOW_BIT;
+}
+
+bool SFXFlags::UsesSrgbEncoding() const {
+  return flags & SRGB_ENCODE_BIT;
+}
+
+bool SFXFlags::ReceivesShadow() const {
+  return flags & RECEIVE_SHADOW_BIT;
+}
+
+std::string SFXFlags::Abbrev() const {
+  std::string result = "ss";
+  if (UsesSrgbEncoding()) {
+    result[0] = 'S';
+  }
+  if (ReceivesShadow()) {
+    result[1] = 'S';
+  }
+  return result;
+}
 
 void MaterialFlags::EnableDiffuseMap(int uv) {
   flags |= DIFFUSE_MAP_BIT;
@@ -618,39 +710,28 @@ std::string AttribFlags::Abbrev() const {
   return result;
 }
 
-std::string SelectOrCreatePBREffect(bool srgb,
-  const MaterialFlags &mat_flags, const AttribFlags &attrib_flags, bool use_env_light) {
+std::optional<std::pair<std::string, std::string>> SelectOrCreatePBREffect(
+  const SFXFlags &sfx_flags, const MaterialFlags &mat_flags,
+  const AttribFlags &attrib_flags, bool use_env_light) {
 
-  char srgb_abbre = srgb ? 'S' : 's';
   char env_light_abbre = use_env_light ? 'E' : 'e';
 
   std::string effect_name = "mineola:effect:pbr:"
+    + sfx_flags.Abbrev()
     + attrib_flags.Abbrev()
     + mat_flags.Abbrev()
-    + srgb_abbre
     + env_light_abbre;
+  std::string shadowmap_effect_name = effect_name + "s";
 
   auto &en = Engine::Instance();
   auto effect = bd_cast<GLEffect>(en.ResrcMgr().Find(effect_name));
   if (!effect) {
-    auto macros = CreatePBRShaderMacros(mat_flags, attrib_flags);
-    if (srgb) {
-      macros.push_back({"SRGB_ENCODE", {}});
-    }
+    auto macros = CreatePBRShaderMacros(sfx_flags, mat_flags, attrib_flags);
     if (use_env_light) {
       macros.push_back({"USE_ENV_LIGHT", {}});
     }
 
-    std::vector<std::unique_ptr<RenderState>> render_states;
-    render_states.push_back(std::make_unique<DepthTestState>(true));
-    render_states.push_back(std::make_unique<DepthFuncState>(render_state::kCmpFuncLess));
-    if (mat_flags.IsDoubleSided()) {
-      render_states.push_back(std::make_unique<CullEnableState>(false));
-    } else {
-      render_states.push_back(std::make_unique<CullEnableState>(true));
-      render_states.push_back(std::make_unique<CullFaceState>(render_state::kCullFaceBack));
-    }
-
+    auto render_states = CreatePBRShaderCommonStates(mat_flags);
     if (mat_flags.IsBlendingEnabled()) {
       render_states.push_back(std::make_unique<BlendEnableState>(true));
       render_states.push_back(std::make_unique<BlendFuncState>(
@@ -661,11 +742,19 @@ std::string SelectOrCreatePBREffect(bool srgb,
 
     if (!CreateEffectFromMemHelper(effect_name.c_str(),
       pbr_vs_str, pbr_fs_str, &macros, std::move(render_states))) {
-      return {};
+      return std::nullopt;
+    }
+
+    render_states = CreatePBRShaderCommonStates(mat_flags);
+    render_states.push_back(std::make_unique<BlendEnableState>(false));
+
+    if (!CreateEffectFromMemHelper(shadowmap_effect_name.c_str(),
+      pbr_shadow_vs_str, pbr_shadow_fs_str, &macros, std::move(render_states))) {
+      return std::nullopt;
     }
   }
 
-  return effect_name;
+  return std::make_pair(std::move(effect_name), std::move(shadowmap_effect_name));
 }
 
 }  // namespace

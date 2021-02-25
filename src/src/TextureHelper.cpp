@@ -12,6 +12,7 @@
 #include <mineola/PixelType.h>
 #include <mineola/Framebuffer.h>
 #include <mineola/ImgppTextureSrc.h>
+#include <mineola/ReservedTextureUnits.h>
 
 namespace {
 
@@ -413,8 +414,8 @@ bool CreateDepthTexture(const char *texture_name, uint32_t width, uint32_t heigh
   desc.compressed = false;
   desc.min_filter = TextureDesc::kLinearMipmapLinear;
   desc.mag_filter = TextureDesc::kLinear;
-  desc.wrap_s = TextureDesc::kRepeat;
-  desc.wrap_t = TextureDesc::kRepeat;
+  desc.wrap_s = TextureDesc::kClampToEdge;
+  desc.wrap_t = TextureDesc::kClampToEdge;
   desc.access = 0;
   desc.array_size = 1;
   desc.levels = 1;
@@ -563,8 +564,25 @@ bool CreateRenderTarget(const char *name,
 }
 
 bool CreateShadowmapRenderTarget(uint32_t width, uint32_t height) {
-  return CreateRenderTarget("mineola:rt:shadowmap",
-    width, height, 32, false, GL_RED, GL_R8, GL_UNSIGNED_BYTE, 1, 1, true);
+  // create render target
+  if (!CreateRenderTarget("mineola:rt:shadowmap",
+    width, height, 32, false, GL_RED, GL_R8, GL_UNSIGNED_BYTE, 1, 1, true)) {
+    return false;
+  }
+
+  // find depth texture
+  auto depth_texture = bd_cast<Texture>(
+    Engine::Instance().ResrcMgr().Find("mineola:rt:shadowmap:depth_texture"));
+  if (!depth_texture) {
+    return false;
+  }
+
+  // bind to texture unit
+  glActiveTexture(GL_TEXTURE0 + kShadowmap0TextureUnit);
+  depth_texture->Bind();
+  glActiveTexture(GL_TEXTURE0 + kNumReservedTextureUnits);
+  CHKGLERR_RET;
+  return true;
 }
 
 

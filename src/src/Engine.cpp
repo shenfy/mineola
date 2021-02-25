@@ -349,13 +349,21 @@ void Engine::Render() {
 
     // actual rendering
     for (auto iter = render_queue.begin(); iter != render_queue.end(); ++iter) {
-      if (!(pass.layer_mask & iter->second->LayerMask()))  // skip masked objects
+      if (!(pass.layer_mask & iter->second->LayerMask())) {  // skip masked objects
         continue;
+      }
+
+      if (pass.sfx == RenderPass::SFX_PASS_SHADOWMAP && !iter->second->GetShadowmapEffectName()) {
+        // In shadowmap pass, skip objects that don't cast shadow.
+        continue;
+      }
 
       CHKGLERR
       iter->second->PreRender(frame_time_, pass_idx);
       current_effect_.second->UploadVariable("_model_mat", glm::value_ptr(iter->first));
-      int tex_unit = kEnvLightProbe0TextureUnit;
+      int tex_unit = kShadowmap0TextureUnit;
+      current_effect_.second->UploadVariable("_shadowmap0", &tex_unit);
+      tex_unit = kEnvLightProbe0TextureUnit;
       current_effect_.second->UploadVariable("_env_light_probe_0", &tex_unit);
       iter->second->Draw(frame_time_, pass_idx);
     }

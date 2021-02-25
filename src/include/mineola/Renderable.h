@@ -23,8 +23,11 @@ public:
 
   void AddVertexArray(std::shared_ptr<vertex_type::VertexArray> va,
             const char *material_name);
-  void SetEffect(const char *effect_name);
-  inline const char *GetEffectName() const {return effect_name_.c_str();}
+  void SetEffect(std::string effect_name);
+  const char *GetEffectName() const;
+
+  void SetShadowmapEffect(std::string effect_name);
+  std::optional<const char *> GetShadowmapEffectName() const;
 
   size_t NumVertexArray() const;
   void SetMaterial(size_t index, const char *material_name);
@@ -49,7 +52,8 @@ public:
 protected:
   int16_t q_id_;
   int layer_mask_;
-  std::string effect_name_; //for standard render pass
+  std::string effect_name_; // for standard render pass
+  std::optional<std::string> shadowmap_effect_name_; // for shadowmap pass
   std::vector<std::shared_ptr<vertex_type::VertexArray> > vertex_arrays_;
   std::vector<std::string> material_names_;
   std::shared_ptr<Skin> skin_;

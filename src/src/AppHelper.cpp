@@ -16,6 +16,7 @@ bool LoadBuiltInShaders() {
   const char defaultvs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "void main(void)\n"
@@ -38,9 +39,32 @@ bool LoadBuiltInShaders() {
     return false;
   }
 
+  const char shadowmapvs[] = R"(#version 300 es
+  precision mediump float;
+  precision highp sampler2DShadow;
+  #include "mineola_builtin_uniforms"
+  in vec3 Pos;
+  void main() {
+    vec4 pos = _model_mat * vec4(Pos, 1.0);
+    gl_Position = _light_proj_mat_0 * _light_view_mat_0 * pos;
+  }
+  )";
+
+  const char shadowmapps[] = R"(#version 300 es
+  precision mediump float;
+  void main() {
+  }
+  )";
+
+  if (!CreateEffectFromMemHelper("mineola:effect:shadowmap_fallback",
+    shadowmapvs, shadowmapps, nullptr, std::move(render_states))) {
+    return false;
+  }
+
   const char diffusevs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "in vec3 Normal;\n"
@@ -55,6 +79,7 @@ bool LoadBuiltInShaders() {
   const char diffuseps[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 normal_wc;\n"
   "out vec4 fragColor;\n"
@@ -73,6 +98,7 @@ bool LoadBuiltInShaders() {
   const char diffuse_tex_vs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "in vec3 Normal;\n"
@@ -90,6 +116,7 @@ bool LoadBuiltInShaders() {
   const char diffuse_tex_ps[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "uniform sampler2D diffuse_sampler;\n"
   "in vec3 normal_wc;\n"
@@ -111,6 +138,7 @@ bool LoadBuiltInShaders() {
   const char ambient_tex_vs[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "in vec3 Pos;\n"
   "in vec2 TexCoord0;\n"
@@ -125,6 +153,7 @@ bool LoadBuiltInShaders() {
   const char ambient_tex_ps[] =
   "#version 300 es\n"
   "precision mediump float;\n"
+  "precision highp sampler2DShadow;\n"
   "#include \"mineola_builtin_uniforms\"\n"
   "uniform sampler2D diffuse_sampler;\n"
   "in vec2 texcoord;\n"

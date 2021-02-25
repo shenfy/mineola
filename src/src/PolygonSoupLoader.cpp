@@ -12,7 +12,6 @@ namespace mineola { namespace primitive_helper {
 
 bool BuildFromPolygonSoup(const PolygonSoup &soup,
   const char *name,
-  const char *effect_name,
   Renderable &renderable) {
   // verts
   using namespace mineola::vertex_type;
@@ -157,7 +156,6 @@ bool BuildFromPolygonSoup(const PolygonSoup &soup,
 
   // fill renderable
   renderable.AddVertexArray(va, material_name.c_str());
-  renderable.SetEffect(effect_name);
   return true;
 }
 
