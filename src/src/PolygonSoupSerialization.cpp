@@ -243,7 +243,7 @@ namespace mineola {
       }
     }
 
-    read_buffer.resize(sizeof(int) * 8);
+    read_buffer.resize(sizeof(int) * 9);
     for (auto &face : soup.faces) {
       if (is_ascii) {
         std::getline(ins, line);
@@ -286,10 +286,10 @@ namespace mineola {
 
         if (soup.has_face_texcoord) {
           face.texcoords.resize(num_vertex);
-          ins.read(&read_buffer[0], sizeof(uint8_t) + sizeof(float) * num_vertex);
+          ins.read(&read_buffer[0], sizeof(uint8_t) + sizeof(float) * num_vertex * 2);
           for (uint8_t i = 0; i < num_vertex; ++i) {
-            face.texcoords[i].x = *(float*)(&read_buffer[sizeof(uint8_t) + i * sizeof(float) * 2]);
-            face.texcoords[i].y = *(float*)(&read_buffer[sizeof(uint8_t) + i * sizeof(float) * 2 + 1]);
+            face.texcoords[i].x = *(float*)(&read_buffer[sizeof(uint8_t) + (i * 2) * sizeof(float)]);
+            face.texcoords[i].y = *(float*)(&read_buffer[sizeof(uint8_t) + (i * 2 + 1) * sizeof(float)]);
           }
         }
       }
