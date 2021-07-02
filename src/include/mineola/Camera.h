@@ -2,14 +2,13 @@
 #define MINEOLA_CAMERA_H
 
 #include <glm/glm.hpp>
-#include "Visitor.h"
 
 namespace mineola {
 
 class GLEffect;
 class Viewport;
 
-class Camera {  // : public Visitable<>
+class Camera {
 public:
   explicit Camera(bool perspective = true);
   virtual ~Camera();
@@ -46,20 +45,6 @@ protected:
   // record if projection matrix is directly set
   bool using_custom_proj_matrix_;
 };
-
-class Resizer
-  : public Traverser {
-    // public Visitor<Camera>
-public:
-  Resizer(uint32_t width, uint32_t height);
-  ~Resizer();
-
-  // virtual void Visit(Camera &);
-
-protected:
-  uint32_t width_, height_;
-};
-
 }
 
 #endif
