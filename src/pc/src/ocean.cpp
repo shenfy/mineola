@@ -1,4 +1,4 @@
-#include "../include/AppFrame.h"
+#include <mineola/AppFrame.h>
 #include <memory>
 #include <iostream>
 #include <string>

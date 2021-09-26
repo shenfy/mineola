@@ -1,4 +1,4 @@
-#include "../include/AppFrame.h"
+#include <mineola/AppFrame.h>
 #include <mineola/glutility.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
