@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mineola VERSION 1.2.0 LANGUAGES C CXX)
+project(mineola VERSION 1.2.1 LANGUAGES C CXX)
 
 # Conan boilerplates
 if (EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
@@ -166,8 +166,10 @@ endif()
 
 if (MINEOLA_PC)
   # We're using glad as the GL loader on PC
-  set(MINEOLA_SRC ${MINEOLA_SRC} src/glad.c)
-  set(MINEOLA_HDR ${MINEOLA_HDR} include/mineola/glad.h include/mineola/khrplatform.h)
+  set(MINEOLA_SRC ${MINEOLA_SRC} src/glad.c src/AppFrame.cpp)
+  set(MINEOLA_HDR ${MINEOLA_HDR} include/mineola/glad.h include/mineola/khrplatform.h include/mineola/AppFrame.h)
+
+  find_package(glfw3 REQUIRED)
 endif()
 
 # The mineola library
@@ -189,6 +191,9 @@ target_link_libraries(mineola PUBLIC
   fx_gltf::fx_gltf
   stb::stb
   ${CMAKE_DL_LIBS})
+if (MINEOLA_PC)
+  target_link_libraries(mineola PUBLIC glfw::glfw)
+endif()
 set_target_properties(mineola PROPERTIES PUBLIC_HEADER "${MINEOLA_HDR}")
 install(TARGETS mineola EXPORT mineolaTargets
   LIBRARY DESTINATION lib
@@ -216,12 +221,10 @@ endif()
 
 # PC examples
 if (MINEOLA_PC)
-  find_package(glfw REQUIRED)
-
   add_executable(gltfview)
   target_sources(gltfview PRIVATE
-    pc/src/gltfdemo.cpp pc/src/AppFrame.cpp)
-  target_link_libraries(gltfview PRIVATE mineola glfw::glfw)
+    pc/src/gltfdemo.cpp)
+  target_link_libraries(gltfview PRIVATE mineola)
   add_custom_command(
     TARGET gltfview
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pc/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
@@ -229,8 +232,8 @@ if (MINEOLA_PC)
 
   add_executable(cloth)
   target_sources(cloth PRIVATE
-    pc/src/cloth.cpp pc/src/AppFrame.cpp)
-  target_link_libraries(cloth PRIVATE mineola glfw::glfw)
+    pc/src/cloth.cpp)
+  target_link_libraries(cloth PRIVATE mineola)
   add_custom_command(
     TARGET cloth
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pc/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
@@ -238,8 +241,8 @@ if (MINEOLA_PC)
 
   add_executable(ocean)
   target_sources(ocean PRIVATE
-    pc/src/ocean.cpp pc/src/AppFrame.cpp)
-  target_link_libraries(ocean PRIVATE mineola glfw::glfw)
+    pc/src/ocean.cpp)
+  target_link_libraries(ocean PRIVATE mineola)
   add_custom_command(
     TARGET ocean
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pc/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
