@@ -19,7 +19,7 @@ class MineolaConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.69.0")
         self.requires("glm/0.9.8.5@g-truc/stable")
-        self.requires("imgpp/2.1.5@shenfy/testing")
+        self.requires("imgpp/2.1.7@shenfy/testing")
         self.requires("fx_gltf/1.1.0@shenfy/testing")
         self.requires("stb/20200203")
         if self.settings.os != 'iOS' and self.settings.os != 'Android':
