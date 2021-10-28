@@ -24,6 +24,9 @@ public:
   bool SetData(uint32_t size, const void *data);
   bool UpdateData(uint32_t offset, uint32_t size, const void *data);
 
+  void *Map();
+  void Unmap();
+
   enum Frequency { STATIC = 0, DYNAMIC = 1, STREAM =2 };
   enum Direction { SEND = 0, READ = 1, COPY = 2 };
   enum Access { READ_ONLY = 0, WRITE_ONLY = 1, READ_WRITE = 2 };
@@ -33,6 +36,7 @@ protected:
   uint32_t frequency_;
   uint32_t direction_;
   uint32_t access_;
+  uint32_t size_;
   std::vector<uint32_t> targets_;
   uint32_t index_;
 };
