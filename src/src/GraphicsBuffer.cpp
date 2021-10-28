@@ -14,6 +14,7 @@ namespace mineola {
       frequency_(frequency),
       direction_(direction),
       access_(access),
+      size_(0),
       targets_({target}),
       index_(0) {
     glGenBuffers(1, &buffer_handle_);
@@ -28,6 +29,7 @@ namespace mineola {
       frequency_(frequency),
       direction_(direction),
       access_(access),
+      size_(0),
       targets_(std::move(targets)),
       index_(0) {
     glGenBuffers(1, &buffer_handle_);
@@ -43,6 +45,7 @@ namespace mineola {
       frequency_(frequency),
       direction_(direction),
       access_(access),
+      size_(0),
       targets_({target}),
       index_(index) {
     glGenBuffers(1, &buffer_handle_);
@@ -83,6 +86,7 @@ namespace mineola {
     glBindBuffer(targets_[0], buffer_handle_);
     glBufferData(targets_[0], size, 0, type_mapping::Usage2GL(frequency_, direction_));
     glBindBuffer(targets_[0], 0);
+    size_ = size;
     return true;
   }
 
@@ -90,6 +94,7 @@ namespace mineola {
     glBindBuffer(targets_[0], buffer_handle_);
     glBufferData(targets_[0], size, data, type_mapping::Usage2GL(frequency_, direction_));
     glBindBuffer(targets_[0], 0);
+    size_ = size;
     return true;
   }
 
@@ -98,5 +103,13 @@ namespace mineola {
     glBufferSubData(targets_[0], offset, size, data);
     glBindBuffer(targets_[0], 0);
     return true;
+  }
+
+  void *GraphicsBuffer::Map() {
+    return glMapBufferRange(targets_[0], 0, size_, type_mapping::Access2GL(access_));
+  }
+
+  void GraphicsBuffer::Unmap() {
+    glUnmapBuffer(targets_[0]);
   }
 }
