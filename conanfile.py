@@ -3,7 +3,7 @@ import os, pathlib
 
 class MineolaConan(ConanFile):
     name = "mineola"
-    version = "1.2.2"
+    version = "1.2.3"
     license = "MIT"
     author = "Fangyang Shen dev@shenfy.com"
     url = "https://github.com/shenfy/mineola"
@@ -19,7 +19,7 @@ class MineolaConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.69.0")
         self.requires("glm/0.9.8.5@g-truc/stable")
-        self.requires("imgpp/2.1.7@shenfy/testing")
+        self.requires("imgpp/2.1.8@shenfy/testing")
         self.requires("fx_gltf/1.1.0@shenfy/testing")
         self.requires("stb/20200203")
         if self.settings.os != 'iOS' and self.settings.os != 'Android':
