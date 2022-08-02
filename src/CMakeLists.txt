@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mineola VERSION 1.2.3 LANGUAGES C CXX)
+project(mineola VERSION 1.2.4 LANGUAGES C CXX)
 
 # Conan boilerplates
 if (EXISTS ${CMAKE_BINARY_DIR}/conan_paths.cmake)
