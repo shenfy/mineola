@@ -3,7 +3,7 @@ import os, pathlib
 
 class MineolaConan(ConanFile):
     name = "mineola"
-    version = "1.2.3"
+    version = "1.2.4"
     license = "MIT"
     author = "Fangyang Shen dev@shenfy.com"
     url = "https://github.com/shenfy/mineola"
