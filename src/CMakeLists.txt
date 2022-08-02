@@ -169,7 +169,7 @@ if (MINEOLA_PC)
   set(MINEOLA_SRC ${MINEOLA_SRC} src/glad.c src/AppFrame.cpp)
   set(MINEOLA_HDR ${MINEOLA_HDR} include/mineola/glad.h include/mineola/khrplatform.h include/mineola/AppFrame.h)
 
-  find_package(glfw3 REQUIRED)
+  find_package(glfw REQUIRED)
 endif()
 
 # The mineola library
