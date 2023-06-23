@@ -2,6 +2,7 @@
 #define MINEOLA_PIXELTYPE_H
 
 #include <tuple>
+#include <cstdint>
 
 namespace mineola { namespace gl {
 

@@ -3,7 +3,7 @@
 #ifdef MINEOLA_USE_STBIMAGE
 
 #include <mineola/STBImagePlugin.h>
-#include <imgpp/imgpp.hpp>
+#include <mineola/Imgpp.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_BMP

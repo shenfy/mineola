@@ -147,34 +147,35 @@ bool BuildSceneFromConfig(const char *config_str,
 
       if (node_desc.find("eye") != node_desc.end()) {  // lookat rbt
         glm::vec3 eye(0.0f, 0.0f, -1.0f), target, up_dir(0.0f, 1.0f, 0.0f);
-        eye = ParseVec3(node_desc["eye"].get<std::string>());
+        eye = detail::ParseArray<glm::vec3>(node_desc["eye"]);
         if (node_desc.find("target") != node_desc.end())
-          target = ParseVec3(node_desc["target"].get<std::string>());
+          target = detail::ParseArray<glm::vec3>(node_desc["target"]);
         if (node_desc.find("up") != node_desc.end())
-          up_dir = ParseVec3(node_desc["up"].get<std::string>());
+          up_dir = detail::ParseArray<glm::vec3>(node_desc["up"]);
         new_node->SetRbt(math::Rbt::LookAt(eye, target, up_dir));
 
         if (node_desc.find("scale") != node_desc.end()) {
-          glm::vec3 scale = ParseVec3(node_desc["scale"].get<std::string>());
+          glm::vec3 scale = detail::ParseArray<glm::vec3>(node_desc["scale"]);
           new_node->SetScale(scale);
         }
       } else {  // TRS rbt
         glm::vec3 translate(0.f, 0.f, 0.f);
-        if (node_desc.find("translate") != node_desc.end())
-          translate = ParseVec3(node_desc["translate"].get<std::string>());
+        if (node_desc.find("translate") != node_desc.end()) {
+          translate = detail::ParseArray<glm::vec3>(node_desc["translate"]);
+        }
         glm::quat rotation(1.f, 0.f, 0.f, 0.f);
         if (node_desc.find("rotate") != node_desc.end()) {
-          glm::vec4 rotate_v = ParseVec4(node_desc["rotate"].get<std::string>());
+          auto rotate_v = detail::ParseArray<glm::vec4>(node_desc["rotate"]);
           rotation = (glm::quat)rotate_v;
         }
         glm::vec3 scale(1.f, 1.f, 1.f);
         if (node_desc.find("scale") != node_desc.end())
-          scale = ParseVec3(node_desc["scale"].get<std::string>());
+          scale = detail::ParseArray<glm::vec3>(node_desc["scale"]);
 
         if (node_desc.find("matrix") != node_desc.end()) {
           auto &matrix = node_desc["matrix"];
           if (matrix.find("raw") != matrix.end()) {
-            auto mat = ParseMat4(matrix["raw"].get<std::string>());
+            auto mat = detail::ParseMatrix<glm::mat4>(matrix["raw"]);
             if (matrix.find("coordsys") != matrix.end()) {
               auto coordsys = matrix["coordsys"].get<std::string>();
               if (strcmp(coordsys.c_str(), "mitsuba") == 0)

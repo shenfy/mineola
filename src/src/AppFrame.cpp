@@ -1,3 +1,4 @@
+#include "prefix.h"
 #include <mineola/AppFrame.h>
 #include <mineola/glutility.h>
 #define GLFW_INCLUDE_NONE

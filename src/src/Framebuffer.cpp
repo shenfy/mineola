@@ -1,7 +1,7 @@
 #include "prefix.h"
 #include <fstream>
 #include <algorithm>
-#include <imgpp/imgpp.hpp>
+#include <mineola/Imgpp.hpp>
 #include <mineola/glutility.h>
 #include <mineola/Framebuffer.h>
 #include <mineola/Engine.h>

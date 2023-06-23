@@ -49,23 +49,23 @@
   "nodes": [
     {
       "name": "geometry",
-      "translate": "0, 0, 0",
-      "rotate": "0, 0, 0, 1",
-      "scale": "1, 1, 1",
+      "translate": [0, 0, 0],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
       "parent": "root"
     },
     {
       "name": "camera",
-      "eye": "20, 0, 20",
-      "target": "0, 0, 0",
-      "up": "0, 1, 0",
+      "eye": [20, 0, 20],
+      "target": [0, 0, 0],
+      "up": [0, 1, 0],
       "parent": "root"
     },
      {
       "name": "light",
-      "translate": "1, 1, 0",
-      "rotate": "0, 0, 0, 1",
-      "scale": "1, 1, 1",
+      "translate": [1, 1, 0],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
       "parent": "root"
     }
   ],

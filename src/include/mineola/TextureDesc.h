@@ -1,6 +1,7 @@
 #ifndef MINEOLA_TEXTUREDESC_H
 #define MINEOLA_TEXTUREDESC_H
 
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include "glutility.h"
 

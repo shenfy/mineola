@@ -1,8 +1,7 @@
 #ifndef MINEOLA_PREFIX_H
 #define MINEOLA_PREFIX_H
 
-#define GLM_ENABLE_EXPERIMENTAL
-#define GLM_FORCE_CTOR_INIT
+#include <mineola/GLMDefines.h>
 
 #ifdef __ANDROID_API__
 #define BOOST_UUID_RANDOM_PROVIDER_FORCE_POSIX
@@ -10,4 +9,4 @@
 
 #define MINEOLA_USE_STBIMAGE
 
-#endif /* MINEOLA_PREFIX_H */
+#endif  /* MINEOLA_PREFIX_H */

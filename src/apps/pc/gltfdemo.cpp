@@ -1,3 +1,4 @@
+#define GLM_FORCE_CTOR_INIT
 #include <mineola/AppFrame.h>
 #include <memory>
 #include <iostream>
@@ -136,6 +137,7 @@ public:
       if (aabb) {
         auto center = aabb->Center();
         auto extent = aabb->Extent();
+
         auto max_extent = std::max(std::max(extent.x, extent.y), extent.z);
         std::cout << "Model center: " << center << ", extent: " << extent << std::endl;
 

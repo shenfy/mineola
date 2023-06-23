@@ -4,11 +4,11 @@
 #include <optional>
 #include "VertexType.h"
 
+namespace mineola {
 namespace imgpp {
   class Img;
 }
 
-namespace mineola {
 class SceneNode;
 
 namespace gltf {

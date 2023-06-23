@@ -1,6 +1,7 @@
 #ifndef MINEOLA_MATHHELPER_H
 #define MINEOLA_MATHHELPER_H
 
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>

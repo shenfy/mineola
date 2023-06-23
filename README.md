@@ -1,17 +1,17 @@
 # Mineola
 OpenGL ES based minimal rendering engine.
 
-## Build on Ubuntu 18.04
+## Build under Linux (tested on Ubuntu 22.04)
 
-We have switched to using [Conan](https://conan.io) to manage dependencies. To build mineola under Linux, please run conan and cmake to generate makefile and build the project:
+We have switched to using vcpkg to manage dependencies.
+To build and install mineola under Linux, please install vcpkg first, set the $VCPKG_ROOT environment variable, and run the following commands:
 ```bash
 $ mkdir build
-$ cd build
-$ conan install ..
-$ cmake ../src
+$ cmake -S src -B build --preset=[Debug|Release|EGLRelease]
+$ cmake --build build --target=install
 ```
 
-## Build for iOS on MacOS
+<!-- ## Build for iOS on MacOS
 
 We are also using CMake to generate the XCode project.
 
@@ -35,4 +35,4 @@ $ NDK=/path/to/ndk/build/cmake/android.toolchain.cmake conan create .. (user)/(c
 
 Then request the mineola shared library in your Android project by editing the build.gradle script.
 Please see the included gltfview example Android Studio project for details.
-(p.s. the project targets x86 emulator by default, feel free to try changing the target arch/api_level)
+(p.s. the project targets x86 emulator by default, feel free to try changing the target arch/api_level) -->

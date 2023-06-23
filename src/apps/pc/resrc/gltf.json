@@ -1,18 +1,12 @@
 {
   "geometries": [
-    {
-      "primitive": "rect",
-      "effect": "effect:shadow",
-      "queue": 1025,
-      "node": "shadow"
-    }
   ],
   "lights": [
     {
       "index": 0,
       "node": "envlight",
       "type": "env",
-      "source": "venice16.ktx"
+      "source": "venice.ktx"
     },
     {
       "index": 0,
@@ -43,9 +37,9 @@
   "nodes": [
     {
       "name": "geometry",
-      "translate": "0, 0, 0",
-      "rotate": "0, 0, 0, 1",
-      "scale": "1, 1, 1",
+      "translate": [0, 0, 0],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
       "parent": "root"
     },
     {
@@ -54,23 +48,23 @@
     },
     {
       "name": "camera",
-      "eye": "0, 0, 1",
-      "target": "0, 0, 0",
-      "up": "0, 1, 0",
+      "eye": [0, 0, 1],
+      "target": [0, 0, 0],
+      "up": [0, 1, 0],
       "parent": "root"
     },
     {
       "name": "envlight",
-      "translate": "0.1, 0.1, 0.0",
-      "rotate": "0, 0, 0, 1",
-      "scale": "1, 1, 1",
+      "translate": [0.1, 0.1, 0.0],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
       "parent": "root"
     },
     {
       "name": "dirlight",
-      "eye": "0.0, 2.0, 0.0",
-      "target": "0.0, 0.0, 0.0",
-      "up": "1.0, 0.0, 0.0",
+      "eye": [0.0, 2.0, 0.0],
+      "target": [0.0, 0.0, 0.0],
+      "up": [1.0, 0.0, 0.0],
       "parent": "root"
     }
   ],

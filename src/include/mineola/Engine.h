@@ -14,11 +14,12 @@
 #include "ResourceManager.h"
 #include "RenderStateManager.h"
 
+namespace mineola {
+
 namespace imgpp {
 class Img;
 }
 
-namespace mineola {
 
 //forward declaration
 class GLEffect;

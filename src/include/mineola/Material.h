@@ -1,11 +1,12 @@
 #ifndef MINEOLA_MATERIAL_H
 #define MINEOLA_MATERIAL_H
 
-#include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include "GLMDefines.h"
+#include <glm/glm.hpp>
 #include "BasisObj.h"
 
 namespace mineola {

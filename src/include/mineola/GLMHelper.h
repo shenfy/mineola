@@ -2,15 +2,41 @@
 #define MINEOLA_GLMHELPER_H
 
 #include <string>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 
 namespace mineola {
 
-glm::vec3 ParseVec3(const std::string &str);
+// glm::vec3 ParseVec3(std::string str);
 glm::vec4 ParseVec4(const std::string &str);
-glm::mat4 ParseMat4(const std::string &str);
+// glm::mat4 ParseMat4(const std::string &str);
 
 namespace detail {
+
+template <typename TR, typename TArr>
+TR ParseArray(const TArr &arr) {
+  TR result;
+  for (int i = 0; i < std::min(TR::length(), (int)arr.size()); i++) {
+    result[i] = (typename TR::value_type)arr[i];
+  }
+  return result;
+}
+
+template <typename TR, typename TArr>
+TR ParseMatrix(const TArr &arr) {
+  TR result;
+  int index = 0;
+  for (int row = 0; row < TR::col_type::length(); row++) {
+    for (int col = 0; col < TR::length(); col++) {
+      if (index < (int)arr.size()) {
+        result[col][row] = (typename TR::value_type)arr[index];
+        ++index;
+      }
+    }
+  }
+  return result;
+}
+
 
 /// Make a linear combination of two vectors and return the result.
 // result = (a * ascl) + (b * bscl)

@@ -1,6 +1,7 @@
 #ifndef MINEOLA_RBT_HPP
 #define MINEOLA_RBT_HPP
 
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
