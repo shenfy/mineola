@@ -3,8 +3,8 @@
 
 #include <variant>
 #include <vector>
-#include <imgpp/imgpp.hpp>
-#include <imgpp/blockimg.hpp>
+#include <mineola/Imgpp.hpp>
+#include <mineola/ImgppBlockImg.hpp>
 #include "TextureDesc.h"
 
 namespace mineola {

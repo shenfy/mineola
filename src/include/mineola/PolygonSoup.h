@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 
 namespace mineola {

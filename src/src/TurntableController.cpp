@@ -1,4 +1,5 @@
 #include "prefix.h"
+#include <boost/bind/bind.hpp>
 #include <mineola/CameraController.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -24,16 +25,23 @@ TurntableController::~TurntableController() {
 bool TurntableController::Activate() {
   auto &en = Engine::Instance();
   mouse_btn_conn_ = en.AddMouseButtonCallback(
-    Engine::mouse_btn_callback_t(&TurntableController::OnMouseButton, this, _1, _2, _3, _4)
+    Engine::mouse_btn_callback_t(&TurntableController::OnMouseButton, this,
+    boost::placeholders::_1,
+    boost::placeholders::_2,
+    boost::placeholders::_3,
+    boost::placeholders::_4)
       .track_foreign(shared_from_this()));
   mouse_move_conn_ = en.AddMouseMoveCallback(
-    Engine::mouse_move_callback_t(&TurntableController::OnMouseMove, this, _1, _2)
+    Engine::mouse_move_callback_t(&TurntableController::OnMouseMove, this,
+    boost::placeholders::_1, boost::placeholders::_2)
       .track_foreign(shared_from_this()));
   mouse_scroll_conn_ = en.AddMouseScrollCallback(
-    Engine::mouse_scroll_callback_t(&TurntableController::OnMouseScroll, this, _1, _2)
+    Engine::mouse_scroll_callback_t(&TurntableController::OnMouseScroll, this,
+    boost::placeholders::_1, boost::placeholders::_2)
       .track_foreign(shared_from_this()));
   pinch_conn_ = en.AddPinchCallback(
-    Engine::pinch_callback_t(&TurntableController::OnPinch, this, _1)
+    Engine::pinch_callback_t(&TurntableController::OnPinch, this,
+    boost::placeholders::_1)
       .track_foreign(shared_from_this()));
   return true;
 }

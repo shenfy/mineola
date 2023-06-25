@@ -1,6 +1,7 @@
 #ifndef MINEOLA_RENDERSTATE_H
 #define MINEOLA_RENDERSTATE_H
 
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include "glutility.h"
 

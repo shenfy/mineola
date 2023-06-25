@@ -1,9 +1,9 @@
 #include "prefix.h"
 #include <mineola/EnvLight.h>
 #include <fstream>
-#include <imgpp/imgpp.hpp>
-#include <imgpp/compositeimg.hpp>
-#include <imgpp/loaders.hpp>
+#include <mineola/Imgpp.hpp>
+#include <mineola/ImgppCompositeImg.hpp>
+#include <mineola/ImgppLoaders.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <mineola/UniformBlock.h>
 #include <mineola/Engine.h>

@@ -2,6 +2,7 @@
 #define MINEOLA_RENDERPASS_H
 
 #include <string>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 
 namespace mineola {

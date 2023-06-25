@@ -3,7 +3,6 @@
 #include <cstring>
 #include <algorithm>
 #include <ctime>
-#include <imgpp/imgpp.hpp>
 #include <mineola/glutility.h>
 #include <mineola/GLEffect.h>
 #include <mineola/Framebuffer.h>

@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <stack>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include "RenderState.h"
 
@@ -17,7 +18,7 @@ public:
   void ApplyCurrentState();
   void PushState();
   void PopState();
-  
+
   void SetClearColor(const glm::vec4 &clear_color, bool force = false);
 
   void SetFrontFace(
@@ -32,7 +33,7 @@ public:
    * dpfail specifies stencil test passes but depth test failed
    * dppass specifies stencil test and depth test both pass
   */
-  
+
   void SetStencilOp(
     render_state::StencilOp sfail,
     render_state::StencilOp dpfail,

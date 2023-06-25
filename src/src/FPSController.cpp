@@ -1,4 +1,5 @@
 #include "prefix.h"
+#include <boost/bind/bind.hpp>
 #include <mineola/CameraController.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -43,16 +44,20 @@ bool FPSController::Activate() {
   auto &en = Engine::Instance();
   auto shared_this = shared_from_this();
   mouse_btn_conn_ = en.AddMouseButtonCallback(
-    Engine::mouse_btn_callback_t(&FPSController::OnMouseButton, this, _1, _2, _3, _4)
+    Engine::mouse_btn_callback_t(&FPSController::OnMouseButton, this, boost::placeholders::_1,
+      boost::placeholders::_2, boost::placeholders::_3, boost::placeholders::_4)
       .track_foreign(shared_this));
   mouse_move_conn_ = en.AddMouseMoveCallback(
-    Engine::mouse_move_callback_t(&FPSController::OnMouseMove, this, _1, _2)
+    Engine::mouse_move_callback_t(&FPSController::OnMouseMove, this, boost::placeholders::_1,
+      boost::placeholders::_2)
       .track_foreign(shared_this));
   keyboard_conn_ = en.AddKeyboardCallback(
-    Engine::keyboard_callback_t(&FPSController::OnKeyboard, this, _1, _2)
+    Engine::keyboard_callback_t(&FPSController::OnKeyboard, this, boost::placeholders::_1,
+      boost::placeholders::_2)
       .track_foreign(shared_this));
   frame_move_conn_ = en.AddFrameMoveCallback(
-    Engine::frame_move_callback_t(&FPSController::OnFrameMove, this, _1, _2)
+    Engine::frame_move_callback_t(&FPSController::OnFrameMove, this, boost::placeholders::_1,
+      boost::placeholders::_2)
       .track_foreign(shared_this));
   return true;
 }

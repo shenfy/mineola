@@ -2,6 +2,7 @@
 #define MINEOLA_LIGHT_H
 
 #include <memory>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 
 namespace mineola {

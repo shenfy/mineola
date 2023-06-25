@@ -1,8 +1,9 @@
 #include "prefix.h"
+#include <mineola/Animation.h>
+#include <stdexcept>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <mineola/glutility.h>
-#include <mineola/Animation.h>
 #include <mineola/SceneNode.h>
 
 namespace {

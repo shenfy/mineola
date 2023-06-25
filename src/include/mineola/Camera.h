@@ -1,6 +1,7 @@
 #ifndef MINEOLA_CAMERA_H
 #define MINEOLA_CAMERA_H
 
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include "Visitor.h"
 

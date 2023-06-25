@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <boost/signals2.hpp>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 #include "Rbt.h"
 

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include "GLMDefines.h"
 #include <glm/glm.hpp>
 
 namespace mineola {

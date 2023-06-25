@@ -3,15 +3,15 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include <imgpp/imgpp.hpp>
-#include <imgpp/compositeimg.hpp>
+#include <mineola/Imgpp.hpp>
+#include <mineola/ImgppCompositeImg.hpp>
 #include <mineola/Texture.h>
+
+namespace mineola {
 
 namespace imgpp {
   class Img;
 }
-
-namespace mineola {
 
 struct TextureDesc;
 class ImgppTextureSrc;

@@ -1,0 +1,11 @@
+{
+    "dependencies": [
+        "boost",
+        "libjpeg-turbo",
+        "libpng",
+        "glm",
+        "stb",
+        "nlohmann-json",
+        "glfw3"
+    ]
+}

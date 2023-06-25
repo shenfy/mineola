@@ -3,8 +3,8 @@
 #include <cstring>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
-#include <imgpp/loaders.hpp>
-#include <imgpp/glhelper.hpp>
+#include <mineola/ImgppLoaders.hpp>
+#include <mineola/ImgppGLHelper.hpp>
 #include <mineola/glutility.h>
 #include <mineola/TypeMapping.h>
 #include <mineola/Texture.h>

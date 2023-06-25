@@ -2,6 +2,7 @@
 #define MINEOLA_GLUTILITY_H
 
 #include <cstdint>
+#include <cstdio>
 #include <chrono>
 #include <memory>
 

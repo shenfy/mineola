@@ -1,10 +1,11 @@
 #ifndef MINEOLA_UNIFORMWRAPPERS_H
 #define MINEOLA_UNIFORMWRAPPERS_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <memory>
+#include "GLMDefines.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Material.h"
 #include "GLEffect.h"
 
