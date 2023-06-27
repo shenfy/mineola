@@ -2,6 +2,7 @@
 #define MINEOLA_APPFRAME_H
 
 #include <stdint.h>
+#include "GLMDefines.h"
 
 struct GLFWwindow;
 

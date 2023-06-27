@@ -155,7 +155,7 @@ elseif (MINEOLA_PC)
       include/mineola/khrplatform.h
       include/mineola/ServerAppFrame.h)
   else()
-    set(MINEOLA_SRC ${MINEOLA_SRC} glad.c AppFrame.cpp>)
+    set(MINEOLA_SRC ${MINEOLA_SRC} glad.c AppFrame.cpp)
     set(MINEOLA_HDR ${MINEOLA_HDR}
       include/mineola/glad.h
       include/mineola/khrplatform.h

@@ -5,7 +5,12 @@
         "libpng",
         "glm",
         "stb",
-        "nlohmann-json",
-        "glfw3"
-    ]
+        "nlohmann-json"
+    ],
+    "features": {
+        "glx": {
+            "description": "Use GLX window system",
+            "dependencies": ["glfw3"]
+        }
+    }
 }
