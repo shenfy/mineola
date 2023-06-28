@@ -1,18 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(mineola VERSION 1.3.0 LANGUAGES C CXX)
 
-set(default_build_type "Release")
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
-  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
-      STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif()
-
-# Decide the platform we're buiding for
-message(STATUS "Building for ${CMAKE_SYSTEM_NAME}:${CMAKE_SYSTEM}")
+message(STATUS ${CMAKE_SYSTEM_NAME})
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
   set(MINEOLA_iOS 1)
@@ -25,6 +14,19 @@ else ()
   set(MINEOLA_PC_HEADLESS NO CACHE BOOL "Use EGL headless build")
   message(STATUS "Target platform setting to PC")
 endif()
+
+set(default_build_type "Release")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
+      STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
+# Decide the platform we're buiding for
+message(STATUS "Building for ${CMAKE_SYSTEM_NAME}:${CMAKE_SYSTEM}")
 
 # Find common dependencies
 find_package(Boost REQUIRED)
@@ -48,7 +50,6 @@ if (MINEOLA_PC)
   endif()
 endif()
 
-
 add_subdirectory(src)
 
 add_subdirectory(apps)
@@ -58,17 +59,24 @@ install(TARGETS mineola
   LIBRARY DESTINATION lib
   PUBLIC_HEADER DESTINATION include/mineola)
 
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "mineolaConfigVersion.cmake"
+  VERSION ${PACKAGE_VERSION}
+  COMPATIBILITY AnyNewerVersion)
+
 install(EXPORT mineolaTargets
   FILE mineolaTargets.cmake
   NAMESPACE mineola::
   DESTINATION lib/cmake/mineola)
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  "mineolaConfigVersion.cmake"
-  VERSION ${mineola_VERSION}
-  COMPATIBILITY AnyNewerVersion)
-
 install(FILES "mineolaConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/mineolaConfigVersion.cmake"
   DESTINATION lib/cmake/mineola)
+
+set(CPACK_VERBATIM_VARIABLES True)
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "dev@shenfy.com")
+set(CPACK_GENERATOR "ZIP")
+include(CPack)

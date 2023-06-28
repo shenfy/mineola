@@ -1,4 +1,3 @@
-#define GLM_FORCE_CTOR_INIT
 #include <mineola/AppFrame.h>
 #include <memory>
 #include <iostream>

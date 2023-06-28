@@ -2,23 +2,15 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "Debug",
+            "name": "GLX",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "VCPKG_MANIFEST_FEATURES": "glx"
             },
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         },
         {
-            "name": "Release",
+            "name": "EGL",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            },
-            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-        },
-        {
-            "name": "EGLRelease",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
                 "MINEOLA_PC_HEADLESS": true
             },
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
