@@ -199,7 +199,7 @@ uint32_t CompressJPEG(const ImgROI &roi, void *dst, uint32_t length) {
 
   memcpy(dst, compressed_buffer, compressed_length);
   free(compressed_buffer);
-  return compressed_length;
+  return (uint32_t)compressed_length;
 }
 
 }}  // end namespace

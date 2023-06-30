@@ -140,7 +140,7 @@ set(MINEOLA_HDR
 
 # Platform specific source and header files
 if (MINEOLA_iOS)
-  # A RendererViewController is provided for iOS
+  # A RendererViewController is provided for iOS/MacOS
   set(MINEOLA_SRC ${MINEOLA_SRC} RendererViewController.mm)
   set(MINEOLA_HDR ${MINEOLA_HDR} include/mineola/RendererViewController.h)
 elseif (MINEOLA_Android)

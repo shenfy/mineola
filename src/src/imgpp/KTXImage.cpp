@@ -154,7 +154,7 @@ bool LoadKTX(const char *src, size_t length, CompositeImg &composite_img,
     offset += ((kv_size + 3) / 4) * 4;
     kv_left -= 4 + ((kv_size + 3) / 4) * 4;
   }
-  uint32_t img_data_size = length - ktx_header.bytes_of_key_value_data - sizeof(KTXHeader);
+  uint32_t img_data_size = (uint32_t)length - ktx_header.bytes_of_key_value_data - (uint32_t)sizeof(KTXHeader);
   ImgBuffer img_buf(img_data_size);
   std::memcpy(img_buf.GetBuffer(), src + offset, img_data_size);
   if (IsCompressedFormat(texture_format)) {
@@ -259,7 +259,7 @@ bool LoadKTX(const char *fn, CompositeImg &composite_img,
     in.read((char*)kv_data.data(), 3 - (kv_size + 3) % 4);
     kv_left -= 4 + ((kv_size + 3) / 4) * 4;
   }
-  uint32_t img_data_size = total_size - ktx_header.bytes_of_key_value_data - sizeof(KTXHeader);
+  uint32_t img_data_size = (uint32_t)(total_size - ktx_header.bytes_of_key_value_data - sizeof(KTXHeader));
   ImgBuffer img_buf(img_data_size);
   in.read((char*)img_buf.GetBuffer(), img_data_size);
   if (IsCompressedFormat(texture_format)) {
@@ -361,7 +361,7 @@ bool WriteKTX(const char *fn, const CompositeImg &composite_img,
     std::memcpy(data.data() + offset + sizeof(uint32_t), item.first.data(), item.first.size());
     // Jump key and null terminate
     std::memcpy(data.data() + offset + sizeof(uint32_t) + item.first.size() + 1, item.second.data(), item.second.size());
-    kv_data_size = item.first.size() + 1 + item.second.size();
+    kv_data_size = (uint32_t)(item.first.size() + 1 + item.second.size());
     offset += sizeof(uint32_t) + 4 * ((kv_data_size + 3) / 4);
     header.bytes_of_key_value_data += sizeof(uint32_t) + 4 * ((kv_data_size + 3) / 4);
   }
