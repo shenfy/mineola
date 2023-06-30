@@ -52,5 +52,10 @@ if (MINEOLA_PC)
       TARGET ocean
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pc/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
       COMMENT "Copy resrc folder to build folder")
+
+    add_executable(envlight)
+    target_sources(envlight PRIVATE pc/envlight.cpp pc/EnvBRDF.cpp)
+    target_link_libraries(envlight PRIVATE mineola)
+
   endif()
 endif()

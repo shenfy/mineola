@@ -166,7 +166,7 @@ bool LoadBSON(const char *fn, Img &img) {
   infile.read((char*)buffer.data(), file_size);
   infile.close();
 
-  return LoadBSON(buffer.data(), file_size, img);
+  return LoadBSON(buffer.data(), (uint32_t)file_size, img);
 }
 
 

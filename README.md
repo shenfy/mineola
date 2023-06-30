@@ -22,7 +22,7 @@ $ ./ocean
 $ ./gltfview resrc/CesiumMan.glb  # press P to play animation, Q to exit
 ```
 
-## Build in NVidia Cuda/GL docker
+## Build inside NVidia Cuda/GL docker
 
 For building inside NVidia GPU enabled containers (eg. nvcr.io/nvidia/cudagl), use or modify the provided Dockerfile.build.
 For example, to build a headless EGL based server library, use the following commands:
@@ -55,22 +55,18 @@ find_package(mineola)
 target_link_libraries(app PRIVATE mineola::mineola)
 ```
 
-<!-- ## Build for iOS on MacOS
+## Build for iOS (on MacOS w/ Apple Silicon)
 
-We are also using CMake to generate the XCode project.
-
-First create an iOS conan profile following [imgpp](https://github.com/shenfy/imgpp#build-from-source-for-ios-w-conan).
-
-Then:
+We use vcpkg and CMake to generate an XCode project for iOS development.
+Install vcpkg and latest cmake, then:
 ```bash
 $ mkdir build
-$ cd build
-$ conan install --profile ios ..
-$ cmake ../src -GXcode -DCMAKE_SYSTEM_NAME=iOS
+$ cmake -S src -B build --preset=iOS\
+> -DCMAKE_BUILD_TYPE={Debug|Release|MinSizeRel|RelWithDebInfo}  # default=Release
 ```
-Then you can either use cmake/xcode command line tools to build the project or open the generated project `mineola` directly in XCode GUI.
+Use xcode to open the generated mineola.xcodeproj in the build directory.
 
-## Build for Android
+<!-- ## Build for Android
 
 Please use the included conanfile and CMake script to build the dynamic-link library libmineola.so for your target arch/api_level:
 ```bash
