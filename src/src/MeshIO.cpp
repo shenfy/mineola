@@ -50,6 +50,10 @@ bool LoadPLY(const char *fn,
     return false;
   }
 
+  if (!soup.has_vertex_normal) {
+    soup.ComputeVertexNormal();
+  }
+
   return LoadPolygonSoup(soup, fn, parent_node,
     std::move(effect), std::move(shadowmap_effect), layer_mask);
 }
@@ -64,6 +68,10 @@ bool LoadPLYFromStream(std::istream &ins,
   PolygonSoup soup;
   if (!LoadSoupFromPLY(ins, soup)) {
     return false;
+  }
+
+  if (!soup.has_vertex_normal) {
+    soup.ComputeVertexNormal();
   }
 
   return LoadPolygonSoup(soup, name, parent_node,

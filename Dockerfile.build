@@ -16,4 +16,10 @@ RUN apt-get update > /dev/null &&\
     /vcpkg/bootstrap-vcpkg.sh &&\
     /vcpkg/vcpkg integrate install &&\
     /vcpkg/vcpkg integrate bash &&\
-    /vcpkg/vcpkg install boost libjpeg-turbo libpng glm stb nlohmann-json
+    /vcpkg/vcpkg install boost libjpeg-turbo libpng glm stb nlohmann-json fmt
+
+ADD . /mineola
+
+RUN cd /mineola &&\
+    cmake -S src -B build --preset=EGL &&\
+    cmake --build build --target=install -j12

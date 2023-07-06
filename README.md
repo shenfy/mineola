@@ -24,29 +24,36 @@ $ ./gltfview resrc/CesiumMan.glb  # press P to play animation, Q to exit
 
 ## Build inside NVidia Cuda/GL docker
 
+### Build a docker image with Mineola installed
 For building inside NVidia GPU enabled containers (eg. nvcr.io/nvidia/cudagl), use or modify the provided Dockerfile.build.
-For example, to build a headless EGL based server library, use the following commands:
+For example, to build a docker image with headless EGL based server library installed, use the following commands:
 ```bash
-$ docker build -f Dockerfile.build -t {channel}/mineola .
-$ docker run --gpus=all --it -v .:/mineola {channel}/mineola
+$ docker build -f Dockerfile.build -t {tag} .
+$ docker run --gpus=all -it -v .:/mineola {tag}
+```
+The headers and library will be installed in `/usr/local/include` and `/usr/local/lib`.
+
+### Build Mineola in the container
+To build and update the library inside the container, mount the repository directoy (eg. `/mineola-1.3.1'), and use the following command:
+```bash
 # inside docker
-root:/$ cd mineola
-root:/mineola$ cmake -S src -B build --preset=EGL
-root:/mineola$ cmake --build build --target=install -j12
-root:/mineola$ cd build
-root:/mineola/build$ cpack
+root:/$ cd mineola-1.3.1
+root:/mineola-1.3.1$ cmake -S src -B build --preset=EGL
+root:/mineola-1.3.1$ cmake --build build --target=install -j12
+root:/mineola-1.3.1$ cd build
+root:/mineola-1.3.1/build$ cpack
 ```
 This will produce a zip archive containing all files need for deployment.
 
-## Use in NVidia Cuda/GL docker
+### Build app in NVidia Cuda/GL docker
 
-Download from the release section or build your own as demonstrated above to get the mineola-1.3.0-Linux.zip archive.
+Download from the release section or build your own as demonstrated above to get the mineola-1.3.1-Linux.zip archive.
 To use the generated archive for app development, extract the contents into /usr/local:
 ```bash
 # inside docker
-root:/$ unzip mineola-1.3.0-Linux.zip
-root:/$ cd mineola-1.3.0-Linux
-root:/mineola-1.3.0-Linux$ cp -r * /usr/local/
+root:/$ unzip mineola-1.3.1-Linux.zip
+root:/$ cd mineola-1.3.1-Linux
+root:/mineola-1.3.1-Linux$ cp -r * /usr/local/
 ```
 
 Then in your project's own CMakeLists.txt, use
@@ -54,6 +61,13 @@ Then in your project's own CMakeLists.txt, use
 find_package(mineola)
 target_link_libraries(app PRIVATE mineola::mineola)
 ```
+
+### Use official docker image
+Directly build your app inside the mineola docker image:
+```bash
+$ docker run --gpus=all -it -v {app_dir}:/{app_dir} fyshen/mineola:1.3.1-egl-ubuntu20.04
+```
+Then use the cmake instructions to build your app.
 
 ## Build for iOS (on MacOS w/ Apple Silicon)
 

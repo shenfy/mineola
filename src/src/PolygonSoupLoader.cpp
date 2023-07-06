@@ -156,6 +156,7 @@ bool BuildFromPolygonSoup(const PolygonSoup &soup,
 
   // fill renderable
   renderable.AddVertexArray(va, material_name.c_str());
+  renderable.SetBbox(soup.ComputeAABB());
   return true;
 }
 

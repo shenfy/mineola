@@ -1,5 +1,6 @@
 #include "prefix.h"
 #include <mineola/PolygonSoup.h>
+#include <mineola/AABB.h>
 
 namespace mineola {
 
@@ -39,5 +40,16 @@ namespace mineola {
           normal = {0, 0, 0};
       }
     }
+    has_vertex_normal = true;
+  }
+
+  AABB PolygonSoup::ComputeAABB() const {
+    glm::vec3 lb(std::numeric_limits<float>::max()), ub(std::numeric_limits<float>::lowest());
+    for (auto &v : vertices) {
+      lb = glm::min(lb, v.pos);
+      ub = glm::max(ub, v.pos);
+    }
+    AABB aabb(lb, ub);
+    return aabb;
   }
 }
