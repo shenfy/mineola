@@ -8,6 +8,8 @@
 
 namespace mineola {
 
+  struct AABB;
+
   struct PolygonSoup {
     struct Vertex {
       glm::vec3 pos;
@@ -38,6 +40,7 @@ namespace mineola {
 
     void Clear();
     void ComputeVertexNormal();
+    AABB ComputeAABB() const;
   };
 }
 

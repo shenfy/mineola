@@ -38,7 +38,7 @@ namespace mineola { namespace shader_parser {
     return true;
   }
 
-  void InsertBuiltInUniformBlock(std::string &shader_str) {
+void InsertBuiltInUniformBlock(std::string &shader_str) {
     static const char built_in_uniform_str[] = R"(
       layout(std140) uniform mineola_builtin_uniforms {
         mat4 _view_mat;
@@ -50,8 +50,15 @@ namespace mineola { namespace shader_parser {
         mat4 _light_proj_mat_0;
         // only _viewport_size.xy have valid value
         vec4 _viewport_size;
+        // 4 lights
         vec4 _light_pos_0;
         vec4 _light_intensity_0;
+        vec4 _light_pos_1;
+        vec4 _light_intensity_1;
+        vec4 _light_pos_2;
+        vec4 _light_intensity_2;
+        vec4 _light_pos_3;
+        vec4 _light_intensity_3;
         // a rotational matrix
         mat4 _env_light_mat_0;
         vec4 _env_light_sh3_0[9];

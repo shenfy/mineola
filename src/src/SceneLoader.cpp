@@ -631,6 +631,12 @@ bool BuildSceneFromConfig(const char *config_str,
           if (uniform_type == "float") {
             float value = uniform["value"].get<float>();
             material->uniform_slots[uniform_name] = uniform_helper::Wrap(value);
+          } else if (uniform_type == "int") {
+            int32_t value = uniform["value"].get<int32_t>();
+            material->uniform_slots[uniform_name] = uniform_helper::Wrap(value);
+          } else if (uniform_type == "uint") {
+            uint32_t value = uniform["value"].get<uint32_t>();
+            material->uniform_slots[uniform_name] = uniform_helper::Wrap(value);
           } else if (uniform_type == "float[]") {
             std::vector<float> value;
             for (const auto &v : uniform["value"]) {
