@@ -220,6 +220,11 @@ void AddSearchPath(const char *path) {
   en.ResrcMgr().AddSearchPath(path);
 }
 
+void RenderGUI() {
+  auto &en = Engine::Instance();
+  en.RenderGUI();
+}
+
 void FrameMove() {
   auto &en = Engine::Instance();
   en.FrameMove();

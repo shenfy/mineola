@@ -8,4 +8,9 @@ find_dependency(Stb REQUIRED)
 find_dependency(nlohmann_json REQUIRED)
 find_dependency(OpenGL REQUIRED)
 
+if (@NEED_GUI@)  # GLX NEED_GUI
+  find_dependency(glfw3 REQUIRED)
+  find_dependency(imgui REQUIRED)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/mineolaTargets.cmake)

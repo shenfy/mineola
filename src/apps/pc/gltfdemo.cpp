@@ -92,7 +92,7 @@ public:
   GLTFViewerApp() {}
   virtual ~GLTFViewerApp() {}
 
-  virtual bool InitScene() override {
+  bool InitScene() override {
     AppFrame::InitScene();
 
     Engine &en = GetEngine();

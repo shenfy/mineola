@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mineola VERSION 1.3.1 LANGUAGES C CXX)
+project(mineola VERSION 1.4.0 LANGUAGES C CXX)
 
 message(STATUS ${CMAKE_SYSTEM_NAME})
 
@@ -40,6 +40,7 @@ find_package(Stb REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 # Platform specific dependencies
+set(NEED_GUI FALSE)
 if (MINEOLA_PC)
   find_package(OpenGL COMPONENTS OpenGL REQUIRED)
   # use GLX and EGL modules
@@ -49,6 +50,8 @@ if (MINEOLA_PC)
     else()
       find_package(OpenGL COMPONENTS GLX REQUIRED)
       find_package(glfw3 CONFIG REQUIRED)
+      find_package(imgui CONFIG REQUIRED)
+      set(NEED_GUI TRUE)
     endif()
   endif()
 endif()
@@ -73,7 +76,9 @@ install(EXPORT mineolaTargets
   NAMESPACE mineola::
   DESTINATION lib/cmake/mineola)
 
-install(FILES "mineolaConfig.cmake"
+configure_file("mineolaConfig.cmake.in" "mineolaConfig.cmake" @ONLY)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/mineolaConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/mineolaConfigVersion.cmake"
   DESTINATION lib/cmake/mineola)
 

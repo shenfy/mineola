@@ -1,16 +1,24 @@
 {
-    "dependencies": [
-        "boost",
-        "libjpeg-turbo",
-        "libpng",
-        "glm",
-        "stb",
-        "nlohmann-json"
-    ],
-    "features": {
-        "glx": {
-            "description": "Use GLX window system",
-            "dependencies": ["glfw3"]
+  "dependencies": [
+    "boost",
+    "libjpeg-turbo",
+    "libpng",
+    "glm",
+    "stb",
+    "nlohmann-json"
+  ],
+  "features": {
+    "glx": {
+      "description": "Use GLX window system",
+      "dependencies": [
+        "glfw3",
+        {
+          "name": "imgui",
+          "features": [
+            "glfw-binding"
+          ]
         }
+      ]
     }
+  }
 }

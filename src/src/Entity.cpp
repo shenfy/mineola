@@ -15,6 +15,7 @@ const boost::uuids::uuid &Entity::Id() {
 }
 
 void Entity::Start() {}
+void Entity::RenderGUI() {}
 void Entity::FrameMove(double time, double frame_time) {}
 void Entity::PreRender() {}
 void Entity::PostRender() {}

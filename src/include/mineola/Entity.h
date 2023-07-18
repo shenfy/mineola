@@ -14,6 +14,7 @@ public:
 
   // life cycle
   virtual void Start();
+  virtual void RenderGUI();
   virtual void FrameMove(double time, double frame_time);
   virtual void PreRender();
   virtual void PostRender();

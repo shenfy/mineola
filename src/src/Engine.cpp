@@ -221,6 +221,13 @@ double Engine::Now() {
   return timer_->Snapshot();
 }
 
+void Engine::RenderGUI() {
+  entity_mgr_.Transform(
+    [](const std::string &, std::shared_ptr<Entity> &entity) {
+      entity->RenderGUI();
+  });
+}
+
 void Engine::FrameMove() {
   //calc time since last frame
   double now = timer_->Snapshot();
