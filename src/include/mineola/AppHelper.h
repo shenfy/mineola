@@ -13,6 +13,7 @@ namespace mineola {
   void ResizeScreen(uint32_t w, uint32_t h);
   void AddSearchPath(const char *path);
 
+  void RenderGUI();
   void FrameMove();
   void Render();
 

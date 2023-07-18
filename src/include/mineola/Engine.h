@@ -61,6 +61,7 @@ public:
   // life cycle
   void Init();
   void Start();
+  void RenderGUI();  // not invoked unless using GUI
   void FrameMove();
   void Render();
   void OnSize(uint32_t width, uint32_t height);

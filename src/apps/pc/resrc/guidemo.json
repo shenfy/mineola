@@ -1,0 +1,92 @@
+{
+  "passes": [
+    {}
+  ],
+  "geometries": [
+    {
+      "primitive": "sphere",
+      "node": "geometry",
+      "effect": "effect:phong",
+      "material": "mat:sphere"
+    }
+  ],
+  "cameras": [
+    {
+      "name": "camera:main",
+      "proj": "perspective",
+      "fovy": 45,
+      "near": 0.1,
+      "far": 100.0,
+      "node": "camera"
+    }
+  ],
+  "lights": [
+    {
+      "index": 0,
+      "node": "light0",
+      "type": "point_dir",
+      "proj": {
+        "type": "perspective",
+        "fovy": 45.0,
+        "aspect": 1.0,
+        "near": 0.1,
+        "far": 20.0
+      },
+      "intensity": [0.5, 0.5, 0.5]
+    },
+    {
+      "index": 1,
+      "node": "light1",
+      "type": "point_dir",
+      "proj": {
+        "type": "perspective",
+        "fovy": 45.0,
+        "aspect": 1.0,
+        "near": 0.1,
+        "far": 20.0
+      },
+      "intensity": [0.2, 0.2, 0.2]
+    }
+  ],
+  "effects": [
+    {
+      "name": "effect:phong",
+      "vertex": "phong.vert",
+      "fragment": "phong.frag",
+      "states": {
+        "depthtest": "on",
+        "depthfunc": "less"
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "name": "geometry",
+      "translate": [0, 0, 0],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
+      "parent": "root"
+    },
+    {
+      "name": "camera",
+      "eye": [0, 0, 5],
+      "target": [0, 0, 0],
+      "up": [0, 1, 0],
+      "parent": "root"
+    },
+    {
+      "name": "light0",
+      "translate": [1.0, 1.0, 1.0],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
+      "parent": "root"
+    },
+    {
+      "name": "light1",
+      "translate": [-1.0, -0.5, 0.5],
+      "rotate": [0, 0, 0, 1],
+      "scale": [1, 1, 1],
+      "parent": "root"
+    }
+  ]
+}

@@ -1,9 +1,12 @@
 #include "prefix.h"
-#include <mineola/AppFrame.h>
+#include <mineola/GuiAppFrame.h>
 #include <mineola/glutility.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <mineola/AppHelper.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <mineola/imgui_impl_opengl3.h>
 
 namespace {
 using namespace mineola;
@@ -13,6 +16,10 @@ void OnResize(GLFWwindow *window, int width, int height) {
 }
 
 void AppOnKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
+  if (ImGui::GetIO().WantCaptureKeyboard) {  // stop imgui events passing through
+    return;
+  }
+
   if (action == GLFW_REPEAT)
     return;
   GetEngine().OnKey((uint32_t)key,
@@ -20,6 +27,10 @@ void AppOnKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
 }
 
 void AppOnMouseButton(GLFWwindow *window, int button, int action, int mods) {
+  if (ImGui::GetIO().WantCaptureMouse) {
+    return;
+  }
+
   double xpos = 0.0, ypos = 0.0;
   glfwGetCursorPos(window, &xpos, &ypos);
   GetEngine().OnMouseButton((uint8_t)button,
@@ -28,6 +39,9 @@ void AppOnMouseButton(GLFWwindow *window, int button, int action, int mods) {
 }
 
 void AppOnMouseMove(GLFWwindow *window, double x, double y) {
+  if (ImGui::GetIO().WantCaptureMouse) {
+    return;
+  }
   GetEngine().OnMouseMove((int)(x + 0.5), (int)(y + 0.5));
 }
 
@@ -38,15 +52,15 @@ void AppOnMouseScroll(GLFWwindow *window, double x_offset, double y_offset) {
 
 namespace mineola {
 
-AppFrame::AppFrame()
+GuiAppFrame::GuiAppFrame()
   : window_width_(512),
   window_height_(512),
   running_(false) {}
 
-AppFrame::~AppFrame() {
+GuiAppFrame::~GuiAppFrame() {
 }
 
-bool AppFrame::CreateRenderWindow() {
+bool GuiAppFrame::CreateRenderWindow() {
   // Initialize GLFW
   if( !glfwInit() ) {
     printf("Failed to initialize GLFW!\n");
@@ -89,10 +103,40 @@ bool AppFrame::CreateRenderWindow() {
   glfwGetFramebufferSize(window_, &fb_width, &fb_height);
   window_width_ = (uint32_t)fb_width;
   window_height_ = (uint32_t)fb_height;
+
   return true;
 }
 
-void AppFrame::Run(uint32_t width, uint32_t height) {
+void GuiAppFrame::InitImGui() {
+  // init imgui
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window_, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+  ImGui_ImplOpenGL3_Init();
+}
+
+void GuiAppFrame::ImGuiPreRender() {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+}
+
+void GuiAppFrame::ImGuiPostRender() {
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GuiAppFrame::DestroyImGui() {
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+}
+
+void GuiAppFrame::Run(uint32_t width, uint32_t height) {
   //create render context and window
   if (width != 0) window_width_ = width;
   if (height != 0) window_height_ = height;
@@ -103,6 +147,7 @@ void AppFrame::Run(uint32_t width, uint32_t height) {
 
   // call AppHelper::InitEngine
   InitEngine();
+  InitImGui();
   AddSearchPath(".");
 
   // virtual function to create scene
@@ -118,15 +163,24 @@ void AppFrame::Run(uint32_t width, uint32_t height) {
   //main loop
   running_ = true;
   while( running_ ) {
+
+    ///////////////////////////////////////////
+    // render GUI
+    ImGuiPreRender();
+    RenderGUI();
+    ///////////////////////////////////////////
+
     ///////////////////////////////////////////
     // call frame move before rendering
     FrameMove();
     ///////////////////////////////////////////
 
     ///////////////////////////////////////////
-    // render
+    // render scene
     Render();
     ///////////////////////////////////////////
+
+    ImGuiPostRender();
 
     // Swap front and back rendering buffers
     glfwSwapBuffers(window_);
@@ -140,14 +194,15 @@ void AppFrame::Run(uint32_t width, uint32_t height) {
 
   ReleaseScene();
   ReleaseEngine();
+  DestroyImGui();
   glfwTerminate();
 }
 
-bool AppFrame::InitScene() {
+bool GuiAppFrame::InitScene() {
   return true;
 }
 
-void AppFrame::ReleaseScene() {
+void GuiAppFrame::ReleaseScene() {
 }
 
 }

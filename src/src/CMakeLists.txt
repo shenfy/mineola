@@ -155,11 +155,18 @@ elseif (MINEOLA_PC)
       include/mineola/khrplatform.h
       include/mineola/ServerAppFrame.h)
   else()
-    set(MINEOLA_SRC ${MINEOLA_SRC} glad.c AppFrame.cpp)
+    set(MINEOLA_SRC ${MINEOLA_SRC}
+      glad.c
+      AppFrame.cpp
+      imgui/imgui_impl_opengl3.cpp
+      GuiAppFrame.cpp
+      )
     set(MINEOLA_HDR ${MINEOLA_HDR}
       include/mineola/glad.h
       include/mineola/khrplatform.h
-      include/mineola/AppFrame.h)
+      include/mineola/AppFrame.h
+      include/mineola/imgui_impl_opengl3.h
+      include/mineola/GuiAppFrame.h)
   endif()
 endif()
 
@@ -189,6 +196,6 @@ elseif (MINEOLA_PC)
   if (MINEOLA_PC_HEADLESS)
     target_link_libraries(mineola PUBLIC OpenGL::EGL)
   else()
-    target_link_libraries(mineola PUBLIC glfw)
+    target_link_libraries(mineola PUBLIC imgui::imgui glfw)
   endif()
 endif()

@@ -57,5 +57,13 @@ if (MINEOLA_PC)
     target_sources(envlight PRIVATE pc/envlight.cpp pc/EnvBRDF.cpp)
     target_link_libraries(envlight PRIVATE mineola)
 
+    add_executable(guidemo)
+    target_sources(guidemo PRIVATE pc/guidemo.cpp)
+    target_link_libraries(guidemo PRIVATE mineola OpenGL::OpenGL)
+    add_custom_command(
+      TARGET guidemo
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/pc/resrc ${CMAKE_CURRENT_BINARY_DIR}/resrc
+      COMMENT "Copy resrc folder to build folder")
+
   endif()
 endif()
