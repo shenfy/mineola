@@ -130,6 +130,23 @@ uniform sampler2D emissive_sampler;  // emission map
 #if defined(USE_ALPHA_MASK)
 uniform float alpha_threshold;  // alpha cut-off threshold
 #endif
+#if defined(USE_CLEARCOAT)
+  uniform float clearcoat_factor;
+  uniform float clearcoat_roughness_factor;
+
+  #if defined(HAS_CLEARCOAT_TEX)
+    uniform sampler2D clearcoat_sampler;
+  #endif
+
+  #if defined(HAS_CLEARCOAT_ROUGH_TEX)
+    uniform sampler2D clearcoat_roughness_sampler;
+  #endif
+
+  #if defined(HAS_CLEARCOAT_NORM_TEX)
+    uniform sampler2D clearcoat_normal_sampler;
+    uniform float clearcoat_normal_scale;
+  #endif
+#endif
 
 uniform vec3 diffuse;  // albedo coefficient
 uniform float alpha;  // albedo transparency
@@ -369,9 +386,9 @@ void main(void) {
   #else
   float shadow_term = 1.0;
   #endif
-  vec3 color_result = emission
-    + diffuse_term * _light_intensity_0.rgb * shadow_term * ao
-    + max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
+
+  vec3 color_result = emission + diffuse_term * _light_intensity_0.rgb  * shadow_term * ao
+      + max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
 
   #if defined(USE_ENV_LIGHT)
   color_result += EnvlightDiffuseTerm(albedo, normal_dir, metallic) * ao;
@@ -379,6 +396,47 @@ void main(void) {
   #else
   color_result += albedo * 0.1;
   #endif
+
+  #if defined(USE_CLEARCOAT)
+    float cc_clearcoat = clearcoat_factor;
+    float cc_rough = clearcoat_roughness_factor;
+    vec3 cc_normal = normalize(normal);
+
+    #if defined(HAS_CLEARCOAT_TEX) && defined(CLEARCOAT_TEX_TEXCOORD)
+      cc_clearcoat *= texture(clearcoat_sampler, CLEARCOAT_TEX_TEXCOORD).x;
+    #endif
+
+    #if defined(HAS_CLEARCOAT_ROUGH_TEX) && defined(CLEARCOAT_ROUGH_TEX_TEXCOORD)
+      cc_rough = texture(clearcoat_roughness_sampler, CLEARCOAT_ROUGH_TEX_TEXCOORD).y;
+    #endif
+
+    cc_clearcoat = clamp(cc_clearcoat, 0.0, 1.0);
+
+    #if defined(HAS_CLEARCOAT_NORM_TEX) && defined(HAS_TANGENT) && defined(CLEARCOAT_NORM_TEX_TEXCOORD)
+      vec3 cc_normal_pp = texture(clearcoat_normal_sampler, CLEARCOAT_NORM_TEX_TEXCOORD).xyz;
+      cc_normal_pp = normalize((cc_normal_pp * 2.0 - 1.0)
+          * vec3(clearcoat_normal_scale, clearcoat_normal_scale, 1.0));
+      cc_normal = normalize(tbn * cc_normal_pp);
+    #endif
+
+    float base_n_dot_v = n_dot_v;
+    CalcDotProducts(light_dir, view_dir, cc_normal,
+        half_dir, n_dot_l, n_dot_v, n_dot_h, v_dot_h);
+    specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, cc_rough, pow2(cc_rough));
+    vec3 clearcoat_specular = max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
+
+    #if defined(USE_ENV_LIGHT)
+      clearcoat_specular += EnvLightSpecularTerm(color_specular, cc_normal, view_dir, cc_rough) * ao;
+    #endif
+
+    float fresnel_term = 0.04 + (1.0 - 0.04) * pow((1.0 - abs(n_dot_v)), 5.0);
+    color_result = color_result * (1.0 - cc_clearcoat * fresnel_term)
+        + clearcoat_specular * cc_clearcoat;
+    // https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md#Emission
+    emission *= 0.04 + (1.0 - 0.04) * pow((1.0 - base_n_dot_v), 5.0);
+  #endif
+
+  color_result += emission;
 
   #if defined(SRGB_ENCODE)
   frag_color = SRGBEncode(vec4(color_result, base_color.a));
@@ -458,6 +516,24 @@ effect_defines_t CreatePBRShaderMacros(const SFXFlags &sfx_flags,
       result.push_back({"HAS_EMISSIVE_MAP", {}});
       result.push_back({"EMIT_TEXCOORD",
         BuildTCName(mat_flags.tex_uvs[MaterialFlags::EMIT_UV_LOC])});
+    }
+    if (mat_flags.UseClearcoat()) {
+      result.push_back({"USE_CLEARCOAT", {}});
+      if (mat_flags.HasClearcoatTex()) {
+        result.push_back({"HAS_CLEARCOAT_TEX", {}});
+        result.push_back({"CLEARCOAT_TEX_TEXCOORD",
+          BuildTCName(mat_flags.tex_uvs[MaterialFlags::CLEARCOAT_TEX_UV_LOC])});
+      }
+      if (mat_flags.HasClearcoatRoughTex()) {
+        result.push_back({"HAS_CLEARCOAT_ROUGH_TEX", {}});
+        result.push_back({"CLEARCOAT_ROUGH_TEX_TEXCOORD",
+          BuildTCName(mat_flags.tex_uvs[MaterialFlags::CLEARCOAT_ROUGH_TEX_UV_LOC])});
+      }
+      if (mat_flags.HasClearcoatNormalTex()) {
+        result.push_back({"HAS_CLEARCOAT_NORM_TEX", {}});
+        result.push_back({"CLEARCOAT_NORM_TEX_TEXCOORD",
+          BuildTCName(mat_flags.tex_uvs[MaterialFlags::CLEARCOAT_NORM_TEX_UV_LOC])});
+      }
     }
   }
   if (mat_flags.IsDoubleSided()) {
@@ -550,6 +626,25 @@ void MaterialFlags::SetUnlit() {
   flags |= UNLIT_BIT;
 }
 
+void MaterialFlags::SetUseClearcoat() {
+  flags |= CLEARCOAT_BIT;
+}
+
+void MaterialFlags::EnableClearcoatTex(int uv) {
+  flags |= CLEARCOAT_TEX_BIT;
+  tex_uvs[CLEARCOAT_TEX_UV_LOC] = uv;
+}
+
+void MaterialFlags::EnableClearcoatRoughTex(int uv) {
+  flags |= CLEARCOAT_ROUGH_TEX_BIT;
+  tex_uvs[CLEARCOAT_ROUGH_TEX_UV_LOC] = uv;
+}
+
+void MaterialFlags::EnableClearcoatNormalTex(int uv) {
+  flags |= CLEARCOAT_NORM_TEX_BIT;
+  tex_uvs[CLEARCOAT_NORM_TEX_UV_LOC] = uv;
+}
+
 void MaterialFlags::EnableDoubleSide() {
   flags |= DOUBLE_SIDE_BIT;
 }
@@ -589,11 +684,27 @@ bool MaterialFlags::IsAlphaCutOffEnabled() const {
 bool MaterialFlags::HasTextures() const {
   return flags & (
     DIFFUSE_MAP_BIT | OCCLUSION_MAP_BIT | NORMAL_MAP_BIT | METALLIC_ROUGHNESS_MAP_BIT
-    | EMISSIVE_MAP_BIT);
+    | EMISSIVE_MAP_BIT | CLEARCOAT_TEX_BIT | CLEARCOAT_ROUGH_TEX_BIT | CLEARCOAT_NORM_TEX_BIT);
 }
 
 bool MaterialFlags::IsUnlit() const {
   return flags & UNLIT_BIT;
+}
+
+bool MaterialFlags::UseClearcoat() const {
+  return flags & CLEARCOAT_BIT;
+}
+
+bool MaterialFlags::HasClearcoatTex() const {
+  return flags & CLEARCOAT_TEX_BIT;
+}
+
+bool MaterialFlags::HasClearcoatRoughTex() const {
+  return flags & CLEARCOAT_ROUGH_TEX_BIT;
+}
+
+bool MaterialFlags::HasClearcoatNormalTex() const {
+  return flags & CLEARCOAT_NORM_TEX_BIT;
 }
 
 bool MaterialFlags::IsDoubleSided() const {
@@ -601,7 +712,7 @@ bool MaterialFlags::IsDoubleSided() const {
 }
 
 std::string MaterialFlags::Abbrev() const {
-  std::string result = "d0o0n0m0e0aud";
+  std::string result = "d0o0n0m0e0audct0r0n0";
   if (HasDiffuseMap()) {
     result[0] = 'D';
     result[1] = tex_uvs[DIFFUSE_UV_LOC] + '0';
@@ -632,6 +743,21 @@ std::string MaterialFlags::Abbrev() const {
   }
   if (IsDoubleSided()) {
     result[12] = 'D';
+  }
+  if (UseClearcoat()) {
+    result[13] = 'C';
+    if (HasClearcoatTex()) {
+      result[14] = 'T';
+      result[15] = tex_uvs[CLEARCOAT_TEX_UV_LOC] + '0';
+    }
+    if (HasClearcoatRoughTex()) {
+      result[16] = 'R';
+      result[17] = tex_uvs[CLEARCOAT_ROUGH_TEX_UV_LOC] + '0';
+    }
+    if (HasClearcoatNormalTex()) {
+      result[18] = 'N';
+      result[19] = tex_uvs[CLEARCOAT_NORM_TEX_UV_LOC] + '0';
+    }
   }
   return result;
 }

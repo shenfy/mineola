@@ -24,6 +24,23 @@ namespace {
 using namespace mineola;
 using namespace mineola::vertex_type;
 
+struct Clearcoat{
+  float factor{0.0f};
+  float roughnessFactor{0.0f};
+  fx::gltf::Material::Texture texture;
+  fx::gltf::Material::Texture roughnessTexture;
+  fx::gltf::Material::NormalTexture normalTexture;
+};
+
+void from_json(nlohmann::json const & json, Clearcoat &clearcoat) {
+  clearcoat = Clearcoat();
+  fx::gltf::detail::ReadOptionalField("clearcoatFactor", json, clearcoat.factor);
+  fx::gltf::detail::ReadOptionalField("clearcoatRoughnessFactor", json, clearcoat.roughnessFactor);
+  fx::gltf::detail::ReadOptionalField("clearcoatTexture", json, clearcoat.texture);
+  fx::gltf::detail::ReadOptionalField("clearcoatRoughnessTexture", json, clearcoat.roughnessTexture);
+  fx::gltf::detail::ReadOptionalField("clearcoatNormalTexture", json, clearcoat.normalTexture);
+}
+
 int MapGLTFSemantics(const std::string &semantics_str) {
   if (semantics_str == "POSITION") {
     return POSITION;
@@ -409,6 +426,33 @@ PBRShadowmapEffectType ShadowmapEffectNameToType(
   return PBRShadowmapEffectType::kCustom;
 }
 
+void LoadClearcoat(const nlohmann::json &clearcoat_json,
+                   const std::shared_ptr<Material> material,
+                   MaterialFlags &material_flags,
+                   std::unordered_map<uint32_t, std::string> &texture_names) {
+  material_flags.SetUseClearcoat();
+  Clearcoat clearcoat;
+  from_json(clearcoat_json, clearcoat);
+  material->uniform_slots["clearcoat_factor"] = uniform_helper::Wrap(clearcoat.factor);
+  material->uniform_slots["clearcoat_roughness_factor"] = uniform_helper::Wrap(clearcoat.roughnessFactor);
+  if (!clearcoat.texture.empty()) {
+    material->texture_slots["clearcoat_sampler"] =
+      {texture_names[(uint32_t)clearcoat.texture.index]};
+    material_flags.EnableClearcoatTex((uint8_t)clearcoat.texture.texCoord);
+  }
+  if (!clearcoat.roughnessTexture.empty()) {
+    material->texture_slots["clearcoat_roughness_sampler"] =
+      {texture_names[(uint32_t)clearcoat.roughnessTexture.index]};
+    material_flags.EnableClearcoatRoughTex((uint8_t)clearcoat.roughnessTexture.texCoord);
+  }
+  if (!clearcoat.normalTexture.empty()) {
+    material->texture_slots["clearcoat_normal_sampler"] =
+      {texture_names[(uint32_t)clearcoat.normalTexture.index]};
+    material->uniform_slots["clearcoat_normal_scale"] = uniform_helper::Wrap(clearcoat.normalTexture.scale);
+    material_flags.EnableClearcoatNormalTex((uint8_t)clearcoat.normalTexture.texCoord);
+  }
+}
+
 bool CreateSceneFromGLTFDoc(
   const fx::gltf::Document &doc,
   const std::string &model_name,
@@ -681,6 +725,9 @@ bool CreateSceneFromGLTFDoc(
         // KHR_materials_unlit
         if (exts.contains("KHR_materials_unlit")) {
           material_flags.SetUnlit();
+        } else if (exts.contains("KHR_materials_clearcoat")) {
+          // This extension must not be used on a material that also uses KHR_materials_unlit
+          LoadClearcoat(exts["KHR_materials_clearcoat"], material, material_flags, texture_names);
         }
       }
 
