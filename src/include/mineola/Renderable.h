@@ -23,13 +23,15 @@ public:
 
   void AddVertexArray(std::shared_ptr<vertex_type::VertexArray> va,
             const char *material_name);
+  size_t NumVertexArray() const;
+  std::shared_ptr<vertex_type::VertexArray> GetVertexArray(int idx);
   void SetEffect(std::string effect_name);
   const char *GetEffectName() const;
 
   void SetShadowmapEffect(std::string effect_name);
   std::optional<const char *> GetShadowmapEffectName() const;
 
-  size_t NumVertexArray() const;
+
   void SetMaterial(size_t index, const char *material_name);
   const std::string &GetMaterialName(size_t index) const;
 

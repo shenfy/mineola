@@ -8,6 +8,38 @@
 #include <mineola/TextureHelper.h>
 #include <mineola/Engine.h>
 
+namespace {
+using namespace mineola;
+
+void GetCompactVertexData(const PolygonSoup &soup, std::vector<float> &data) {
+  size_t num_attributes = 3 + (soup.has_vertex_normal ? 3 : 0)
+    + (soup.has_vertex_texcoord ? 2 : 0);
+  auto length = num_attributes * soup.vertices.size();
+  data.clear();
+  data.reserve(length);
+
+  for (const auto &vert: soup.vertices) {
+    data.push_back(vert.pos[0]);
+    data.push_back(vert.pos[1]);
+    data.push_back(vert.pos[2]);
+    if (soup.has_vertex_normal) {
+      data.push_back(vert.normal[0]);
+      data.push_back(vert.normal[1]);
+      data.push_back(vert.normal[2]);
+    }
+    if (soup.has_vertex_texcoord) {
+      data.push_back(vert.tex[0]);
+      data.push_back(vert.tex[1]);
+    }
+    if (soup.has_vertex_color) {
+      // encode rgba to float
+      data.push_back(*(float*)&vert.color.val);
+    }
+  }
+}
+
+}
+
 namespace mineola { namespace primitive_helper {
 
 bool BuildFromPolygonSoup(const PolygonSoup &soup,
@@ -17,27 +49,7 @@ bool BuildFromPolygonSoup(const PolygonSoup &soup,
   using namespace mineola::vertex_type;
 
   std::vector<float> verts_data;
-  size_t num_attributes = 3 + (soup.has_vertex_normal ? 3 : 0)
-    + (soup.has_vertex_texcoord ? 2 : 0);
-  verts_data.reserve(num_attributes * soup.vertices.size());
-  for (const auto &vert: soup.vertices) {
-    verts_data.push_back(vert.pos[0]);
-    verts_data.push_back(vert.pos[1]);
-    verts_data.push_back(vert.pos[2]);
-    if (soup.has_vertex_normal) {
-      verts_data.push_back(vert.normal[0]);
-      verts_data.push_back(vert.normal[1]);
-      verts_data.push_back(vert.normal[2]);
-    }
-    if (soup.has_vertex_texcoord) {
-      verts_data.push_back(vert.tex[0]);
-      verts_data.push_back(vert.tex[1]);
-    }
-    if (soup.has_vertex_color) {
-      // encode rgba to float
-      verts_data.push_back(*(float*)&vert.color.val);
-    }
-  }
+  GetCompactVertexData(soup, verts_data);
 
   std::shared_ptr<VertexArray> va(new VertexArray());
 
@@ -157,6 +169,26 @@ bool BuildFromPolygonSoup(const PolygonSoup &soup,
   // fill renderable
   renderable.AddVertexArray(va, material_name.c_str());
   renderable.SetBbox(soup.ComputeAABB());
+  return true;
+}
+
+bool UpdateVertexData(const PolygonSoup &soup, Renderable &renderable) {
+  // verts
+  using namespace mineola::vertex_type;
+
+  if (renderable.NumVertexArray() == 0) {
+    return false;
+  }
+
+  std::vector<float> verts_data;
+  GetCompactVertexData(soup, verts_data);
+
+  auto va = renderable.GetVertexArray(0);
+  auto vs = va->VertexStreams()[0];
+  vs->buffer_ptr->Bind();
+  vs->buffer_ptr->UpdateData(0, vs->Stride() * vs->size, &verts_data[0]);
+  va->MarkVertexUpdated();
+
   return true;
 }
 

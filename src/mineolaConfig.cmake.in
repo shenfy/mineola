@@ -10,7 +10,7 @@ find_dependency(OpenGL REQUIRED)
 
 if (@NEED_GUI@)  # GLX NEED_GUI
   find_dependency(glfw3 REQUIRED)
-  find_dependency(imgui REQUIRED)
+  find_dependency(imgui CONFIG REQUIRED)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/mineolaTargets.cmake)

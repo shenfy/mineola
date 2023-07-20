@@ -97,7 +97,8 @@ public:
   void AddVertexStream(std::shared_ptr<VertexStream> vertex_stream);
   void SetIndexStream(std::shared_ptr<VertexStream> index_stream);
 
-  void MarkVertexUpdated();
+  std::vector<std::shared_ptr<VertexStream>> &VertexStreams();
+  void MarkVertexUpdated();  // MUST call after updating vertex data
   bool Draw();
 
   int &PrimitiveType();

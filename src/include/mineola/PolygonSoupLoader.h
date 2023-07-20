@@ -13,6 +13,9 @@ namespace primitive_helper {
 bool BuildFromPolygonSoup(const PolygonSoup &soup,
   const char *name, Renderable &renderable);
 
+bool UpdateVertexData(const PolygonSoup &soup,
+  Renderable &renderable);
+
 }}  // end namespace
 
 #endif  // MINEOLA_POLYGONSOUPLOADER_H
