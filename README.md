@@ -34,26 +34,26 @@ $ docker run --gpus=all -it -v .:/mineola {tag}
 The headers and library will be installed in `/usr/local/include` and `/usr/local/lib`.
 
 ### Build Mineola in the container
-To build and update the library inside the container, mount the repository directoy (eg. `/mineola-1.4.0'), and use the following command:
+To build and update the library inside the container, mount the repository directoy (eg. `/mineola-1.4.1'), and use the following command:
 ```bash
 # inside docker
-root:/$ cd mineola-1.4.0
-root:/mineola-1.4.0$ cmake -S src -B build --preset=EGL
-root:/mineola-1.4.0$ cmake --build build --target=install -j12
-root:/mineola-1.4.0$ cd build
-root:/mineola-1.4.0/build$ cpack
+root:/$ cd mineola-1.4.1
+root:/mineola-1.4.1$ cmake -S src -B build --preset=EGL
+root:/mineola-1.4.1$ cmake --build build --target=install -j12
+root:/mineola-1.4.1$ cd build
+root:/mineola-1.4.1/build$ cpack
 ```
 This will produce a zip archive containing all files need for deployment.
 
 ### Build app in NVidia Cuda/GL docker
 
-Download from the release section or build your own as demonstrated above to get the mineola-1.4.0-Linux.zip archive.
+Download from the release section or build your own as demonstrated above to get the mineola-1.4.1-Linux.zip archive.
 To use the generated archive for app development, extract the contents into /usr/local:
 ```bash
 # inside docker
-root:/$ unzip mineola-1.4.0-Linux.zip
-root:/$ cd mineola-1.4.0-Linux
-root:/mineola-1.4.0-Linux$ cp -r * /usr/local/
+root:/$ unzip mineola-1.4.1-Linux.zip
+root:/$ cd mineola-1.4.1-Linux
+root:/mineola-1.4.1-Linux$ cp -r * /usr/local/
 ```
 
 Then in your project's own CMakeLists.txt, use
@@ -65,7 +65,7 @@ target_link_libraries(app PRIVATE mineola::mineola)
 ### Use official docker image
 Directly build your app inside the mineola docker image:
 ```bash
-$ docker run --gpus=all -it -v {app_dir}:/{app_dir} fyshen/mineola:1.4.0-egl-ubuntu20.04
+$ docker run --gpus=all -it -v {app_dir}:/{app_dir} fyshen/mineola:1.4.1-egl-ubuntu20.04
 ```
 Then use the cmake instructions to build your app.
 

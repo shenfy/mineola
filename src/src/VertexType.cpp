@@ -45,6 +45,10 @@ void VertexArray::SetIndexStream(std::shared_ptr<VertexStream> index_stream_ptr)
   is_indexed_ = true;
 }
 
+std::vector<std::shared_ptr<VertexStream>> &VertexArray::VertexStreams() {
+  return vertex_stream_ptrs_;
+}
+
 void VertexArray::SetIndexed(bool indexed) {
   is_indexed_ = indexed;
 }
