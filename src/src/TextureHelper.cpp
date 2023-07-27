@@ -42,7 +42,10 @@ bool IsPNGFormat(const uint8_t *buffer) {
 
 bool IsJPEGFormat(const uint8_t *buffer) {
   if (buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF &&
-    (buffer[3] == 0xE0 || buffer[3] == 0xE1 || buffer[3] == 0xEE || buffer[3] == 0xDB)) {
+    (buffer[3] == 0xE0 || buffer[3] == 0xE1
+    || buffer[3] == 0xE2 || buffer[3] == 0xE3
+    || buffer[3] == 0xE8 || buffer[3] == 0xEE
+    || buffer[3] == 0xD8 || buffer[3] == 0xDB)) {
     return true;
   }
   return false;

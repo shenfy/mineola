@@ -7,7 +7,7 @@
   "lights": [
     {
       "index": 0,
-      "type": "point_dir",
+      "type": "point",
       "proj": {
         "type": "perspective",
         "fovy": 90,
