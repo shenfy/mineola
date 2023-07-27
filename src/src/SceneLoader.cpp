@@ -213,6 +213,70 @@ bool BuildSceneFromConfig(const char *config_str,
     }
   }
 
+  // attach lights
+  if (doc.find("lights") != doc.end()) {
+    const auto &lights = doc["lights"];
+    for (const auto &light_config : lights) {
+      std::shared_ptr<Light> light;
+      size_t index = light_config["index"].get<int>();
+      auto type = light_config["type"].get<std::string>();
+
+      if (type == "point") {
+        auto point_light = std::make_shared<PointLight>(index);
+
+        auto &proj = light_config["proj"];
+        float fovy = proj["fovy"].get<float>();
+        float aspect = proj["aspect"].get<float>();
+        float z_near = proj["near"].get<float>();
+        float z_far = proj["far"].get<float>();
+        point_light->SetProjParams(glm::radians(fovy), aspect, z_near, z_far);
+        point_light->SetIntensity(JArray2Vec<glm::vec3>(light_config["intensity"]));
+
+        light = point_light;
+      } else if (type == "dir") {
+        auto dir_light = std::make_shared<DirLight>(index);
+        auto &proj = light_config["proj"];
+        float left = proj["left"].get<float>();
+        float right = proj["right"].get<float>();
+        float bottom = proj["bottom"].get<float>();
+        float top = proj["top"].get<float>();
+        float z_near = proj["near"].get<float>();
+        float z_far = proj["far"].get<float>();
+        dir_light->SetOrthoProjParams(left, right, bottom, top, z_near, z_far);
+        dir_light->SetIntensity(JArray2Vec<glm::vec3>(light_config["intensity"]));
+
+        light = dir_light;
+      } else if (type == "env") {
+        auto env_light = std::make_shared<EnvLight>(index);
+
+        auto source = light_config["source"].get<std::string>();
+        std::string envlight_fn;
+        if (en.ResrcMgr().LocateFile(source.c_str(), envlight_fn)) {
+          if (!env_light->LoadFromFile(envlight_fn.c_str())) {
+            MLOG("Failed to load env light from %s\n", source.c_str());
+            continue;
+          }
+        } else {
+          MLOG("Env light source %s not found in search paths!\n", source.c_str());
+          continue;
+        }
+
+        light = env_light;
+      } else {
+        MLOG("Invalid light type!\n");
+        continue;
+      }
+
+      if (!light) {  // if no light was created
+        MLOG("Light params invalid!\n");
+        continue;
+      }
+
+      auto [node, unused] = GetNode(light_config, nodes_dict);
+      node->Lights().push_back(light);
+    }
+  }
+
   // attach renderables
   if (doc.find("geometries") != doc.end()) {
     const auto &geos = doc["geometries"];
@@ -339,71 +403,6 @@ bool BuildSceneFromConfig(const char *config_str,
       } else {
         MLOG("Invalid prefab type: %s\n", type.c_str());
       }
-    }
-  }
-
-  // attach lights
-  if (doc.find("lights") != doc.end()) {
-    const auto &lights = doc["lights"];
-    for (const auto &light_config : lights) {
-      std::shared_ptr<Light> light;
-      size_t index = light_config["index"].get<int>();
-      auto type = light_config["type"].get<std::string>();
-
-      if (type == "point_dir") {
-        auto point_dir_light = std::make_shared<PointDirLight>(index);
-
-        auto &proj = light_config["proj"];
-        auto proj_type = proj["type"].get<std::string>();
-        if (proj_type == "perspective") {
-          float fovy = proj["fovy"].get<float>();
-          float aspect = proj["aspect"].get<float>();
-          float z_near = proj["near"].get<float>();
-          float z_far = proj["far"].get<float>();
-          point_dir_light->SetProjParams(glm::radians(fovy), aspect, z_near, z_far);
-        } else if (proj_type == "orthographic") {
-          float left = proj["left"].get<float>();
-          float right = proj["right"].get<float>();
-          float bottom = proj["bottom"].get<float>();
-          float top = proj["top"].get<float>();
-          float z_near = proj["near"].get<float>();
-          float z_far = proj["far"].get<float>();
-          point_dir_light->SetOrthoProjParams(left, right, bottom, top, z_near, z_far);
-        } else {
-          MLOG("Invalid light projection type: %s\n", proj_type.c_str());
-          continue;
-        }
-        point_dir_light->SetIntensity(JArray2Vec<glm::vec3>(light_config["intensity"]));
-
-        light = point_dir_light;
-      } else if (type == "env") {
-        auto env_light = std::make_shared<EnvLight>(index);
-
-        auto source = light_config["source"].get<std::string>();
-        std::string envlight_fn;
-        if (en.ResrcMgr().LocateFile(source.c_str(), envlight_fn)) {
-          if (!env_light->LoadFromFile(envlight_fn.c_str())) {
-            MLOG("Failed to load env light from %s\n", source.c_str());
-            continue;
-          }
-        } else {
-          MLOG("Env light source %s not found in search paths!\n", source.c_str());
-          continue;
-        }
-
-        light = env_light;
-      } else {
-        MLOG("Invalid light type!\n");
-        continue;
-      }
-
-      if (!light) {  // if no light was created
-        MLOG("Light params invalid!\n");
-        continue;
-      }
-
-      auto [node, unused] = GetNode(light_config, nodes_dict);
-      node->Lights().push_back(light);
     }
   }
 

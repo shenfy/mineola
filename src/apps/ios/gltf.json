@@ -17,7 +17,7 @@
     {
       "index": 0,
       "node": "dirlight",
-      "type": "point_dir",
+      "type": "dir",
       "proj": {
         "type": "orthographic",
         "left": -1.0,

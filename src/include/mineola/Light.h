@@ -26,16 +26,15 @@ protected:
   size_t idx_;
 };
 
-class PointDirLight : public Light {
+class PointLight : public Light {
 public:
-  PointDirLight(size_t idx);
-  virtual ~PointDirLight() override;
+  PointLight(size_t idx);
+  ~PointLight() override;
 
   void UpdateLightTransform(const math::Rbt &rbt) override;
   void UpdateUniforms(UniformBlock *ub) override;
 
   void SetProjParams(float fovy, float aspect, float near, float far);
-  void SetOrthoProjParams(float left, float right, float bottom, float top, float near, float far);
   void SetProjMatrix(const glm::mat4 &proj_mat);
   void SetIntensity(glm::vec3 intensity);
 
@@ -44,8 +43,20 @@ protected:
   glm::mat4 proj_mat_;
   glm::vec3 pos_;
   glm::vec3 intensity_;
+
+  void UploadUniforms(glm::vec4 &v4, UniformBlock *ub);
 };
 
+class DirLight : public PointLight {
+public:
+  DirLight(size_t idx);
+  ~DirLight() override;
+  
+  void SetOrthoProjParams(float left, float right, 
+    float bottom, float top,
+    float near, float far);
+  void UpdateUniforms(UniformBlock *ub) override;
+};
 
 }
 

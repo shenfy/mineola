@@ -24,7 +24,7 @@
     {
       "index": 0,
       "node": "light0",
-      "type": "point_dir",
+      "type": "point",
       "proj": {
         "type": "perspective",
         "fovy": 45.0,
@@ -37,7 +37,7 @@
     {
       "index": 1,
       "node": "light1",
-      "type": "point_dir",
+      "type": "point",
       "proj": {
         "type": "perspective",
         "fovy": 45.0,

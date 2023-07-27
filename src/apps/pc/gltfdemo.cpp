@@ -170,7 +170,7 @@ public:
           light_node->SetPosition(pos);
 
           for (auto &light: light_node->Lights()) {
-            auto dir_light = bd_cast<PointDirLight>(light);
+            auto dir_light = bd_cast<DirLight>(light);
             if (dir_light) {
               // Because light node up is (1, 0, 0), so left/right is world z,
               // bottom/top is world x, forward/backward is world y

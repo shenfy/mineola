@@ -7,21 +7,6 @@
       "node": "envlight",
       "type": "env",
       "source": "venice16.ktx"
-    },
-    {
-      "index": 0,
-      "node": "dirlight",
-      "type": "point_dir",
-      "proj": {
-        "type": "orthographic",
-        "left": -1.0,
-        "right": 1.0,
-        "bottom": -1.0,
-        "top": 1.0,
-        "near": 0.1,
-        "far": 10.0
-      },
-      "intensity": [1, 1, 1]
     }
   ],
   "cameras": [
@@ -58,13 +43,6 @@
       "translate": [0.1, 0.1, 0.0],
       "rotate": [0, 0, 0, 1],
       "scale": [1, 1, 1],
-      "parent": "root"
-    },
-    {
-      "name": "dirlight",
-      "eye": [0.0, 2.0, 0.0],
-      "target": [0.0, 0.0, 0.0],
-      "up": [1.0, 0.0, 0.0],
       "parent": "root"
     }
   ],

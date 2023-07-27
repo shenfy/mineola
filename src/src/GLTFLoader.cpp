@@ -18,13 +18,23 @@
 #include <mineola/PBRShaders.h>
 #include <mineola/AnimatedEntity.h>
 #include <mineola/GLMHelper.h>
+#include <mineola/Light.h>
 
-namespace {
+namespace details {
 
-using namespace mineola;
-using namespace mineola::vertex_type;
+struct LightPunctual {
+  std::array<float, 3> color{ fx::gltf::defaults::IdentityVec3 };
+  float intensity{1.0f};
+  std::string type;
+};
 
-struct Clearcoat{
+void from_json(const nlohmann::json &json, LightPunctual &light_punctual) {
+  fx::gltf::detail::ReadOptionalField("color", json, light_punctual.color);
+  fx::gltf::detail::ReadOptionalField("intensity", json, light_punctual.intensity);
+  fx::gltf::detail::ReadRequiredField("type", json, light_punctual.type);
+}
+
+struct Clearcoat {
   float factor{0.0f};
   float roughnessFactor{0.0f};
   fx::gltf::Material::Texture texture;
@@ -32,14 +42,20 @@ struct Clearcoat{
   fx::gltf::Material::NormalTexture normalTexture;
 };
 
-void from_json(nlohmann::json const & json, Clearcoat &clearcoat) {
-  clearcoat = Clearcoat();
+void from_json(const nlohmann::json &json, Clearcoat &clearcoat) {
   fx::gltf::detail::ReadOptionalField("clearcoatFactor", json, clearcoat.factor);
   fx::gltf::detail::ReadOptionalField("clearcoatRoughnessFactor", json, clearcoat.roughnessFactor);
   fx::gltf::detail::ReadOptionalField("clearcoatTexture", json, clearcoat.texture);
   fx::gltf::detail::ReadOptionalField("clearcoatRoughnessTexture", json, clearcoat.roughnessTexture);
   fx::gltf::detail::ReadOptionalField("clearcoatNormalTexture", json, clearcoat.normalTexture);
 }
+
+}  // end namespace details
+
+namespace {
+
+using namespace mineola;
+using namespace mineola::vertex_type;
 
 int MapGLTFSemantics(const std::string &semantics_str) {
   if (semantics_str == "POSITION") {
@@ -431,8 +447,8 @@ void LoadClearcoat(const nlohmann::json &clearcoat_json,
                    MaterialFlags &material_flags,
                    std::unordered_map<uint32_t, std::string> &texture_names) {
   material_flags.SetUseClearcoat();
-  Clearcoat clearcoat;
-  from_json(clearcoat_json, clearcoat);
+  details::Clearcoat clearcoat = clearcoat_json;
+
   material->uniform_slots["clearcoat_factor"] = uniform_helper::Wrap(clearcoat.factor);
   material->uniform_slots["clearcoat_roughness_factor"] = uniform_helper::Wrap(clearcoat.roughnessFactor);
   if (!clearcoat.texture.empty()) {
@@ -907,6 +923,34 @@ bool CreateSceneFromGLTFDoc(
     }
   }
 
+  // load KHR_lights_punctual
+  std::vector<std::shared_ptr<Light>> lights;
+  if (!doc.extensionsAndExtras.empty()
+    && doc.extensionsAndExtras.contains("extensions")
+    && doc.extensionsAndExtras["extensions"].contains("KHR_lights_punctual")) {
+    auto &ls = doc.extensionsAndExtras["extensions"]["KHR_lights_punctual"];
+    std::vector<details::LightPunctual> light_punctuals = ls["lights"];
+
+    int light_idx = 0;
+    for (const auto &lp : light_punctuals) {
+      if (lp.type == "point" || lp.type == "spot") {
+        auto light = std::make_shared<PointLight>(light_idx++);
+        light->SetIntensity(glm::vec3{
+          lp.intensity * lp.color[0],
+          lp.intensity * lp.color[1],
+          lp.intensity * lp.color[2]});
+        lights.push_back(bd_cast<Light>(light));
+      } else if (lp.type == "directional") {
+        auto light = std::make_shared<DirLight>(light_idx++);
+        light->SetIntensity(glm::vec3{
+          lp.intensity * lp.color[0],
+          lp.intensity * lp.color[1],
+          lp.intensity * lp.color[2]});
+        lights.push_back(bd_cast<Light>(light));
+      }
+    }
+  }
+
   // load node hierarchy
   std::vector<std::shared_ptr<SceneNode>> scene_nodes;
   std::vector<int32_t> scene_node_skins;
@@ -940,6 +984,19 @@ bool CreateSceneFromGLTFDoc(
       if (n.mesh >= 0) {
         std::copy(meshes[n.mesh].begin(), meshes[n.mesh].end(),
           std::back_inserter(node->Renderables()));
+      }
+
+      // extensions
+      if (!n.extensionsAndExtras.empty() && n.extensionsAndExtras.contains("extensions")) {
+        auto &exts = n.extensionsAndExtras["extensions"];
+        // KHR_materials_unlit
+        if (exts.contains("KHR_lights_punctual")) {
+          int light_idx = 0;
+          fx::gltf::detail::ReadRequiredField("light", exts["KHR_lights_punctual"], light_idx);
+          if (light_idx < lights.size()) {
+            node->Lights().push_back(lights[light_idx]);          
+          }
+        }
       }
 
       scene_nodes.push_back(node);

@@ -183,6 +183,13 @@ const float dielectric_specular = 0.04;
 const vec3 black = vec3(0.0, 0.0, 0.0);
 const float PI = 3.1415926535897932;
 
+vec3 LightDir(vec4 light_pos, vec3 pos_wc) {
+  if (light_pos.w < 0.1) {
+    return normalize(light_pos.xyz);
+  } else {
+    return normalize(light_pos.xyz - pos_wc);
+  }
+}
 float pow2(float x) {
   return x * x;
 }
@@ -193,6 +200,9 @@ vec3 SpecularColor(vec3 albedo, float metallic) {
 vec3 SchlickFresnelFast(vec3 f0, float v_dot_h) {
   float approx = exp2((-5.55473 * v_dot_h - 6.98316) * v_dot_h);
   return f0 + (1.0 - f0) * approx;
+}
+float FresnelTerm(float f0, float n_dot_v) {
+  return f0 + (1.0 - f0) * pow(1.0 - n_dot_v, 5.0);
 }
 vec3 DiffuseTerm(vec3 albedo, float n_dot_l, float metallic) {
   vec3 c_diff = mix(albedo * 0.96, vec3(0.0), metallic);
@@ -224,6 +234,38 @@ void CalcDotProducts(vec3 light_dir, vec3 view_dir, vec3 normal_dir,
   n_dot_v = clamp(dot(normal_dir, view_dir), 0.0, 1.0);
   n_dot_h = clamp(dot(normal_dir, half_dir), 0.0, 1.0);
   v_dot_h = clamp(dot(view_dir, half_dir), 0.0, 1.0);
+}
+vec3 DirectLightShading(vec3 albedo, vec3 color_specular,
+  vec4 light_pos, vec3 light_intensity,
+  vec3 view_dir, vec3 normal_dir, vec3 pos_wc,
+  float rough, float a2, float metallic, float shadow_term, float ao) {
+  vec3 light_dir = LightDir(light_pos, pos_wc);
+  vec3 half_dir;
+  float n_dot_l;
+  float n_dot_v;
+  float n_dot_h;
+  float v_dot_h;
+  CalcDotProducts(light_dir, view_dir, normal_dir,
+    half_dir, n_dot_l, n_dot_v, n_dot_h, v_dot_h);
+  vec3 diffuse_term = DiffuseTerm(albedo, n_dot_l, metallic);
+  vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
+  return diffuse_term * light_intensity * shadow_term * ao
+    + max(specular_term * n_dot_l * light_intensity * shadow_term, vec3(0.0));
+}
+vec3 DirectLightClearCoatShading(vec3 color_specular,
+  vec4 light_pos, vec3 light_intensity,
+  vec3 view_dir, vec3 normal_dir, vec3 pos_wc,
+  float rough, float a2, float shadow_term) {
+  vec3 light_dir = LightDir(light_pos, pos_wc);
+  vec3 half_dir;
+  float n_dot_l;
+  float n_dot_v;
+  float n_dot_h;
+  float v_dot_h;
+  CalcDotProducts(light_dir, view_dir, normal_dir,
+    half_dir, n_dot_l, n_dot_v, n_dot_h, v_dot_h);
+  vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
+  return max(specular_term * n_dot_l * light_intensity * shadow_term, vec3(0.0));
 }
 vec3 EnvlightDiffuseTerm(vec3 albedo, vec3 normal_wc, float metallic) {
   vec3 n = normalize(mat3(_env_light_mat_0) * normal_wc);
@@ -344,8 +386,12 @@ void main(void) {
   vec4 eye_wc = _view_mat_inv * vec4(0.0, 0.0, 0.0, 1.0);
   eye_wc /= eye_wc.w;
   vec3 light_wc = _light_pos_0.xyz;
-  // vec3 light_dir = normalize(light_wc - pos_wc);
-  vec3 light_dir = normalize(light_wc);
+  vec3 light_dir;
+  if (_light_pos_0.w < 0.1) {
+    light_dir = normalize(light_wc);
+  } else {
+    light_dir = normalize(light_wc - pos_wc);
+  }
   vec3 view_dir = normalize(eye_wc.xyz - pos_wc);
   vec3 normal_dir = vec3(0.0);
 
@@ -368,27 +414,24 @@ void main(void) {
   }
   #endif
 
-  vec3 half_dir;
-  float n_dot_l;
-  float n_dot_v;
-  float n_dot_h;
-  float v_dot_h;
-  CalcDotProducts(light_dir, view_dir, normal_dir,
-    half_dir, n_dot_l, n_dot_v, n_dot_h, v_dot_h);
-  vec3 albedo = base_color.rgb;
-  vec3 diffuse_term = DiffuseTerm(albedo, n_dot_l, metallic);
-  float a = pow2(rough);
-  float a2 = pow2(a);
-  vec3 color_specular = SpecularColor(albedo, metallic);
-  vec3 specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, rough, a2);
   #if defined(RECEIVE_SHADOW)
   float shadow_term = PCFSoftShadow(pos_wc, -1e-3);
   #else
   float shadow_term = 1.0;
   #endif
-
-  vec3 color_result = emission + diffuse_term * _light_intensity_0.rgb  * shadow_term * ao
-      + max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
+  
+  vec3 albedo = base_color.rgb;
+  float a = pow2(rough);
+  float a2 = pow2(a);
+  vec3 color_specular = SpecularColor(albedo, metallic);
+  vec3 color_result = DirectLightShading(albedo, color_specular, _light_pos_0, _light_intensity_0.rgb, 
+    view_dir, normal_dir, pos_wc, rough, a2, metallic, shadow_term, ao)
+    + DirectLightShading(albedo, color_specular, _light_pos_1, _light_intensity_1.rgb, 
+    view_dir, normal_dir, pos_wc, rough, a2, metallic, shadow_term, ao)
+    + DirectLightShading(albedo, color_specular, _light_pos_2, _light_intensity_2.rgb, 
+    view_dir, normal_dir, pos_wc, rough, a2, metallic, shadow_term, ao)
+    + DirectLightShading(albedo, color_specular, _light_pos_3, _light_intensity_3.rgb, 
+    view_dir, normal_dir, pos_wc, rough, a2, metallic, shadow_term, ao);
 
   #if defined(USE_ENV_LIGHT)
   color_result += EnvlightDiffuseTerm(albedo, normal_dir, metallic) * ao;
@@ -409,7 +452,7 @@ void main(void) {
     #if defined(HAS_CLEARCOAT_ROUGH_TEX) && defined(CLEARCOAT_ROUGH_TEX_TEXCOORD)
       cc_rough = texture(clearcoat_roughness_sampler, CLEARCOAT_ROUGH_TEX_TEXCOORD).y;
     #endif
-
+    float cc_a2 = pow2(cc_rough);
     cc_clearcoat = clamp(cc_clearcoat, 0.0, 1.0);
 
     #if defined(HAS_CLEARCOAT_NORM_TEX) && defined(HAS_TANGENT) && defined(CLEARCOAT_NORM_TEX_TEXCOORD)
@@ -419,21 +462,25 @@ void main(void) {
       cc_normal = normalize(tbn * cc_normal_pp);
     #endif
 
-    float base_n_dot_v = n_dot_v;
-    CalcDotProducts(light_dir, view_dir, cc_normal,
-        half_dir, n_dot_l, n_dot_v, n_dot_h, v_dot_h);
-    specular_term = SpecularTerm(color_specular, n_dot_h, n_dot_l, n_dot_v, v_dot_h, cc_rough, pow2(cc_rough));
-    vec3 clearcoat_specular = max(specular_term * n_dot_l * _light_intensity_0.rgb  * shadow_term, vec3(0.0));
-
+    vec3 clearcoat_specular =
+      DirectLightClearCoatShading(color_specular, _light_pos_0, _light_intensity_0.rgb,
+                                  view_dir, cc_normal, pos_wc, cc_rough, cc_a2, shadow_term)
+      + DirectLightClearCoatShading(color_specular, _light_pos_1, _light_intensity_1.rgb,
+                                  view_dir, cc_normal, pos_wc, cc_rough, cc_a2, shadow_term)
+      + DirectLightClearCoatShading(color_specular, _light_pos_2, _light_intensity_2.rgb,
+                                  view_dir, cc_normal, pos_wc, cc_rough, cc_a2, shadow_term)
+      + DirectLightClearCoatShading(color_specular, _light_pos_3, _light_intensity_3.rgb,
+                                  view_dir, cc_normal, pos_wc, cc_rough, cc_a2, shadow_term);
     #if defined(USE_ENV_LIGHT)
       clearcoat_specular += EnvLightSpecularTerm(color_specular, cc_normal, view_dir, cc_rough) * ao;
     #endif
 
-    float fresnel_term = 0.04 + (1.0 - 0.04) * pow((1.0 - abs(n_dot_v)), 5.0);
+    float n_dot_v = clamp(dot(cc_normal, view_dir), 0.0, 1.0);
+    float fresnel_term = FresnelTerm(0.04, n_dot_v);
     color_result = color_result * (1.0 - cc_clearcoat * fresnel_term)
         + clearcoat_specular * cc_clearcoat;
-    // https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md#Emission
-    emission *= 0.04 + (1.0 - 0.04) * pow((1.0 - base_n_dot_v), 5.0);
+    n_dot_v = clamp(dot(normal_dir, view_dir), 0.0, 1.0);
+    emission *= FresnelTerm(0.04, n_dot_v);
   #endif
 
   color_result += emission;
