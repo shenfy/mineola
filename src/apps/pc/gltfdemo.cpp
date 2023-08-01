@@ -48,6 +48,18 @@ bool FindEnvLight(const std::shared_ptr<SceneNode> &node) {
   return result;
 }
 
+int CountDirectLight(const std::shared_ptr<SceneNode> &node) {
+  int count = 0;
+  node->DFTraverse([&count](auto &node) {
+    for (auto &light: node.Lights()) {
+      if (bd_cast<PointLight>(light)) {
+        count++;
+      }
+    }
+  });
+  return count;
+}
+
 std::ostream &operator<<(std::ostream &os, const glm::vec3 &vec) {
   os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
   return os;
@@ -124,6 +136,17 @@ public:
 
       if (has_env_light) {
         prefab_helper::CreateSkybox(RenderPass::RENDER_LAYER_ALL, true, *en.Scene());
+      }
+
+      if (CountDirectLight(en.Scene()) == 0) {
+        // add direct light
+        auto light = std::make_shared<DirLight>(0);
+        light->SetIntensity(glm::vec3(1.0f));
+        auto light_node = std::make_shared<SceneNode>();
+        light_node->SetName("dirlight");
+        light_node->SetPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+        light_node->Lights().push_back(light);
+        light_node->LinkTo(light_node, en.Scene());
       }
 
       // Adjust camera, light and shadow

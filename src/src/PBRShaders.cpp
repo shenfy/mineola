@@ -113,19 +113,29 @@ precision highp sampler2DShadow;
 
 #if defined(HAS_ALBEDO_MAP)
 uniform sampler2D diffuse_sampler;  // base color
+uniform vec4 diffuse_sampler_ts;
+uniform float diffuse_sampler_rot;
 #endif
 #if defined(HAS_AO_MAP)
 uniform sampler2D lightmap_sampler;  // occlusion map
+uniform vec4 lightmap_sampler_ts;
+uniform float lightmap_sampler_rot;
 #endif
 #if defined(HAS_NORMAL_MAP)
 uniform sampler2D normal_sampler;  // normal map
+uniform vec4 normal_sampler_ts;
+uniform float normal_sampler_rot;
 uniform float normal_scale;
 #endif
 #if defined(HAS_METALLIC_MAP)
-uniform sampler2D metallic_roughness_sampler;  // metallic roughness
+uniform sampler2D mr_sampler;  // metallic roughness
+uniform vec4 mr_sampler_ts;
+uniform float mr_sampler_rot;
 #endif
 #if defined(HAS_EMISSIVE_MAP)
 uniform sampler2D emissive_sampler;  // emission map
+uniform vec4 emissive_sampler_ts;
+uniform float emissive_sampler_rot;
 #endif
 #if defined(USE_ALPHA_MASK)
 uniform float alpha_threshold;  // alpha cut-off threshold
@@ -136,15 +146,21 @@ uniform float alpha_threshold;  // alpha cut-off threshold
 
   #if defined(HAS_CLEARCOAT_TEX)
     uniform sampler2D clearcoat_sampler;
+    uniform vec4 clearcoat_sampler_ts;
+    uniform float clearcoat_sampler_rot;
   #endif
 
   #if defined(HAS_CLEARCOAT_ROUGH_TEX)
-    uniform sampler2D clearcoat_roughness_sampler;
+    uniform sampler2D cc_rough_sampler;
+    uniform vec4 cc_rough_sampler_ts;
+    uniform float cc_rough_sampler_rot;
   #endif
 
   #if defined(HAS_CLEARCOAT_NORM_TEX)
-    uniform sampler2D clearcoat_normal_sampler;
-    uniform float clearcoat_normal_scale;
+    uniform sampler2D cc_normal_sampler;
+    uniform vec4 cc_normal_sampler_ts;
+    uniform float cc_normal_sampler_rot;
+    uniform float cc_normal_scale;
   #endif
 #endif
 
@@ -183,15 +199,21 @@ const float dielectric_specular = 0.04;
 const vec3 black = vec3(0.0, 0.0, 0.0);
 const float PI = 3.1415926535897932;
 
+float pow2(float x) {
+  return x * x;
+}
+vec2 UVTform(vec2 uv, vec4 ts, float rot) {
+  mat3 R = mat3(cos(rot), -sin(rot), 0.0,
+    sin(rot), cos(rot), 0.0,
+    0.0, 0.0, 1.0);
+  return (R * vec3(uv * ts.zw, 1.0)).xy + ts.xy;
+}
 vec3 LightDir(vec4 light_pos, vec3 pos_wc) {
   if (light_pos.w < 0.1) {
     return normalize(light_pos.xyz);
   } else {
     return normalize(light_pos.xyz - pos_wc);
   }
-}
-float pow2(float x) {
-  return x * x;
 }
 vec3 SpecularColor(vec3 albedo, float metallic) {
   return mix(vec3(dielectric_specular), albedo, metallic);
@@ -345,8 +367,11 @@ void main(void) {
   vec4 base_color = vec4(1.0);
   #endif
 
+  vec2 uv_trs;
+
   #if defined(HAS_ALBEDO_MAP) && defined(DIFFUSE_TEXCOORD)
-  base_color *= texture(diffuse_sampler, DIFFUSE_TEXCOORD) * vec4(diffuse, alpha);
+  uv_trs = UVTform(DIFFUSE_TEXCOORD, diffuse_sampler_ts, diffuse_sampler_rot);
+  base_color *= texture(diffuse_sampler, uv_trs) * vec4(diffuse, alpha);
   #else
   base_color *= vec4(diffuse, alpha);
   #endif
@@ -363,13 +388,15 @@ void main(void) {
   #endif
 
   #if defined(HAS_AO_MAP) && defined(AO_TEXCOORD)
-  float ao = texture(lightmap_sampler, AO_TEXCOORD).x;
+  uv_trs = UVTform(AO_TEXCOORD, lightmap_sampler_ts, lightmap_sampler_rot);
+  float ao = texture(lightmap_sampler, uv_trs).x;
   #else
   float ao = 1.0;
   #endif
 
   #if defined(HAS_METALLIC_MAP) && defined(METAL_TEXCOORD)
-  vec4 o_m_r = texture(metallic_roughness_sampler, METAL_TEXCOORD);
+  uv_trs = UVTform(METAL_TEXCOORD, mr_sampler_ts, mr_sampler_rot);
+  vec4 o_m_r = texture(mr_sampler, uv_trs);
   float rough = o_m_r.y;
   float metallic = o_m_r.z;
   #else
@@ -378,7 +405,8 @@ void main(void) {
   #endif
 
   #if defined(HAS_EMISSIVE_MAP) && defined(EMIT_TEXCOORD)
-  vec3 emission = texture(emissive_sampler, EMIT_TEXCOORD).rgb * emit;
+  uv_trs = UVTform(EMIT_TEXCOORD, emissive_sampler_ts, emissive_sampler_rot);
+  vec3 emission = texture(emissive_sampler, uv_trs).rgb * emit;
   #else
   vec3 emission = emit;
   #endif
@@ -397,7 +425,8 @@ void main(void) {
 
   #if defined(HAS_NORMAL)
     #if defined(HAS_NORMAL_MAP) && defined(HAS_TANGENT) && defined(NORMAL_TEXCOORD)
-      vec3 normal_pp = texture(normal_sampler, NORMAL_TEXCOORD).xyz;
+      uv_trs = UVTform(NORMAL_TEXCOORD, normal_sampler_ts, normal_sampler_rot);
+      vec3 normal_pp = texture(normal_sampler, uv_trs).xyz;
       normal_pp = normalize((normal_pp * 2.0 - 1.0) * vec3(normal_scale, normal_scale, 1.0));
       normal_dir = normalize(tbn * normal_pp);
     #else
@@ -446,19 +475,24 @@ void main(void) {
     vec3 cc_normal = normalize(normal);
 
     #if defined(HAS_CLEARCOAT_TEX) && defined(CLEARCOAT_TEX_TEXCOORD)
-      cc_clearcoat *= texture(clearcoat_sampler, CLEARCOAT_TEX_TEXCOORD).x;
+      uv_trs = UVTform(CLEARCOAT_TEX_TEXCOORD, clearcoat_sampler_ts, clearcoat_sampler_rot);
+      cc_clearcoat *= texture(clearcoat_sampler, uv_trs).x;
     #endif
 
     #if defined(HAS_CLEARCOAT_ROUGH_TEX) && defined(CLEARCOAT_ROUGH_TEX_TEXCOORD)
-      cc_rough = texture(clearcoat_roughness_sampler, CLEARCOAT_ROUGH_TEX_TEXCOORD).y;
+      uv_trs = UVTform(CLEARCOAT_ROUGH_TEX_TEXCOORD,
+        cc_rough_sampler_ts, cc_rough_sampler_rot);
+      cc_rough = texture(cc_rough_sampler, uv_trs).y;
     #endif
     float cc_a2 = pow2(cc_rough);
     cc_clearcoat = clamp(cc_clearcoat, 0.0, 1.0);
 
     #if defined(HAS_CLEARCOAT_NORM_TEX) && defined(HAS_TANGENT) && defined(CLEARCOAT_NORM_TEX_TEXCOORD)
-      vec3 cc_normal_pp = texture(clearcoat_normal_sampler, CLEARCOAT_NORM_TEX_TEXCOORD).xyz;
+      uv_trs = UVTform(CLEARCOAT_NORM_TEX_TEXCOORD,
+        cc_normal_sampler_ts, cc_normal_sampler_rot);
+      vec3 cc_normal_pp = texture(cc_normal_sampler, uv_trs).xyz;
       cc_normal_pp = normalize((cc_normal_pp * 2.0 - 1.0)
-          * vec3(clearcoat_normal_scale, clearcoat_normal_scale, 1.0));
+          * vec3(cc_normal_scale, cc_normal_scale, 1.0));
       cc_normal = normalize(tbn * cc_normal_pp);
     #endif
 

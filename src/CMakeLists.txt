@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(mineola VERSION 1.4.1 LANGUAGES C CXX)
+project(mineola VERSION 1.4.2 LANGUAGES C CXX)
 
 message(STATUS ${CMAKE_SYSTEM_NAME})
 
