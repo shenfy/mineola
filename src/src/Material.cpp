@@ -7,7 +7,17 @@
 #include <mineola/glutility.h>
 #include <mineola/ReservedTextureUnits.h>
 
+namespace {
+    const mineola::TextureTransform kDefaultTransform;
+}
+
 namespace mineola {
+
+void TextureTransform::UploadToShader(const char *tex_name, GLEffect *effect) const {
+  std::string var_name = tex_name;
+  effect->UploadVariable((var_name + "_ts").c_str(), glm::value_ptr(offset_scale));
+  effect->UploadVariable((var_name + "_rot").c_str(), &rotation);
+}
 
 void Material::UploadToShader(GLEffect *effect) {
   effect->UploadVariable("ambient", glm::value_ptr(ambient));
@@ -45,8 +55,16 @@ void Material::UploadToShader(GLEffect *effect) {
       texture->Bind();
       ++tex_unit;
     }
-    if (all_found)
-      effect->UploadVariable(iter->first.c_str(), &tex_units[0]);
+    if (!all_found)
+      continue;
+
+    effect->UploadVariable(iter->first.c_str(), &tex_units[0]);
+    
+    if (auto trs_iter = texture_tforms.find(iter->first); trs_iter != texture_tforms.end()) {
+      trs_iter->second.UploadToShader(iter->first.c_str(), effect);
+    } else {
+      kDefaultTransform.UploadToShader(iter->first.c_str(), effect);
+    }
  }
 }
 

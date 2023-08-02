@@ -52,6 +52,18 @@ void from_json(const nlohmann::json &json, Clearcoat &clearcoat) {
 
 }  // end namespace details
 
+namespace mineola {
+
+void from_json(const nlohmann::json &json, TextureTransform &tform) {
+  std::array<float, 2> offset{0.0f, 0.0f}, scale{1.0f, 1.0f};
+  fx::gltf::detail::ReadOptionalField("offset", json, offset);
+  fx::gltf::detail::ReadOptionalField("scale", json, scale);
+  tform.offset_scale = glm::vec4(offset[0], offset[1], scale[0], scale[1]);
+  fx::gltf::detail::ReadOptionalField("rotation", json, tform.rotation);
+}
+
+}
+
 namespace {
 
 using namespace mineola;
@@ -442,6 +454,14 @@ PBRShadowmapEffectType ShadowmapEffectNameToType(
   return PBRShadowmapEffectType::kCustom;
 }
 
+std::optional<TextureTransform> LoadTexTform(const nlohmann::json &ext_json) {
+  if (ext_json.contains("extensions") && ext_json["extensions"].contains("KHR_texture_transform")) {
+    TextureTransform ttform = ext_json["extensions"]["KHR_texture_transform"];
+    return ttform;
+  }
+  return {};
+}
+
 void LoadClearcoat(const nlohmann::json &clearcoat_json,
                    const std::shared_ptr<Material> material,
                    MaterialFlags &material_flags,
@@ -455,17 +475,23 @@ void LoadClearcoat(const nlohmann::json &clearcoat_json,
     material->texture_slots["clearcoat_sampler"] =
       {texture_names[(uint32_t)clearcoat.texture.index]};
     material_flags.EnableClearcoatTex((uint8_t)clearcoat.texture.texCoord);
+    if (auto ttform = LoadTexTform(clearcoat.texture.extensionsAndExtras))
+      material->texture_tforms["clearcoat_sampler"] = *ttform;
   }
   if (!clearcoat.roughnessTexture.empty()) {
-    material->texture_slots["clearcoat_roughness_sampler"] =
+    material->texture_slots["cc_rough_sampler"] =
       {texture_names[(uint32_t)clearcoat.roughnessTexture.index]};
     material_flags.EnableClearcoatRoughTex((uint8_t)clearcoat.roughnessTexture.texCoord);
+    if (auto ttform = LoadTexTform(clearcoat.roughnessTexture.extensionsAndExtras))
+      material->texture_tforms["cc_rough_sampler"] = *ttform;
   }
   if (!clearcoat.normalTexture.empty()) {
-    material->texture_slots["clearcoat_normal_sampler"] =
+    material->texture_slots["cc_normal_sampler"] =
       {texture_names[(uint32_t)clearcoat.normalTexture.index]};
-    material->uniform_slots["clearcoat_normal_scale"] = uniform_helper::Wrap(clearcoat.normalTexture.scale);
+    material->uniform_slots["cc_normal_scale"] = uniform_helper::Wrap(clearcoat.normalTexture.scale);
     material_flags.EnableClearcoatNormalTex((uint8_t)clearcoat.normalTexture.texCoord);
+    if (auto ttform = LoadTexTform(clearcoat.normalTexture.extensionsAndExtras))
+      material->texture_tforms["cc_normal_sampler"] = *ttform;
   }
 }
 
@@ -694,16 +720,22 @@ bool CreateSceneFromGLTFDoc(
           {texture_names[(uint32_t)m.normalTexture.index]};
         material->uniform_slots["normal_scale"] = uniform_helper::Wrap(m.normalTexture.scale);
         material_flags.EnableNormalMap((uint8_t)m.normalTexture.texCoord);
+        if (auto ttform = LoadTexTform(m.normalTexture.extensionsAndExtras))
+          material->texture_tforms["normal_sampler"] = *ttform;
       }
       if (!m.occlusionTexture.empty()) {
         material->texture_slots["lightmap_sampler"] =
           {texture_names[(uint32_t)m.occlusionTexture.index]};
         material_flags.EnableOcclusionMap((uint8_t)m.occlusionTexture.texCoord);
+        if (auto ttform = LoadTexTform(m.occlusionTexture.extensionsAndExtras))
+          material->texture_tforms["lightmap_sampler"] = *ttform;
       }
       if (!m.emissiveTexture.empty()) {
         material->texture_slots["emissive_sampler"] =
           {texture_names[(uint32_t)m.emissiveTexture.index]};
         material_flags.EnableEmissiveMap((uint8_t)m.emissiveTexture.texCoord);
+        if (auto ttform = LoadTexTform(m.emissiveTexture.extensionsAndExtras))
+          material->texture_tforms["emissive_sampler"] = *ttform;
       }
       material->emit = glm::vec3(
         m.emissiveFactor[0], m.emissiveFactor[1], m.emissiveFactor[2]);
@@ -715,12 +747,16 @@ bool CreateSceneFromGLTFDoc(
           material->texture_slots["diffuse_sampler"] =
             {texture_names[(uint32_t)m_pbr.baseColorTexture.index]};
           material_flags.EnableDiffuseMap((uint8_t)m_pbr.baseColorTexture.texCoord);
+          if (auto ttform = LoadTexTform(m_pbr.baseColorTexture.extensionsAndExtras))
+            material->texture_tforms["diffuse_sampler"] = *ttform;
         }
         if (!m_pbr.metallicRoughnessTexture.empty()) {
-          material->texture_slots["metallic_roughness_sampler"] =
+          material->texture_slots["mr_sampler"] =
             {texture_names[(uint32_t)m_pbr.metallicRoughnessTexture.index]};
           material_flags.EnableMetallicRoughnessMap(
             (uint8_t)m_pbr.metallicRoughnessTexture.texCoord);
+          if (auto ttform = LoadTexTform(m_pbr.metallicRoughnessTexture.extensionsAndExtras))
+            material->texture_tforms["mr_sampler"] = *ttform;
         }
 
         material->diffuse = glm::vec3(
